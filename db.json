@@ -1,0 +1,18 @@
+{
+	"posts": [
+		{
+			"id": 1,
+			"name": "Thor's hammer",
+			"description": "Mjölnir, the legendary hammer of the Norse god of thunder.",
+			"image": "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/thors-hammer-mjolnir-is-seen-during-thor-ragnarok-paris-news-photo-865171312-1560960203.jpg"
+		},
+		{
+			"name": "Katar Dagger",
+			"description": "Ancient Katar knife of Sikh Empire. Also known as punching knife",
+			"image": "https://cdn.shopify.com/s/files/1/1597/7419/products/Antique_Vintage_India_Indian_Scissors_Katar_Dagger_Fighting_Knife1_1024x1024.jpeg"
+		}
+	],
+	"profile": {
+		"name": "tokenURI"
+	}
+}
