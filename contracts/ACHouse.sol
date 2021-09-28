@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.3;
 
-
+// import "./ACHouseToken.sol";
 
 contract ACHouse  {
     
@@ -55,9 +55,6 @@ contract ACHouse  {
         Create NFT 
         Fractionalize NFT
 
-
-    */
-
     function createNFT(string memory _name, string memory _symbol, string memory _desc, string memory _imageURL) public {
 
         // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place. 
@@ -71,6 +68,14 @@ contract ACHouse  {
         // if user wants to generate funds, owner retain will be less than 100 and user sets price per shard (token). 
 
         //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC20 depending on implementation
+    }
+    */
+
+    function createNFT() public {
+
+        // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place. 
+        // if using ERC721 - only name and symbol is needed to along with unique id for the NFT to create. 
+        //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC721 depending on implementation
     }
 
 
