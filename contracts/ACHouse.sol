@@ -30,7 +30,6 @@ contract ACHouse  {
     mapping (address => Participant ) ParticipantMapping;
 
     /**Functions - Registration  */
-
     function register(string memory _name, uint _userType) public returns (bool) {
         require(isUserRegistered(msg.sender) == false, "User Already registered");
 
@@ -49,6 +48,29 @@ contract ACHouse  {
 
         RegisteredUserAddresses.push(msg.sender);
         return true;
+    }
+
+    /** after user connects wallet to web3 and gets access to website. 
+    Options avaiable for USER:
+        Create NFT 
+        Fractionalize NFT
+
+
+    */
+
+    function createNFT(string memory _name, string memory _symbol, string memory _desc, string memory _imageURL) public {
+
+        // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place. 
+        // if using ERC721 - only name and symbol is needed to along with unique id for the NFT to create. 
+
+        //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC721 depending on implementation
+    }
+
+    function fracNFT(string memory _shardName, string memory _shardSymbol, uint256 supply, uint256 _ownerRetain, uint256 _price) public {
+        // owner retain - amount of shards (tokes) will be given to the user, if all then end of steps. 
+        // if user wants to generate funds, owner retain will be less than 100 and user sets price per shard (token). 
+
+        //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC20 depending on implementation
     }
 
 
