@@ -1,25 +1,29 @@
-import React, { Component } from 'react';
-import './app.scss';
-import { Content } from 'carbon-components-react';
-import TutorialHeader from './components/TutorialHeader';
-import { Route, Switch } from 'react-router-dom';
-import FrontPage from './content/FrontPage';
-import AuctionsPage from './content/AuctionsPage';
+import React from 'react';
 
-class App extends Component {
-  render() {
-    return (
-      <>
-        <TutorialHeader />
-        <Content>
-          <Switch>
-            <Route exact path="/" component={FrontPage} />
-            <Route path="/repos" component={AuctionsPage} />
-          </Switch>
-        </Content>
-      </>
-    );
-  }
+const App = props => {
+  return (
+    <div>
+      <div className="p-10 bg-base-100 text-base-content">
+        <button className="btn">button</button>
+        <button className="btn btn-primary">button</button>
+        <button className="btn btn-secondary">button</button>
+        <button className="btn btn-accent">button</button>
+      </div>
+
+      <div className="p-10 bg-base-100 text-base-content" data-theme="garden">
+        <button className="btn">button</button>
+        <button className="btn btn-primary">button</button>
+        <button className="btn btn-secondary">button</button>
+        <button className="btn btn-accent">button</button>
+      </div>
+
+      <div className="p-10 bg-base-100 text-base-content" data-theme="forest">
+        <button className="btn">button</button>
+        <button className="btn btn-primary">button</button>
+        <button className="btn btn-secondary">button</button>
+        <button className="btn btn-accent">button</button>
+      </div>
+    </div>
+  );
 }
-
 export default App;
