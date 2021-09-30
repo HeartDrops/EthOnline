@@ -5,6 +5,7 @@ import TutorialHeader from './components/TutorialHeader';
 import { Route, Switch } from 'react-router-dom';
 import FrontPage from './content/FrontPage';
 import AuctionsPage from './content/AuctionsPage';
+import Footer from './components/Footer';
 
 class App extends Component {
   render() {
@@ -17,6 +18,7 @@ class App extends Component {
             <Route path="/repos" component={AuctionsPage} />
           </Switch>
         </Content>
+        <Footer />
       </>
     );
   }

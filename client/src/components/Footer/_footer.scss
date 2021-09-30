@@ -1,0 +1,13 @@
+.site-footer {
+    background-color: $black; 
+    color: $white;
+    padding: 50px 0px;
+}
+.site-social{
+    display: flex; 
+    justify-content: flex-end;
+    a {
+        color: $white;
+        padding-right: 10px;
+    }
+}

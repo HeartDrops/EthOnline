@@ -1,3 +1,16 @@
+// Define global variables
+
+$white: #FFFFFF;
+$black: #000000;
+
+:root {
+    --color-primary: #005070;
+    --color-secondary: #DD0000;
+    --color-additional: #FFCE00;
+    --color-background: #FFCE00; // used for header in homepage
+  }
+
 @import './components/TutorialHeader/tutorial-header.scss';
 @import './content/FrontPage/front-page.scss';
 @import './content/AuctionsPage/auctions-page.scss';
+@import './components/Footer/footer.scss';
