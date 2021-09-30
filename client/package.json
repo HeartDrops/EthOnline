@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "react": "latest",
-        "react-dom": "latest"
+        "react-dom": "latest",
+        "react-router-dom": "^5.3.0"
     }
 }
