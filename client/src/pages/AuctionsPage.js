@@ -1,7 +1,12 @@
 import React from 'react';
+import ShowcaseAuctions from '../components/showcaseAuctions';
 
 const AuctionsPage = () => {
-  return <div>AUCTIONS PAGE</div>;
+  return (
+    <>
+      <ShowcaseAuctions/>
+    </>
+    );
 };
 
 export default AuctionsPage;

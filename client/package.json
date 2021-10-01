@@ -11,6 +11,7 @@
         "babel-loader": "latest",
         "css-loader": "latest",
         "daisyui": "latest",
+        "dotenv-webpack": "^7.0.3",
         "html-webpack-plugin": "latest",
         "postcss": "latest",
         "postcss-loader": "latest",
@@ -21,8 +22,13 @@
         "webpack-dev-server": "latest"
     },
     "dependencies": {
+        "ethers": "^5.4.7",
+        "nft.storage": "^3.3.0",
+        "node-sass": "^6.0.1",
         "react": "latest",
         "react-dom": "latest",
-        "react-router-dom": "^5.3.0"
+        "react-router-dom": "^5.3.0",
+        "styled-components": "^5.3.1",
+        "web3modal": "^1.9.4"
     }
 }

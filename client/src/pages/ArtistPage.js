@@ -1,7 +1,16 @@
 import React from 'react';
+import ArtForm from '../components/artForm';
+import FileUpload from '../components/fileUpload';
 
 const ArtistPage = () => {
-  return <div> PAGE TO CREATE AN AUCTION</div>;
+
+  return (
+    <>
+      <ArtForm/>
+      <FileUpload/>
+    </>
+  
+  );
 };
 
 export default ArtistPage;

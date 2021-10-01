@@ -14,11 +14,11 @@ const App = props => {
   return (
     <>
       <Header />
-      <Router>    
-        <Route exact path="/" component={FrontPage} />
-        <Route path="/auctions" component={AuctionsPage} />
-        <Route path="/create" component={ArtistPage} />
-      </Router>
+        <Router>    
+          <Route exact path="/" component={FrontPage} />
+          <Route path="/auctions" component={AuctionsPage} />
+          <Route path="/create" component={ArtistPage} />
+        </Router>
       <Footer />
     </>
   );

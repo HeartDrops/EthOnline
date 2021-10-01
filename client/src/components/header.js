@@ -9,8 +9,8 @@ const HeaderSite = () => {
                 <div className="navbar mb-2 shadow-lg bg-neutral text-neutral-content rounded-box">
                     <div className="px-2 mx-2 navbar-start">
                         <span className="text-lg font-bold">
-                                Heart Drops
-                            </span>
+                            <Link to='/'>Heart Drops</Link>
+                        </span>
                     </div> 
                     <div className="hidden px-2 mx-2 navbar-center lg:flex">
                         <div className="flex items-stretch">
