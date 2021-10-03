@@ -23,7 +23,7 @@
         "webpack-dev-server": "latest"
     },
     "dependencies": {
-        "@walletconnect/web3-provider": "^1.6.5",
+        "@babel/runtime": "^7.15.4",
         "ethers": "^5.4.7",
         "nft.storage": "^3.3.0",
         "node-sass": "^6.0.1",

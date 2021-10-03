@@ -20,7 +20,7 @@ const ShowcaseAuctions = () => {
                         </h2> 
                         <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Sit sit necessitatibus veritatis sed molestiae voluptates incidunt iure sapiente.</p> 
                         <div className="justify-end card-actions">
-                            <Link  to="/" className="btn btn-secondary">Donate</Link>
+                            <Link  to="/donate" className="btn btn-secondary">Donate</Link>
                         </div>
                         </div>
                     </div> 
@@ -36,7 +36,7 @@ const ShowcaseAuctions = () => {
                         </h2> 
                         <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Sit sit necessitatibus veritatis sed molestiae voluptates incidunt iure sapiente.</p> 
                         <div className="justify-end card-actions">
-                            <Link  to="/" className="btn btn-secondary">Donate</Link>
+                            <Link  to="/donate" className="btn btn-secondary">Donate</Link>
                         </div>
                         </div>
                     </div> 

@@ -24,6 +24,11 @@ module.exports = {
             }
         ]
     },
+    devServer: {
+        historyApiFallback: true,
+        liveReload: true,
+        hot: true
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: 'src/index.html'
