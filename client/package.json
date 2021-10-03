@@ -5,6 +5,7 @@
     },
     "devDependencies": {
         "@babel/core": "latest",
+        "@babel/plugin-transform-runtime": "^7.15.0",
         "@babel/preset-env": "latest",
         "@babel/preset-react": "latest",
         "autoprefixer": "latest",
@@ -22,6 +23,7 @@
         "webpack-dev-server": "latest"
     },
     "dependencies": {
+        "@babel/runtime": "^7.15.4",
         "ethers": "^5.4.7",
         "nft.storage": "^3.3.0",
         "node-sass": "^6.0.1",
