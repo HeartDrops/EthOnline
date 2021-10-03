@@ -45,6 +45,30 @@ const FrontPage = () => {
         </div>
       </div>
     </div>
+
+    <div className="py-5">
+      <h2 className="my-5 text-5xl font-bold text-center">Community contributions</h2>
+      <div className="container mx-auto p-5">
+        <div class="w-full shadow stats">
+          <div class="stat place-items-center place-content-center">
+            <div class="stat-title">Number of charities</div> 
+            <div class="stat-value text-primary">3</div> 
+            <div class="stat-desc text-primary">lorem ipsum</div>
+          </div> 
+          <div class="stat place-items-center place-content-center">
+            <div class="stat-title">Number of Heart Drops</div> 
+            <div class="stat-value text-secondary">4</div> 
+            <div class="stat-desc text-secondary">lorem ipsum</div>
+          </div> 
+          <div class="stat place-items-center place-content-center">
+            <div class="stat-title">Total value distributed</div> 
+            <div class="stat-value text-accent">1,200</div> 
+            <div class="stat-desc text-accent">lorem ipsum</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div className="py-5">
       <h2 className="my-5 text-5xl font-bold text-center">Get involved</h2>
       <div className="container mx-auto p-5"></div>
