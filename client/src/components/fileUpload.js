@@ -85,7 +85,9 @@ const FileUpload = ({
         />
       </FileUploadContainer>
       <FilePreviewContainer>
-        <span>To Upload</span>
+        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-city">
+            To Upload
+        </label>        
         <PreviewList>
           {Object.keys(files).map((fileName, index) => {
             let file = files[fileName];

@@ -13,13 +13,13 @@ import './index.css';
 const App = props => {
   return (
     <>
-      <Header />
-        <Router>    
+      <Router>    
+        <Header />
           <Route exact path="/" component={FrontPage} />
           <Route path="/auctions" component={AuctionsPage} />
           <Route path="/create" component={ArtistPage} />
-        </Router>
-      <Footer />
+        <Footer />
+      </Router>
     </>
   );
 }

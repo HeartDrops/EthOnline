@@ -5,6 +5,7 @@ const AuctionsPage = () => {
   return (
     <>
       <ShowcaseAuctions/>
+      <ShowcaseAuctions/>
     </>
     );
 };

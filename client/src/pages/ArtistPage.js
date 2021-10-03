@@ -1,13 +1,13 @@
 import React from 'react';
 import ArtForm from '../components/artForm';
-import FileUpload from '../components/fileUpload';
+import Connect from '../components/connect';
 
 const ArtistPage = () => {
 
   return (
     <>
       <ArtForm/>
-      <FileUpload/>
+      <Connect/>
     </>
   
   );

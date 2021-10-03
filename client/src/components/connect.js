@@ -6,13 +6,13 @@ const generateMessageSignature = () => {
   return (
     '******************************************************************************** \n' +
     'Welcome to Heart Drops \n' +
-    '******************************************************************************** \n' +
+    '******************************************************************************** \n' 
   );
 }
 
 const generateSignature = async (signer, userAddy ) => {
   let signed;
-  const message = generateMessageSignature(userAddy, 'EthBlox');
+  const message = generateMessageSignature();
   signed = await signer.signMessage(message);
 };
 

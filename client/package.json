@@ -1,10 +1,11 @@
 {
     "scripts": {
-        "dev": "webpack serve --mode=development --output-path ./ --port 3100",
+        "dev": "webpack serve --mode=development --output-path ./ --port 3100 --hot",
         "build": "webpack --mode=production"
     },
     "devDependencies": {
         "@babel/core": "latest",
+        "@babel/plugin-transform-runtime": "^7.15.0",
         "@babel/preset-env": "latest",
         "@babel/preset-react": "latest",
         "autoprefixer": "latest",
@@ -22,6 +23,7 @@
         "webpack-dev-server": "latest"
     },
     "dependencies": {
+        "@walletconnect/web3-provider": "^1.6.5",
         "ethers": "^5.4.7",
         "nft.storage": "^3.3.0",
         "node-sass": "^6.0.1",
@@ -29,6 +31,7 @@
         "react-dom": "latest",
         "react-router-dom": "^5.3.0",
         "styled-components": "^5.3.1",
+        "web3": "^1.6.0",
         "web3modal": "^1.9.4"
     }
 }
