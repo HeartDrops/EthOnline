@@ -5,7 +5,7 @@ import ShowcaseAuctions from '../components/showcaseAuctions'
 const FrontPage = () => {
   return (
     <>
-    <div className="hero min-h-screen bg-base-200">
+    <div className="hero bg-base-200 py-5">
       <div className="flex-col hero-content lg:flex-row-reverse">
         <img src="https://picsum.photos/id/1005/600/600" className="max-w-sm rounded-lg shadow-2xl" /> 
         <div>
@@ -20,7 +20,35 @@ const FrontPage = () => {
         </div>
       </div>
     </div>
+
     <ShowcaseAuctions />
+
+    <div className="py-5">
+      <h2 className="my-5 text-5xl font-bold text-center">How it works</h2>
+      <div className="container mx-auto p-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-20">
+          <div class="card shadow-2xl lg:card-side bg-primary text-primary-content">
+            <div class="card-body">
+              <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
+            </div>
+          </div> 
+          <div class="card shadow-2xl lg:card-side bg-secondary text-secondary-content">
+            <div class="card-body">
+              <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
+            </div>
+          </div>
+          <div class="card shadow-2xl lg:card-side bg-accent text-secondary-accent">
+            <div class="card-body">
+              <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
+            </div>
+          </div> 
+        </div>
+      </div>
+    </div>
+    <div className="py-5">
+      <h2 className="my-5 text-5xl font-bold text-center">Get involved</h2>
+      <div className="container mx-auto p-5"></div>
+    </div>
     </>
   );
 };
