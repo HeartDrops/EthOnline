@@ -27,18 +27,18 @@ const FrontPage = () => {
       <h2 className="my-5 text-5xl font-bold text-center">How it works</h2>
       <div className="container mx-auto p-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-20">
-          <div class="card shadow-2xl lg:card-side bg-primary text-primary-content">
-            <div class="card-body">
+          <div className="card shadow-2xl lg:card-side bg-primary text-primary-content">
+            <div className="card-body">
               <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
             </div>
           </div> 
-          <div class="card shadow-2xl lg:card-side bg-secondary text-secondary-content">
-            <div class="card-body">
+          <div className="card shadow-2xl lg:card-side bg-secondary text-secondary-content">
+            <div className="card-body">
               <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
             </div>
           </div>
-          <div class="card shadow-2xl lg:card-side bg-accent text-secondary-accent">
-            <div class="card-body">
+          <div className="card shadow-2xl lg:card-side bg-accent text-secondary-accent">
+            <div className="card-body">
               <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
             </div>
           </div> 
@@ -49,21 +49,21 @@ const FrontPage = () => {
     <div className="py-5">
       <h2 className="my-5 text-5xl font-bold text-center">Community contributions</h2>
       <div className="container mx-auto p-5">
-        <div class="w-full shadow stats">
-          <div class="stat place-items-center place-content-center">
-            <div class="stat-title">Number of charities</div> 
-            <div class="stat-value text-primary">3</div> 
-            <div class="stat-desc text-primary">lorem ipsum</div>
+        <div className="w-full shadow stats">
+          <div className="stat place-items-center place-content-center">
+            <div className="stat-title">Number of charities</div> 
+            <div className="stat-value text-primary">3</div> 
+            <div className="stat-desc text-primary">lorem ipsum</div>
           </div> 
-          <div class="stat place-items-center place-content-center">
-            <div class="stat-title">Number of Heart Drops</div> 
-            <div class="stat-value text-secondary">4</div> 
-            <div class="stat-desc text-secondary">lorem ipsum</div>
+          <div className="stat place-items-center place-content-center">
+            <div className="stat-title">Number of Heart Drops</div> 
+            <div className="stat-value text-secondary">4</div> 
+            <div className="stat-desc text-secondary">lorem ipsum</div>
           </div> 
-          <div class="stat place-items-center place-content-center">
-            <div class="stat-title">Total value distributed</div> 
-            <div class="stat-value text-accent">1,200</div> 
-            <div class="stat-desc text-accent">lorem ipsum</div>
+          <div className="stat place-items-center place-content-center">
+            <div className="stat-title">Total value distributed</div> 
+            <div className="stat-value text-accent">1,200</div> 
+            <div className="stat-desc text-accent">lorem ipsum</div>
           </div>
         </div>
       </div>

@@ -17,8 +17,8 @@ const App = (props) => {
 				<Route path="/auctions" component={AuctionsPage} />
 				<Route path="/create" component={ArtistPage} />
 				<Route path="/donate" component={BuyerPage} />
+        <Footer />
 			</Router>
-			<Footer />
 		</>
 	);
 };
