@@ -21,6 +21,12 @@ module.exports = {
                     { loader: "css-loader", options: { importLoaders: 1 } },
                     "postcss-loader",
                 ],
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                use: [{
+                    loader: 'file-loader'
+                }],
             }
         ]
     },

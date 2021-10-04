@@ -7,9 +7,8 @@ const ArtistPage = () => {
   return (
     <>
       <ArtForm/>
-      <Connect/>
+      {/* <Connect/> */}
     </>
-  
   );
 };
 

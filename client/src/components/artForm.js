@@ -7,56 +7,35 @@ const ArtForm = () => {
   const [ artName, setArtName ] = useState('');
   
   const [isValid, setIsValid] = useState(true);
-  // If forms are filled, setNextPage = true
-  const [nextPage, setNextPage] = useState(false);
   // If setStep to change page
   const [step, setStep] = useState(0);
-
-  const [image, setImage] = useState(null);
-
-  const submitHandler = (event) => {
-    if (event.keyCode == 13) {
-      let valid = false;
-      let userName = event.target.value.trim();
-      if ( userName.length > 3) {
-        setUserName(userName);
-        valid = true;
-      } else {
-        valid = false;
-      }
-    } else {
-      console.log('err');
-    }
-    setIsValid(valid);
-  };
-
-  const inputChangeHandler = (event) => {
-    if (event.target.value.trim().length > 0) {
-      console.log('hee')
-    }
-  };
 
 
 
 
   const selectNextHandler = () => {
-    if (nextPage==true) {
-      setNextPage((prevActivePage) => prevActivePage + 1);
-    };
+    if (step < 3) {
+      setStep((prevActiveStep) => prevActiveStep + 1);
+      console.log('next');
+    } else {
+      console.log('no');
+    }
   };
+
+  const selectPrevHandler = () => {
+    if (step > 0 ) {
+      setStep((prevActiveStep) => prevActiveStep - 1);
+      console.log('next');
+    } else {
+      console.log('no');
+    }
+  };
+
 
 
   const apiKey = process.env.API_KEY;
   const client = new NFTStorage({ token: apiKey })
 
-  const updateUploadedFiles = (files) => 
-    setNewUserInfo({ ...newUserInfo, profileImages: files});
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // logic to add image
-  };
-  
 
   const styles = {divClass: 'text-base hover:scale-110 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200  bg-gray-100 text-gray-700 border duration-200 ease-in-out border-gray-600 transition',
                   textBorder: 'bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u'
@@ -100,7 +79,7 @@ const ArtForm = () => {
     </form>
     </div> */}
     <div className="p-5 my-20">
-    <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">The NFT Generator 3000</h2>
+    <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalize</h2>
     <div className="mx-4 p-4">
         <div className="flex items-center">
             <div className="flex items-center text-teal-600 relative">
@@ -144,8 +123,33 @@ const ArtForm = () => {
             </div>
         </div>
     </div>
+    {step==0 &&
+    <>
+      <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Select your NFT standard</h2>
+          <div class="relative m-7 my-10 flex flex-wrap mx-auto justify-center">
+          <div class="relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out">
+            <div class="overflow-x-hidden rounded-2xl relative">
+              <img class="h-60 rounded-2xl w-full object-fill " src="https://ichef.bbci.co.uk/news/800/cpsprodpb/2692/production/_117547890_cd7706e1-1a9b-4e9e-9d55-7afe73c24984.jpg"/>
+            </div>
+            <div class="mt-6 pl-2 mb-2 flex justify-center items-center">
+              <div>
+                <p class="items-center text-lg font-bold text-gray-900 mb-2">ERC721</p>
+              </div>
+            </div>
+          </div>
+          <div class="relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out">
+            <div class="overflow-x-hidden rounded-2xl relative ">
+              <img class="h-60 rounded-2xl w-full object-fill" src="https://pixahive.com/wp-content/uploads/2020/10/Gym-shoes-153180-pixahive.jpg"/>
+            </div>
+            <div class="mt-6 pl-2 mb-2 flex justify-center items-center">
+              <div>
+                <p class="items-center text-lg font-bold text-gray-900 mb-2">ERC1155</p>
+              </div>
+            </div>
+          </div>
+        </div> </>}
 
-    { nextPage==0 && 
+    {step==1 && 
       <div className="mt-8 p-4">
         <div>
             <div className="font-bold text-gray-600 text-xs leading-8 uppercase h-6 mx-2 mt-3">UserName</div>
@@ -155,7 +159,6 @@ const ArtForm = () => {
                       <input 
                         placeholder="Beeple" 
                         className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
-                        onChange={inputChangeHandler}  
                         /> 
                     </div>
                 </div>
@@ -178,8 +181,104 @@ const ArtForm = () => {
                 </div>
             </div>
         </div>
-        <div className="flex p-2 mt-4">
-          <button className={`${styles.divClasses} ${step==0 ? 'disabled:opacity-50' : ''}`}>Previous</button>
+    </div>}
+
+    { step==2 &&
+      <div class="m-7 my-20"> 
+      <FileUpload 
+      accept=".jpg,.png,.jpeg,.gif"
+      label="NFT Images(s)"
+    />
+    <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+      hover:bg-teal-600  
+      bg-purple-500 
+      text-white 
+      font-bold
+      border duration-200 ease-in-out 
+      border-teal-600 transition"
+      >Submit</button>
+      </div>
+      }
+      { step==3 && 
+        <div class=" my-20 flex items-center justify-center">
+          <div class="max-w-4xl  bg-white rounded-lg shadow-xl">
+              <div class="p-4 border-b">
+                  <h2 class="text-2xl ">
+                      Please confirm that your information is valid
+                  </h2>
+                  <p class="text-sm text-gray-500">
+                      Personal details and application. 
+                  </p>
+              </div>
+              <div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                          Preferred Name
+                      </p>
+                      <p>
+                          Jane Doe
+                      </p>
+                  </div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                          NFT URI
+                      </p>
+                      <p>
+                          Insert URI
+                      </p>
+                  </div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                          Discord Handle
+                      </p>
+                      <p>
+                          sendmeat#5744
+                      </p>
+                  </div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                          To be raised
+                      </p>
+                      <p>
+                          $ 12000 / 3ETH
+                      </p>
+                  </div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                          Token supply
+                      </p>
+                      <p>
+                        200
+                      </p>
+                  </div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                          Token symbol
+                      </p>
+                      <p>
+                        $PUNK
+                      </p>
+                  </div>
+                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                        Timeline
+                      </p>
+                      <p>
+                        True
+                      </p>
+                  </div>
+              </div>
+          </div> 
+        </div>
+          
+          }
+
+      <div className="flex p-2 mt-4">
+          <button 
+            className={`${styles.divClasses} ${step==0 ? 'disabled:opacity-50' : ''}`}
+            onClick={selectPrevHandler}
+          >Previous
+          </button>
         <div className="flex-auto flex flex-row-reverse">
           <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
             hover:bg-teal-600  
@@ -188,25 +287,10 @@ const ArtForm = () => {
             font-bold
             border duration-200 ease-in-out 
             border-teal-600 transition"
-            onSelectNext={selectNextHandler}
+            onClick={selectNextHandler}
             >Next</button>
             </div>
         </div>
-    </div>}
-    <FileUpload 
-      accept=".jpg,.png,.jpeg,.gif"
-      label="NFT Images(s)"
-      updateFilesCb={updateUploadedFiles}
-    />
-    <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
-      hover:bg-teal-600  
-      bg-purple-500 
-      text-white 
-      font-bold
-      border duration-200 ease-in-out 
-      border-teal-600 transition"
-      onSubmit={handleSubmit}
-      >Submit</button>
   </div>
 
 
