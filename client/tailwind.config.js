@@ -6,12 +6,12 @@ module.exports = {
     plugins: [
         require('daisyui')
     ],
-}
 
-daisyui: {
-    themes: [
+    // config (optional)
+    daisyui: {
+      themes: [
       {
-        'heartDrops': {                     /* your theme name */
+        'heartdrops': {                          /* your theme name */
            'primary' : '#a991f7',           /* Primary color */
            'primary-focus' : '#8462f4',     /* Primary color - focused */
            'primary-content' : '#ffffff',   /* Foreground content color to use on primary color */
@@ -40,4 +40,5 @@ daisyui: {
         },
       },
     ],
-  },
+    },
+}
