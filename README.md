@@ -15,4 +15,26 @@ to store the JSON data. or we can store it directly in structs and the image in 
 ERC 721 can be used to create the NFT which is what opensea uses and so does other NFT sites. which means we can connect to third party sites if need be ( prob not for demo)
 same with ERC 20 industry standard or we can use ERC777 which is ERC20 with better safegaurds.
 
+/\*\* after user connects wallet to web3 and gets access to website.
+Options avaiable for USER:
+Create NFT
+Fractionalize NFT
+
+    function createNFT(string memory _name, string memory _symbol, string memory _desc, string memory _imageURL) public {
+
+        // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place.
+        // if using ERC721 - only name and symbol is needed to along with unique id for the NFT to create.
+
+        //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC721 depending on implementation
+    }
+
+    */
+
+    // function createNFT() public {
+
+    //     // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place.
+    //     // if using ERC721 - only name and symbol is needed to along with unique id for the NFT to create.
+    //     //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC721 depending on implementation
+    // }
+
 \*/

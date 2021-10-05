@@ -12,6 +12,4 @@ contract ACHouseToken721 is ERC721 {
    function setParentAddress(address _address) public {
        parentAddress = _address;
    }
-
-
 }

@@ -2,55 +2,62 @@ pragma solidity ^0.8.3;
 //"SPDX-License-Identifier: UNLICENSED"
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 
 
-
-
-contract ACHouseToken1155 is ERC1155 {
-
+contract ACHouseToken1155 is ERC1155, IERC1155Receiver {
     address parentAddress;
+
+    uint256[] tokensIdscreated;
     
     constructor() ERC1155("") {}
+    
+    
+    function setParentAddress(address _address) public {
+        parentAddress = _address;
+    }
 
-   function setParentAddress(address _address) public {
-       parentAddress = _address;
-   }
+    /**
+    public functions available through implementation of ERC1155
+    -supportsInterface
+    -uri - get the current set uri
+    -balanceOf
+    -balanceBatch
+    -setApprovalForAll
+    -isApprovedForAll
+    -safeTransferFrom
+    -safeBatchTransferFrom
 
-   function mintNFT(address _ownerAddress, string memory _uri, uint256 _id) public {
+     */ 
+    function mintNFT(address _ownerAddress, uint256 _id, uint256 amount ) public {
        // using erc 1155 to creat NFT
        // mint will create NFT and send it to the address. IF address is parent contract then it will throw error unless IERC1155Receiver.onERC1155BatchReceived is implemented. 
 
-       _setURI(_uri);
-       _mint(_ownerAddress, _id, 1, ""); 
-   }
+       _mint(_ownerAddress, _id, amount, ""); 
+       tokensIdscreated.push(_id);
 
+    }
 
-   
-   
-   
-   
-   // owner address is prob artist address. USING ERC1155
-//    function mintNFT1155(address _ownerAddress, string memory _uri, uint256 _id, uint256 _supply) public {
-
-//        // using erc 1155 to creat NFT
-//        ERC1155(_uri)._mint(_ownerAddress, _id, 1, ""); // ERC 721 like but still ERC1155 NFT token
-
-//        ERC1155(_uri)._mint(_ownerAddress, _id, 10**9, ""); // ERC 20 like but its still ERC1155 fungible token
-
-//        // transfer to the owner part comes here
-//    }
-
-//    // owner address is prob artist address. USING ERC721
-//    function mintNFT721(address _ownerAddress, string memory _uri, string memory _name, string memory _symbol, uint256 _id, uint256 _supply) public {
-
-//        // using erc 1155 to creat NFT
-//        ERC721(_name, _symbol)._mint(_ownerAddress, _id);
-
-//        // transfer to the owner part comes here
-//    }
-
-//    function mintERC20(address _ownerAddress,string memory _name, string memory _symbol, uint256 _supply) public {
-//        ERC20(_name, _symbol)._mint(_ownerAddress, 10**9);
-//    }
+    function setURI(string memory newuri) public {
+        _setURI(newuri);
+    }
     
+    //get tokens totalnumber. 
+    function getTokenCount() public view returns (uint256) {
+        return tokensIdscreated.length;
+    }
+    //returns the array of all tokenids. 
+    function getTokenIds() public  view returns ( uint256[] memory) {
+        return tokensIdscreated;
+    }
+    
+    function onERC1155Received( address operator, address from,uint256 id, uint256 value, bytes calldata data) override pure external returns (bytes4){
+        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
+    }
+    
+    function onERC1155BatchReceived( address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data ) override pure external returns (bytes4){
+        return bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"));
+    }
+
+
 }

@@ -3,26 +3,26 @@ pragma solidity ^0.8.3;
 
 import "./ACHouseToken1155.sol";
 import "./ACHouseToken721.sol";
-import "./ACHouseToken20.sol";
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+// import "./ACHouseToken20.sol";
+// import "./CheckerERC165.sol";
 
-contract ACHouse  {
+// import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+// import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+// import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+// import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol"
+
+// import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+// import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+
+contract ACHouse {
 
     address owner;
 
-    ACHouseToken1155 multitoken;
-    ACHouseToken721 nftToken;
-    ACHouseToken20 fractoken;
+    ACHouseToken1155 _multiToken;
+    ACHouseToken721 _nftToken;
 
-    // constructor(address _erc1155token){
-
-    //     owner = msg.sender;
-    //     // token = IERC20(_erc20token);
-    //     multitoken = IERC1155(_erc1155token);
-    // }
-    
-    /** Variables and Event Emitters */
+       /** Variables and Event Emitters */
     struct AuctionPlace {
         uint256 id;
         string name;
@@ -54,31 +54,13 @@ contract ACHouse  {
     mapping (address => NGO ) NgoMapping; 
     
     // User address maps to - Chaities and the donation amount. 
-    mapping ( address =>  mapping (address => uint256)) UserNGODonation; 
-
-    struct NFTContracts{
-        ACHouseToken721 contracts;
-        address nftcontractAddress;
-    }
-
-    struct fracNFTContracts{
-        ACHouseToken20 contracts;
-        address fraccontractAddress;
-    }
-    mapping (string => NFTContracts) NFTContractsMappings;
-    mapping (string => fracNFTContracts) fracNFTContractsMappings;
+    mapping ( address =>  mapping (address => uint256)) UserNGODonation;
     
-    
-    /** Getters function */
-    function getNftData(string memory _nftName) public view returns (NFTContracts memory){
-        return NFTContractsMappings[_nftName];
-    }
-    
-    function getfracNftData(string memory _shard) public view returns (fracNFTContracts memory){
-        return fracNFTContractsMappings[_shard];
-    }
 
-
+    constructor(address _mToken, address _nToken){
+        _multiToken = ACHouseToken1155(_mToken);
+        _nftToken = ACHouseToken721(_nToken);
+    }
     
     /**Functions - Registration  */
     function register(string memory _name, uint _userType) public returns (bool) {
@@ -107,47 +89,26 @@ contract ACHouse  {
         return true;
     }
 
-    function createNFt() public {
-
+    /**ERC1155 functionality */
+    function setURI1155(string memory _uri) public {
+        _multiToken.setURI(_uri);
+    }
+    // mint 1155 NFT - set supply to 1. 
+    function createNFT1155(uint256 _id, uint256 _amount) public {
+        _multiToken.mintNFT(msg.sender, _id, _amount);
     }
 
-    function fracNFT(string memory _shardName, string memory _shardSymbol, uint256 supply) public {
-        // owner retain - amount of shards (tokes) will be given to the user, if all then end of steps. 
-        // if user wants to generate funds, owner retain will be less than 100 and user sets price per shard (token). 
-        
-        fractoken = new ACHouseToken20(_shardName, _shardSymbol, supply);
-        
-        fracNFTContracts memory cont = fracNFTContracts(fractoken, address(fractoken));
-        
-        fracNFTContractsMappings[_shardName] = cont;
+    //get tokens totalnumber. 
+    function getTokenCount() public returns (uint256) {
+        return _multiToken.getTokenCount();
     }
-    
-    
-
-    /** after user connects wallet to web3 and gets access to website. 
-    Options avaiable for USER:
-        Create NFT 
-        Fractionalize NFT
-
-    function createNFT(string memory _name, string memory _symbol, string memory _desc, string memory _imageURL) public {
-
-        // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place. 
-        // if using ERC721 - only name and symbol is needed to along with unique id for the NFT to create. 
-
-        //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC721 depending on implementation
+    //returns the array of all tokenids. 
+    function getTokenIds() public returns (uint256[] memory) {
+        return _multiToken.getTokenIds();
     }
 
-    */
 
-    // function createNFT() public {
-
-    //     // if using ERC1155 - we need to create a JSON object and store it in IPFS or in blockchain. it requires a URI pointed at json file and then minting can take place. 
-    //     // if using ERC721 - only name and symbol is needed to along with unique id for the NFT to create. 
-    //     //calls ACHouseToken.mintERC1155 or ACHouseToken.mintERC721 depending on implementation
-    // }
-
-
-
+    /**Helpers */
     function isUserRegistered( address _address) internal view returns (bool) {
          
         for( uint8 j = 0; j < RegisteredUserAddresses.length; j++){
@@ -158,5 +119,24 @@ contract ACHouse  {
         }
         return (false); // user is not registered.
     }
+
+    // //ERC1155 
+    // function onERC1155Received( address operator, address from, uint256 id, uint256 value, bytes calldata data ) override external returns (bytes4){
+        
+    //     // external transfer of Token to parent contract will trigger this function. Leverage this to 
+    //     // continue the transfer to the ACHouseToken1155 which holds all 1155 tokens. 
+    //     _multiToken.safeTransferFrom(from, address(_multiToken), id, value, data);
+        
+    //     return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
+    // }
+    
+    // function onERC1155BatchReceived( address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data ) override external returns (bytes4) {
+
+    //     // external transfer of Token to parent contract will trigger this function. Leverage this to 
+    //     // continue the transfer to the ACHouseToken1155 which holds all 1155 tokens. 
+    //     _multiToken.safeBatchTransferFrom(from, address(_multiToken), ids, values, data);
+
+    //     return bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"));
+    // }
 
 }
