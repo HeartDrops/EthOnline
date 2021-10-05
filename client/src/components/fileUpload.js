@@ -35,6 +35,7 @@ const FileUpload = ({
   };
 
   const addNewFiles = (newFiles) => {
+    console.log(newFiles)
     for (let file of newFiles) {
       if (file.size <= maxFileSizeInBytes) {
         if (!otherProps.multiple) {
@@ -52,11 +53,15 @@ const FileUpload = ({
   };
 
   const handleNewFileUpload = (e) => {
-    const { files: newFiles } = e.target;
-    if (newFiles.length) {
-      let updatedFiles = addNewFiles(newFiles);
-      setFiles(updatedFiles);
-      callUpdateFilesCb(updatedFiles);
+    if (Object.entries(files).length == 0) {
+      const { files: newFiles } = e.target;
+      if (newFiles.length) {
+        let updatedFiles = addNewFiles(newFiles);
+        setFiles(updatedFiles);
+        callUpdateFilesCb(updatedFiles);
+      }
+    } else {
+      console.log('too many')
     }
   };
 

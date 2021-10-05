@@ -1,17 +1,59 @@
 import React, { useState } from 'react';
 import FileUpload from './fileUpload';
-import { NFTStorage, File } from 'nft.storage';
+import { NFTStorage, File, Blob  } from 'nft.storage';
+import { ethers } from 'ethers';
 
 const ArtForm = () => {
   const [ userName, setUserName ] = useState('');
   const [ artName, setArtName ] = useState('');
-  
   const [isValid, setIsValid] = useState(true);
+
+  // Token standard
+  const [standard, setStandard] = useState(null);
+
   // If setStep to change page
   const [step, setStep] = useState(0);
 
+  // File upload
+  const [newFile, setNewFile] = useState({
+    nftImage: []
+  });
+  const [img, setImg] = useState(null);
+
+  const token = process.env.API_KEY;
+  const endpoint = 'https://api.nft.storage';
+
+  const updateUploadedFiles= (files) => {
+    setNewFile({ ...newFile, nftImage: files })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(newFile);
+    console.log(URL.createObjectURL(newFile.nftImage[0]));
+    setImg(URL.createObjectURL(newFile.nftImage[0]));
+  }
+
+  const storeNFT = async () => {
+    console.log('storing')
+    const client = new NFTStorage({ token: token })
+    const cid = await client.storeBlob(img)
+    console.log('IPFS URL for the Blob:' + cid);
+    const metadata = await client.store({
+      name: 'nft.storage store',
+      description: 'ERC-1155 compatible metadata.',
+      image: new Blob(img, 'pinpie.jpg', { type: 'image/jpg' }),
+    })
+  }
 
 
+  const erc721StandardHandler = () => {
+    setStandard("ERC721")
+  };
+
+  const erc1155StandardHandler = () => {
+    setStandard("ERC1155")
+  };
 
   const selectNextHandler = () => {
     if (step < 3) {
@@ -33,9 +75,6 @@ const ArtForm = () => {
 
 
 
-  const apiKey = process.env.API_KEY;
-  const client = new NFTStorage({ token: apiKey })
-
 
   const styles = {divClass: 'text-base hover:scale-110 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200  bg-gray-100 text-gray-700 border duration-200 ease-in-out border-gray-600 transition',
                   textBorder: 'bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u'
@@ -44,40 +83,6 @@ const ArtForm = () => {
 
   return (
     <>
-    {/* <div className="w-full max-w-xs md:justify-center">
-    <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-      <div className="flex flex-wrap -mx-3 mb-6">
-        <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-          <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            for="grid-first-name"
-            onChange={inputChangeHandler}
-          >
-            Preferred Name
-          </label>
-          <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-red-500 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white" id="grid-first-name" type="text" placeholder="Beeple"/>
-          <p className="text-red-500 text-xs italic">Please fill out this field.</p>
-        </div>
-      </div>
-      <div className="flex flex-wrap -mx-3 mb-2">
-        <div className="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="grid-city">
-            Name of Art Piece
-          </label>
-          <input className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" id="grid-city" type="text" placeholder="CryptoPunks #1223"/>
-        </div>
-      </div>
-      <div className="p-6 card bordered">
-      <div className="form-control">
-        <label className="cursor-pointer label">
-          <span className="label-text">Enable Deadline</span> 
-          <input type="checkbox" checked="checked" className="checkbox checkbox-secondary" />
-        </label>
-      </div>
-    </div>
-    <FileUpload/>
-    </form>
-    </div> */}
     <div className="p-5 my-20">
     <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalize</h2>
     <div className="mx-4 p-4">
@@ -127,7 +132,10 @@ const ArtForm = () => {
     <>
       <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Select your NFT standard</h2>
           <div class="relative m-7 my-10 flex flex-wrap mx-auto justify-center">
-          <div class="relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out">
+          <div 
+            class=" 0 35px 60px -15px rgba(0, 0, 0, 0.3) relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out"
+            onClick={erc721StandardHandler}
+          >
             <div class="overflow-x-hidden rounded-2xl relative">
               <img class="h-60 rounded-2xl w-full object-fill " src="https://ichef.bbci.co.uk/news/800/cpsprodpb/2692/production/_117547890_cd7706e1-1a9b-4e9e-9d55-7afe73c24984.jpg"/>
             </div>
@@ -137,7 +145,10 @@ const ArtForm = () => {
               </div>
             </div>
           </div>
-          <div class="relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out">
+          <div 
+            class="relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out"
+            onClick={erc1155StandardHandler}
+            >
             <div class="overflow-x-hidden rounded-2xl relative ">
               <img class="h-60 rounded-2xl w-full object-fill" src="https://pixahive.com/wp-content/uploads/2020/10/Gym-shoes-153180-pixahive.jpg"/>
             </div>
@@ -188,6 +199,8 @@ const ArtForm = () => {
       <FileUpload 
       accept=".jpg,.png,.jpeg,.gif"
       label="NFT Images(s)"
+      multiple
+      updateFilesCb={updateUploadedFiles}
     />
     <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
       hover:bg-teal-600  
@@ -196,7 +209,17 @@ const ArtForm = () => {
       font-bold
       border duration-200 ease-in-out 
       border-teal-600 transition"
+      onClick={handleSubmit}
       >Submit</button>
+      <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+      hover:bg-teal-600  
+      bg-purple-500 
+      text-white 
+      font-bold
+      border duration-200 ease-in-out 
+      border-teal-600 transition"
+      onClick={storeNFT}
+      >Store</button>
       </div>
       }
       { step==3 && 
