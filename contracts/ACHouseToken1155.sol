@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 
 
-contract ACHouseToken1155 is ERC1155, IERC1155Receiver {
+contract ACHouseToken1155 is ERC1155 {
     address parentAddress;
 
     uint256[] tokensIdscreated;
@@ -17,24 +17,15 @@ contract ACHouseToken1155 is ERC1155, IERC1155Receiver {
         parentAddress = _address;
     }
 
-    /**
-    public functions available through implementation of ERC1155
-    -supportsInterface
-    -uri - get the current set uri
-    -balanceOf
-    -balanceBatch
-    -setApprovalForAll
-    -isApprovedForAll
-    -safeTransferFrom
-    -safeBatchTransferFrom
-
-     */ 
     function mintNFT(address _ownerAddress, uint256 _id, uint256 amount ) public {
        // using erc 1155 to creat NFT
        // mint will create NFT and send it to the address. IF address is parent contract then it will throw error unless IERC1155Receiver.onERC1155BatchReceived is implemented. 
 
        _mint(_ownerAddress, _id, amount, ""); 
        tokensIdscreated.push(_id);
+
+       //apprvove parent contract to handle tokens and transactions.
+        setApprovalForAll(parentAddress, true);
 
     }
 
@@ -51,13 +42,28 @@ contract ACHouseToken1155 is ERC1155, IERC1155Receiver {
         return tokensIdscreated;
     }
     
-    function onERC1155Received( address operator, address from,uint256 id, uint256 value, bytes calldata data) override pure external returns (bytes4){
-        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
-    }
+    // function onERC1155Received( address operator, address from,uint256 id, uint256 value, bytes calldata data) override pure external returns (bytes4){
+    //     // TransferSingle.emit(operator, from, , id, value);
+    //     return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
+    // }
     
-    function onERC1155BatchReceived( address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data ) override pure external returns (bytes4){
-        return bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"));
-    }
+    // function onERC1155BatchReceived( address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data ) override pure external returns (bytes4){
+    //     return bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"));
+    // }
 
 
 }
+
+
+    /**
+    public functions available through implementation of ERC1155
+    -supportsInterface
+    -uri - get the current set uri
+    -balanceOf
+    -balanceBatch
+    -setApprovalForAll
+    -isApprovedForAll
+    -safeTransferFrom
+    -safeBatchTransferFrom
+
+     */ 
