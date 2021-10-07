@@ -1,3 +1,7 @@
 node_modules
 
-build/
+build/contracts/
+
+client/dist/
+
+client/src/contracts/
