@@ -39,6 +39,13 @@ module.exports = {
            'error' : '#ff5724',             /* Error */
         },
       },
+    {
+      extend: {
+        boxShadow: {
+          blue: '0 4px 14px 0 rgba(19, 51, 81, 0.39)',
+        }
+      }
+    }
     ],
     },
 }

@@ -7,7 +7,6 @@ const ShowcaseAuctions = () => {
     return (
         <>
             <div className="py-5">
-                <h2 className="my-5 text-5xl font-bold text-center">Current Heart Drops</h2>
                 <div className="container mx-auto p-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
                         <div className="card bordered shadow-2xl">

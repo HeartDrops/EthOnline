@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FileUpload from './fileUpload';
 import { NFTStorage, File, Blob  } from 'nft.storage';
 import { ethers } from 'ethers';
+import coinGecko from '../api/coinGecko';
 
 const ArtForm = () => {
   const [ userName, setUserName ] = useState('');
   const [ artName, setArtName ] = useState('');
-  const [isValid, setIsValid] = useState(true);
+  const [ artDesc, setArtDesc ] = useState('');
+  const [ ethAddress, setEthAddress ] = useState('');
+  const [ discord, setDiscord ] = useState('');
+  const [ deadline, setDeadline ] = useState(false); 
+  const [ isValid, setIsValid ] = useState({
+    username: true,
+    artname: true,
+    ethadd: true
+  });
+  const [ ethPrice, setEthPrice ] = useState(null);
 
   // Token standard
   const [standard, setStandard] = useState(null);
@@ -22,6 +32,22 @@ const ArtForm = () => {
 
   const token = process.env.API_KEY;
   const endpoint = 'https://api.nft.storage';
+
+  // Price of ETH
+  const getEthPrice = async () => {
+    const ethPrice = await
+      coinGecko.get(`/simple/price/`, {
+        params: {
+          ids: "ethereum",
+          vs_currencies: 'usd',
+        },
+      });
+    setEthPrice(ethPrice.data.ethereum.usd);
+  }
+
+  if (ethPrice == null) {
+    getEthPrice();
+  }
 
   const updateUploadedFiles= (files) => {
     setNewFile({ ...newFile, nftImage: files })
@@ -39,28 +65,188 @@ const ArtForm = () => {
     const client = new NFTStorage({ token: token })
     const cid = await client.storeBlob(img)
     console.log('IPFS URL for the Blob:' + cid);
-    const metadata = await client.store({
-      name: 'nft.storage store',
-      description: 'ERC-1155 compatible metadata.',
-      image: new Blob(img, 'pinpie.jpg', { type: 'image/jpg' }),
-    })
+    // const metadata = await client.store({
+    //   name: 'nft.storage store',
+    //   description: 'ERC-1155 compatible metadata.',
+    //   image: new Blob(img, 'pinpie.jpg', { type: 'image/jpg' }),
+    // })
   }
 
 
   const erc721StandardHandler = () => {
-    setStandard("ERC721")
+    if (standard=="ERC721") {
+      setStandard(null);
+    } else {
+      setStandard("ERC721");
+    }
   };
 
   const erc1155StandardHandler = () => {
-    setStandard("ERC1155")
+    if (standard=="ERC1155") {
+      setStandard(null);
+    } else {
+      setStandard("ERC1155");
+    }
   };
 
-  const selectNextHandler = () => {
-    if (step < 3) {
-      setStep((prevActiveStep) => prevActiveStep + 1);
-      console.log('next');
+  const userNameChangeHandler = (e) => {
+    const username = e.target.value;
+    setUserName(username);
+  }
+
+  const artNameChangeHandler = (e) => {
+    const artname = e.target.value;
+    setArtName(artname);
+  }
+
+
+  const ethAddressChangeHandler = (e) => {
+    const address = e.target.value.trim();
+    setEthAddress(address);
+  }
+
+  const discordChangeHandler = (e) => {
+    const discord = e.target.value;
+    setDiscord(discord);
+  }
+
+  const artDescChangeHandler = (e) => {
+    const artdesc = e.target.value;
+    setArtDesc(artdesc);
+  }
+
+  const verifyFormData = () => {
+    let userValid = false;
+    let addrValid = false;
+    let artValid = false;
+    let descValid = false
+    // username
+    if (range(3,14,1).includes(userName.length)) {
+      userValid = true;
+    } 
+    if (range(3,14,1).includes(artName.length)) {
+      artValid = true;
+    } 
+    if (ethers.utils.isAddress(ethAddress)) {
+      addrValid = true;
+    } 
+    if (artDesc.length > 0) {
+      if (artDesc.match(/(\w+)/g).length < 26) {
+        descValid = true;
+      } else {
+        descValid = false;
+      }
     } else {
-      console.log('no');
+      descValid = true
+    }
+    return [userValid, addrValid, artValid, descValid];
+
+  };
+
+  const [ tokenSupply, setTokenSupply ] = useState(null);
+  const [ validSupply, setValidSupply ] = useState(true);
+  const [ tokenPrice, setTokenPrice ] = useState(null);
+  const [ validPrice, setValidPrice ] = useState(true);
+  const [ tokenSymbol, setTokenSymbol ] = useState(null);
+  const [ amtUSD, setAmtUSD ] = useState(0);
+  const [ amtEth, setAmtEth ] = useState(0)
+
+  // Amount to raise
+
+
+  const tokenSupplyHandler = (e) => {
+    const tokensupply = +e.target.value;
+    if (tokensupply > 10 ) {
+      setTokenSupply(tokensupply);
+      setValidSupply(true);
+    } else {
+      setValidSupply(false);
+    }
+  }
+
+  
+  const tokenPriceHandler = (e) => {
+    const tokenprice = +e.target.value;
+    if (tokenprice < 1 && tokenprice > 0) {
+      setTokenPrice(tokenprice);
+      setValidPrice(true);
+    } else {
+      setValidPrice(false);
+    }
+  }
+
+  const tokenSymbolHandler = (e) => {
+    const tokenSymbol = '$' + e.target.value.trim().toUpperCase();
+    setTokenSymbol(tokenSymbol);
+  }
+
+  const deadlineHandler = () => {
+    console.log(!deadline);
+    setDeadline(!deadline);
+  }
+
+  // const generateAmtUSD = () => {
+  //   const priceInEth = +tokenSupply * +tokenPrice;
+  //   setAmtUSD(priceInEth * getEthPrice())
+  // }
+
+  useEffect(() => {
+    const generateAmtUSD = () => {
+      const priceInEth = +tokenSupply * +tokenPrice;
+      setAmtEth(priceInEth);
+      console.log(priceInEth);
+      setAmtUSD(priceInEth * ethPrice)
+    };
+    console.log(isInt(tokenSupply))
+    console.log(validPrice)
+    console.log(ethPrice)
+    if ( isInt(tokenSupply) && validPrice && ethPrice !=null) {
+      generateAmtUSD();
+    } else {
+      console.log('ho')
+    }
+  }, [tokenPrice, tokenSupply]);
+
+
+
+
+  // Helper functions
+
+  const range = (start, stop, step) => {
+    var a = [start], b = start;
+    while (b < stop) {
+        a.push(b += step || 1);
+    }
+    return a;
+  }
+
+  const isInt = (value) => {
+    return !isNaN(value) && (function(x) { return (x | 0) === x; })(parseFloat(value))
+  }
+
+  const selectNextHandler = () => {
+    console.log(step);
+    console.log(standard);
+    switch (step < 3) {
+      case step==0 && standard!=null:
+        setStep((prevActiveStep) => prevActiveStep + 1);
+        break
+      case step==1:
+        const [userValid, addrValid, artValid, descValid] = verifyFormData();
+        console.log(userValid);
+        console.log(addrValid);
+        console.log(artValid);
+        setIsValid({
+            username: userValid,
+            artname: artValid,
+            ethadd: addrValid,
+          });  
+        if (userValid && addrValid && artValid && descValid) {
+          setStep((prevActiveStep) => prevActiveStep + 1);
+        }
+        break
+      case step==2 && img!=null:
+        setStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
 
@@ -85,225 +271,311 @@ const ArtForm = () => {
     <>
     <div className="p-5 my-20">
     <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalize</h2>
-    <div className="mx-4 p-4">
-        <div className="flex items-center">
-            <div className="flex items-center text-teal-600 relative">
-                <div className="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 border-teal-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="feather feather-bookmark ">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                </div>
-                <div className="absolute top-0 -ml-10 text-center mt-16 w-32 text-xs font-medium uppercase text-teal-600">Before you proceed</div>
-            </div>
-            <div className="flex-auto border-t-2 transition duration-500 ease-in-out border-teal-600"></div>
-            <div className="flex items-center text-gray-500 relative">
-                <div className="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 border-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="feather feather-mail ">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                </div>
-                <div className="absolute top-0 -ml-10 text-center mt-16 w-32 text-xs font-medium uppercase text-gray-500">Personal</div>
-            </div>
-            <div className="flex-auto border-t-2 transition duration-500 ease-in-out border-gray-300"></div>
-            <div className="flex items-center text-gray-500 relative">
-                <div className="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 border-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="feather feather-mail ">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                </div>
-                <div className="absolute top-0 -ml-10 text-center mt-16 w-32 text-xs font-medium uppercase text-gray-500">Upload</div>
-            </div>
-            <div className="flex-auto border-t-2 transition duration-500 ease-in-out border-gray-300"></div>
-            <div className="flex items-center text-gray-500 relative">
-                <div className="rounded-full transition duration-500 ease-in-out h-12 w-12 py-3 border-2 border-gray-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="feather feather-database ">
-                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-                    </svg>
-                </div>
-                <div className="absolute top-0 -ml-10 text-center mt-16 w-32 text-xs font-medium uppercase text-gray-500">Confirm</div>
-            </div>
-        </div>
-    </div>
+    <ul className="w-full steps">
+      <li data-content={step==0 ? "?" : "✓"} className={step==0 ? "step" : "step step-info"}>Information</li> 
+      <li data-content={step<1 ? "?" : "✓"} className={step<1 ? "step" : "step step-info"}>Details</li> 
+      <li data-content={step<2 ? "?" : "✓"} className={step<2 ? "step" : "step step-info"}>Upload Image</li> 
+      <li data-content={step<3 ? "?" : "✓"} className={step<3 ? "step" : "step step-info"}>Mint & Fractionalize</li>
+    </ul>
     {step==0 &&
     <>
-      <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Select your NFT standard</h2>
-          <div class="relative m-7 my-10 flex flex-wrap mx-auto justify-center">
-          <div 
-            class=" 0 35px 60px -15px rgba(0, 0, 0, 0.3) relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out"
-            onClick={erc721StandardHandler}
-          >
-            <div class="overflow-x-hidden rounded-2xl relative">
-              <img class="h-60 rounded-2xl w-full object-fill " src="https://ichef.bbci.co.uk/news/800/cpsprodpb/2692/production/_117547890_cd7706e1-1a9b-4e9e-9d55-7afe73c24984.jpg"/>
-            </div>
-            <div class="mt-6 pl-2 mb-2 flex justify-center items-center">
-              <div>
-                <p class="items-center text-lg font-bold text-gray-900 mb-2">ERC721</p>
-              </div>
-            </div>
-          </div>
-          <div 
-            class="relative max-w-sm min-w-[340px] bg-white shadow-md rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out"
-            onClick={erc1155StandardHandler}
+      <div className="card rounded-lg text-center shadow-2xl mx-40 my-20 py-10  md:text-xl">
+        <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Select your NFT standard</h2>
+            <div className="relative m-7 my-10 flex flex-wrap mx-auto justify-center">
+            <div 
+              className={standard=="ERC721" ? "0 2px 4px 0 rgba(255, 0, 0, 0.10) shadow-sm relative max-w-sm min-w-[340px] bg-white rounded-3xl p-2 mx-10 my-3 cursor-pointer": "0 35px 60px -15px rgba(0, 0, 0, 0.3) relative max-w-sm min-w-[340px] bg-white shadow-lg rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out"}
+              onClick={erc721StandardHandler}
             >
-            <div class="overflow-x-hidden rounded-2xl relative ">
-              <img class="h-60 rounded-2xl w-full object-fill" src="https://pixahive.com/wp-content/uploads/2020/10/Gym-shoes-153180-pixahive.jpg"/>
-            </div>
-            <div class="mt-6 pl-2 mb-2 flex justify-center items-center">
-              <div>
-                <p class="items-center text-lg font-bold text-gray-900 mb-2">ERC1155</p>
+              <div className="overflow-x-hidden rounded-2xl relative">
+                <img className="h-60 rounded-2xl w-full object-fill " src="https://ichef.bbci.co.uk/news/800/cpsprodpb/2692/production/_117547890_cd7706e1-1a9b-4e9e-9d55-7afe73c24984.jpg"/>
+              </div>
+              <div 
+                className="mt-6 pl-2 mb-2 flex justify-center items-center"
+                >
+                <div>
+                  <p className="items-center text-lg font-bold text-gray-900 mb-2">ERC721</p>
+                </div>
               </div>
             </div>
-          </div>
-        </div> </>}
+            <div 
+              className={standard=="ERC1155" ? "0 2px 4px 0 rgba(255, 0, 0, 0.10) shadow-sm relative max-w-sm min-w-[340px] bg-white rounded-3xl p-2 mx-10 my-3 cursor-pointer": "0 35px 60px -15px rgba(0, 0, 0, 0.3) relative max-w-sm min-w-[340px] bg-white shadow-lg rounded-3xl p-2 mx-10 my-3 cursor-pointer motion-safe:hover:scale-105 transition duration-500 ease-in-out"}
+              onClick={erc1155StandardHandler}
+              >
+              <div className="overflow-x-hidden rounded-2xl relative ">
+                <img className="h-60 rounded-2xl w-full object-fill" src="https://pixahive.com/wp-content/uploads/2020/10/Gym-shoes-153180-pixahive.jpg"/>
+              </div>
+              <div className="mt-6 pl-2 mb-2 flex justify-center items-center">
+                <div>
+                  <p className="items-center text-lg font-bold text-gray-900 mb-2">ERC1155</p>
+                </div>
+              </div>
+            </div>
+          </div> 
+        </div>
+        </>}
 
     {step==1 && 
-      <div className="mt-8 p-4">
-        <div>
-            <div className="font-bold text-gray-600 text-xs leading-8 uppercase h-6 mx-2 mt-3">UserName</div>
+          <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
+            <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Required Information</h2>
             <div className="flex flex-col md:flex-row">
                 <div className="w-full flex-1 mx-2 svelte-1l8159u">
-                    <div className={`${styles.textBorder} ${!isValid ? 'border-red-500' : ''}`}>
+                <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase"> Preferred Name (*)</div>
+                    <div className={`${styles.textBorder} ${!isValid.username ? 'border-red-500' : ''}`}>
                       <input 
                         placeholder="Beeple" 
                         className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onChange={userNameChangeHandler}
+                        value={userName} 
                         /> 
                     </div>
                 </div>
                 <div className="w-full flex-1 mx-2 svelte-1l8159u">
-                    <div className="bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u">
-                      <input placeholder="Gordan Ramsay" className="p-1 px-2 appearance-none outline-none w-full text-gray-800"/> 
+                  <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase"> Name of Art Piece (*)</div>
+                    <div className={`${styles.textBorder} ${!isValid.artname ? 'border-red-500' : ''}`}>
+                      <input 
+                        placeholder="Mona Lisa" 
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onChange={artNameChangeHandler}
+                        value={artName}
+                        /> 
                     </div>
                 </div>
-            </div>
+              </div>
             <div className="flex flex-col md:flex-row">
                 <div className="w-full mx-2 flex-1 svelte-1l8159u">
-                    <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase"> Ethereum Address</div>
-                    <div className="bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u">
-                        <input placeholder="Just a hint.." className="p-1 px-2 appearance-none outline-none w-full text-gray-800"/> </div>
+                    <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase"> Ethereum Address (*)</div>
+                    <div className={`${styles.textBorder} ${!isValid.ethadd ? 'border-red-500' : ''}`}>
+                        <input 
+                          placeholder="0xb13...B25" 
+                          className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                          onChange={ethAddressChangeHandler}
+                          value={ethAddress}
+                        /> </div>
                 </div>
                 <div className="w-full mx-2 flex-1 svelte-1l8159u">
                     <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">Discord</div>
                     <div className="bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u">
-                        <input placeholder="sendmeat#5744" className="p-1 px-2 appearance-none outline-none w-full text-gray-800"/> </div>
+                      <input 
+                        placeholder="sendmeat#5744" 
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onChange={discordChangeHandler}
+                        value={discord}
+                      /> 
+                    </div>
                 </div>
             </div>
+            <div className="flex flex-col md:flex-row">
+                <div className="w-full flex-1 mx-2 svelte-1l8159u">
+                  <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase"> Description of Art Piece in 25 words</div>
+                    <div className={`${styles.textBorder}`}>
+                      <input 
+                        placeholder="This fine art speaks volumes about the atrocities of men..." 
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onChange={artDescChangeHandler}
+                        value={artDesc}
+                        /> 
+                    </div>
+                </div>
+              </div>
         </div>
-    </div>}
+   }
 
-    { step==2 &&
+  { step==2 && 
+    <div class="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
+      <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Upload your art piece</h2>
+      <h3 className="title text-xl mb-8 my-2 mx-auto text-center text-purple-700">Supported files: JPG, PNG, JPEG, GIF</h3>
       <div class="m-7 my-20"> 
-      <FileUpload 
-      accept=".jpg,.png,.jpeg,.gif"
-      label="NFT Images(s)"
-      multiple
-      updateFilesCb={updateUploadedFiles}
-    />
-    <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
-      hover:bg-teal-600  
-      bg-purple-500 
-      text-white 
-      font-bold
-      border duration-200 ease-in-out 
-      border-teal-600 transition"
-      onClick={handleSubmit}
-      >Submit</button>
-      <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
-      hover:bg-teal-600  
-      bg-purple-500 
-      text-white 
-      font-bold
-      border duration-200 ease-in-out 
-      border-teal-600 transition"
-      onClick={storeNFT}
-      >Store</button>
+        <FileUpload 
+        accept=".jpg,.png,.jpeg,.gif"
+        label="NFT Image"
+        multiple
+        updateFilesCb={updateUploadedFiles}
+      />
+        <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out 
+          border-teal-600 transition"
+          onClick={handleSubmit}
+          >Submit</button>
+        {img && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out 
+          border-teal-600 transition"
+          onClick={storeNFT}
+        >Store</button>}
       </div>
+    </div>
       }
       { step==3 && 
-        <div class=" my-20 flex items-center justify-center">
-          <div class="max-w-4xl  bg-white rounded-lg shadow-xl">
-              <div class="p-4 border-b">
-                  <h2 class="text-2xl ">
+        <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
+        <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Mint and Fractionalize it!</h2>
+        <div className=" my-20 flex items-center justify-center">
+          <div className="max-w-4xl">
+              <div className="p-4 border-b">
+                  <h2 className="text-2xl ">
                       Please confirm that your information is valid
                   </h2>
-                  <p class="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500">
                       Personal details and application. 
                   </p>
               </div>
               <div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
+                  <div className={ !isValid ? "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-red-500": "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b"}>
+                      <p className="text-gray-600">
                           Preferred Name
                       </p>
                       <p>
-                          Jane Doe
+                          {userName}
                       </p>
                   </div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
-                          NFT URI
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Discord handle
                       </p>
                       <p>
-                          Insert URI
+                          {discord}
                       </p>
                   </div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
-                          Discord Handle
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Art Piece
                       </p>
                       <p>
-                          sendmeat#5744
+                          {artName}
                       </p>
                   </div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
-                          To be raised
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Standard
                       </p>
                       <p>
-                          $ 12000 / 3ETH
+                          {standard}
                       </p>
                   </div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Description
+                      </p>
+                      <p>
+                          {artDesc}
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                        Token symbol
+                      </p>
+                      <input 
+                        placeholder="PUNKS" 
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onChange={tokenSymbolHandler}
+                        maxLength="8"
+                        /> 
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
                           Token supply
                       </p>
                       <p>
-                        200
+                      <input 
+                        placeholder="1000" 
+                        className={`${styles.textBorder} ${!validSupply ? 'border-red-500' : ''}`}
+                        onChange={tokenSupplyHandler}
+                        onKeyPress={(event) => {
+                            if (!/[0-9]/.test(event.key)) {
+                              event.preventDefault();
+                            }
+                          }}
+                        maxLength="5"
+                        /> 
                       </p>
                   </div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
-                          Token symbol
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Token price
                       </p>
                       <p>
-                        $PUNK
+                      <input 
+                        placeholder="50" 
+                        className={`${styles.textBorder} ${!validPrice ? 'border-red-500' : ''}`}
+                        onChange={tokenPriceHandler}
+                        onKeyPress={(event) => {
+                            if (!/^\d*\.?\d*$/.test(event.key)) {
+                              event.preventDefault();
+                            }
+                          }}
+                        maxlength="3"
+                        /> 
                       </p>
                   </div>
-                  <div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
-                        Timeline
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Amount to be raised
                       </p>
                       <p>
-                        True
+                      <input 
+                        placeholder="$50000" 
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onKeyDown={(event) => {
+                          event.preventDefault();
+                        }}
+                        value={`${amtEth.toFixed(2)} ETH/ US$ ${amtUSD.toFixed(2)}`}
+                        />
                       </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                        Deadline (+ 7 days)
+                      </p>
+                      <p>
+                        <input 
+                          type="checkbox" 
+                          checked={deadline ? "checked" : ""} 
+                          class="checkbox" 
+                          onChange={deadlineHandler}
+                        />
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b items-center">
+                      <p class="text-gray-600">
+                        Image
+                      </p>
+                    <img src={URL.createObjectURL(newFile.nftImage[0])}></img>
                   </div>
               </div>
           </div> 
         </div>
-          
+        <button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out 
+          border-teal-600 transition"
+        >Mint</button>
+      </div>          
           }
 
       <div className="flex p-2 mt-4">
-          <button 
-            className={`${styles.divClasses} ${step==0 ? 'disabled:opacity-50' : ''}`}
+          { step!=0 && <button 
+            className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+            hover:bg-teal-600  
+            bg-purple-500 
+            text-white 
+            font-bold
+            border duration-200 ease-in-out 
+            border-teal-600 transition"
             onClick={selectPrevHandler}
           >Previous
-          </button>
+          </button>}
         <div className="flex-auto flex flex-row-reverse">
-          <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          {step!=3 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
             hover:bg-teal-600  
             bg-purple-500 
             text-white 
@@ -311,7 +583,7 @@ const ArtForm = () => {
             border duration-200 ease-in-out 
             border-teal-600 transition"
             onClick={selectNextHandler}
-            >Next</button>
+            >Next</button>}
             </div>
         </div>
   </div>
