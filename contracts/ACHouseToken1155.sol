@@ -17,6 +17,10 @@ contract ACHouseToken1155 is ERC1155 {
         parentAddress = _address;
     }
 
+    function setURI(string memory newuri) public {
+        _setURI(newuri);
+    }
+
     function mintNFT(address _ownerAddress, uint256 _id, uint256 amount ) public {
        // using erc 1155 to creat NFT
        // mint will create NFT and send it to the address. IF address is parent contract then it will throw error unless IERC1155Receiver.onERC1155BatchReceived is implemented. 
@@ -27,10 +31,6 @@ contract ACHouseToken1155 is ERC1155 {
        //apprvove parent contract to handle tokens and transactions.
         setApprovalForAll(parentAddress, true);
 
-    }
-
-    function setURI(string memory newuri) public {
-        _setURI(newuri);
     }
     
     //get tokens totalnumber. 

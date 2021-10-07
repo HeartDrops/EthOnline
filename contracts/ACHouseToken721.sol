@@ -33,4 +33,13 @@ contract ACHouseToken721 is ERC721, ERC721URIStorage {
     function getTokenUri(uint256 tokenId) public returns(string memory){
         return tokenURI(tokenId);
     }
+
+    //get tokens totalnumber. 
+    function getTokenCount() public view returns (uint256) {
+        return tokensIdscreated.length;
+    }
+    //returns the array of all tokenids. 
+    function getTokenIds() public  view returns ( uint256[] memory) {
+        return tokensIdscreated;
+    }
 }

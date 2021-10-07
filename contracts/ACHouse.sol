@@ -15,6 +15,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   using Counters for Counters.Counter;
   Counters.Counter private _itemIds;
   Counters.Counter private _itemsSold;
+  Counters.Counter private _fracItemIds;
 
   address owner;
 
@@ -25,7 +26,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   struct AuctionPlace {
     uint256 id;
     string name;
-  }
+  } 
   struct Artist {
     uint256 id;
     string name;
@@ -83,6 +84,25 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   
   event MarketItemSold(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
     address seller, address owner, uint256 price, bool sold);
+
+  /*******************fractionalize NFT */
+  struct FractionalizeToken {
+    uint itemId;
+    address nftContract;
+    uint256 tokenId;
+    address payable seller;
+    address payable owner;
+    address fractionalContract;
+    uint256 shardId;
+    uint256 priceOfShard;
+    uint256 supplyMinted;
+    uint256 supplyRemaining;
+  }
+  // id to fracToken
+  mapping(uint256 => FractionalizeToken) idToFracToken;
+  //user purchase to id to amount purchased
+  mapping (address => mapping(uint256 => uint256)) userShardPurchaseAmount;
+
 
   constructor(address _mToken, address _nToken) {
     _multiToken = ACHouseToken1155(_mToken);
@@ -263,7 +283,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     return true;
   }
 
-  /**ERC1155 functionality */
+  /**ERC1155 functionality ***********************************************/
   function setURI1155(string memory _uri) public {
     _multiToken.setURI(_uri);
   }
@@ -281,7 +301,59 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     return _multiToken.getTokenIds();
   }
 
+  /*************Fractional NFT */
 
+  //hold NFT and trasnfer ownership to ACHouse. 
+  // ACHouse will mint 1155 then set it to orig owner of nft. 
+  function fractionalize1155NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri) public {
+    _fracItemIds.increament();
+    uint fracId = _fracItemIds.current();
+
+    FractionalizeToken memory fracItem = new FractionalizeToken(fracId, nftContract, tokenId, payable(msg.sender), 
+      address(0), _multiToken, shardId, priceOfShard, supplyToCreate, supplyToCreate); // supplyMinted and SupplyRemaining will be set as same for now. 
+    
+    idToFracToken[fracId] = fracItem;
+
+    //get ownership of nftContract and its token.
+    IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
+    
+    //Mint 1155 fungible tokens.
+
+
+  }
+
+  function fractionalize721NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri) public {
+    _fracItemIds.increament();
+    uint fracId = _fracItemIds.current();
+
+    FractionalizeToken memory fracItem = new FractionalizeToken(fracId, nftContract, tokenId, payable(msg.sender), 
+      address(0), _multiToken, shardId, priceOfShard, supplyToCreate, supplyToCreate); // supplyMinted and SupplyRemaining will be set as same for now. 
+    
+    idToFracToken[fracId] = fracItem;
+
+    //get ownership of nftContract and its token.
+    IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+
+    //Mint 1155 fungible tokens.
+    
+    
+
+  }
+  
+  /**ERC721 functionzlity *************************************************/
+  // mint 721 NFT - set supply to 1. 
+  function createNFT1155(uint256 _id, string memory uri) public {
+    _nftToken.mintNFT(msg.sender, _id, uri);
+  }
+
+  //get tokens totalnumber. 
+  function getTokenCount() public view returns(uint256) {
+    return _nftToken.getTokenCount();
+  }
+  //returns the array of all tokenids. 
+  function getTokenIds() public view returns(uint256[] memory) {
+    return _nftToken.getTokenIds();
+  }
 
   /**Helpers */
   function isUserRegistered(address _address) internal view returns(bool) {
