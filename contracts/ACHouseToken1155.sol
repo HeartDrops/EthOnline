@@ -9,6 +9,9 @@ contract ACHouseToken1155 is ERC1155 {
     address parentAddress;
 
     uint256[] tokensIdscreated;
+
+    //to track supply of each token via id => total
+    mapping(uint256 => uint256) private _totalSupply;
     
     constructor() ERC1155("") {}
     
@@ -28,6 +31,8 @@ contract ACHouseToken1155 is ERC1155 {
        _mint(_ownerAddress, _id, amount, ""); 
        tokensIdscreated.push(_id);
 
+       _totalSupply[_id] = amount;
+
        //apprvove parent contract to handle tokens and transactions.
         setApprovalForAll(parentAddress, true);
 
@@ -40,6 +45,10 @@ contract ACHouseToken1155 is ERC1155 {
     //returns the array of all tokenids. 
     function getTokenIds() public  view returns ( uint256[] memory) {
         return tokensIdscreated;
+    }
+
+    function getTotalSupplyOfToken(uint256 _id) public view returns(uint256) {
+        return _totalSupply[_id];
     }
     
     // function onERC1155Received( address operator, address from,uint256 id, uint256 value, bytes calldata data) override pure external returns (bytes4){
