@@ -50,7 +50,7 @@ contract ACHouseToken1155 is ERC1155 {
     // function onERC1155BatchReceived( address operator, address from, uint256[] calldata ids, uint256[] calldata values, bytes calldata data ) override pure external returns (bytes4){
     //     return bytes4(keccak256("onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)"));
     // }
-
+ 
 
 }
 

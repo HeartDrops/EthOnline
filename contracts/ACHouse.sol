@@ -317,7 +317,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     //get ownership of nftContract and its token.
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
     
-    //Mint 1155 fungible tokens.
+    //Mint 1155 fungible tokens. 
 
 
   }
