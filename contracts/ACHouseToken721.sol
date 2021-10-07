@@ -4,7 +4,7 @@ pragma solidity ^0.8.3;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
-contract ACHouseToken721 is ERC721, ERC721URIStorage {
+contract ACHouseToken721 is ERC721 {
 
     address parentAddress;
 
@@ -22,7 +22,7 @@ contract ACHouseToken721 is ERC721, ERC721URIStorage {
        // mint will create NFT and send it to the address. 
 
        _safeMint(_ownerAddress, _id, ""); 
-       _setTokenURI(tokenId, _tokenURI);
+    //    _setTokenURI(_id, _tokenUri);
        
        tokensIdscreated.push(_id);
        
