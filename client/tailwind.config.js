@@ -13,7 +13,7 @@ module.exports = {
       {
         'heartdrops': {                          /* your theme name */
            'primary' : '#5200AD',           /* Primary color */
-           'primary-focus' : '#4E00A5',     /* Primary color - focused */
+           'primary-focus' : '#390079',     /* Primary color - focused */
            'primary-content' : '#ffffff',   /* Foreground content color to use on primary color */
 
            'secondary' : '#E800F6',         /* Secondary color */
