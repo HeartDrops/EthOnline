@@ -46,13 +46,16 @@ const HeaderSite = () => {
                   </svg>
                 </button>
               </div>
-              <div className="flex-none">
+              <div className="flex-none" style="display:none;">
                <div className="avatar">
                  <div className="rounded-full w-10 h-10 m-1">
                    <img src="https://i.pravatar.cc/500?img=32" />
                  </div>
                </div>
              </div>
+             <div className="flex-none">
+                <button class="btn btn-info">Connect Wallet</button>
+              </div>
             </div>
 
         </>
