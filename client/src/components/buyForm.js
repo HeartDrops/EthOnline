@@ -35,7 +35,7 @@ const BuyForm = () => {
 		contractACHouse1155,
 		contractACHouse721,
         contractACHouseProvider = null;
-
+	
 	// nb of tokens received for a given amount of eth
 	const [minReceivedToken, setMinReceivedTokens] = useState(0);
 
@@ -199,8 +199,9 @@ const BuyForm = () => {
 				mintingNFTs();
 
 				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
+				console.log('value', e.target.value);
 				if (pattern.test(e.target.value)) { // check if input is a valid number
-
+					
 					const priceInEth = e.target.value;
 					setDonationAmtEth(priceInEth);
 					setDonationAmtUSD(priceInEth * ethPrice);
@@ -210,14 +211,47 @@ const BuyForm = () => {
 					setDonationAmtTokens(nbTokens);
 
 					// calculate estimated fees
-
-					// calculate donation amount to charity
+					// estimateFees();
 					
-				} else {
-					// input is not a number
-					// console.log('PAS un nombre');
+				} else if (e.target.value) { // input is not a number
 					const newError = "Please enter a decimal number";
 					setErrors(newError);
+				}
+			}, 1000)
+		);
+	};
+
+	const changeInputTokens = (e) => {
+		setErrors(null);
+		setDonationAmtEth(null);
+		setDonationAmtTokens(null);
+		setDonationAmtUSD(null);
+
+		if (timer) {
+			clearTimeout(timer);
+			setTimer(null);
+		}
+		setTimer(
+			setTimeout(() => {
+
+				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
+				if (pattern.test(e.target.value)) { // check if input is a valid number
+
+					const nbTokens = e.target.value;
+					setDonationAmtEth(nbTokens);
+
+					const priceInEth = nbTokens * tokenPrice;
+
+					setDonationAmtUSD(priceInEth);
+					setDonationAmtUSD(priceInEth * ethPrice);
+
+					// calculate estimated fees
+					// estimateFees();
+
+				} else { // input is not a number
+					const newErrorTokens = "Please enter a decimal number";
+					console.log(newErrorTokens);
+					// setErrorsInputTokens(newError);
 				}
 			}, 1000)
 		);
@@ -231,7 +265,6 @@ const BuyForm = () => {
 	};
 
 	const createMarketItem1155 = () => {
-
 		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
 		// Same applies for NFT create outside of our system.
 		contractACHouse
@@ -244,11 +277,10 @@ const BuyForm = () => {
     const fractionalizeMarketItem1155 = () => {
         // fractionalize721NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri) => uint256
 		contractACHouse
-			.fractionalize1155NFT(contractACHouse.address, 1, 1, 2, 200, 'test' )
+			.fractionalize1155NFT(contractACHouse.address, 1, 1, 2, 200, 'ipfs://bafyreih76tru7mgvpjqszqfjnipbqf5hbit2x37cddpu57slid7kwkeyxy/metadata.json' )
 			.then((f) => {
 				console.log("fractionalize1155NFT", f);
 			});
-        // get an error 
 
         // QUESTIONS : 
         //  -- how to get list of current auctions ? 
@@ -278,6 +310,23 @@ const BuyForm = () => {
             .then((f) => {
 			    console.log("parent address", f);
 		});
+	};
+
+	const createMarketSale = async () => {
+	
+		const ganacheUrl = "http://127.0.0.1:7545";
+		let provider = new providers.JsonRpcProvider(ganacheUrl);
+
+		let overrides = {
+			value:  ethers.utils.parseEther("10")
+		};
+		let tx = await contractACHouse.createMarketSale(contractACHouse1155.address, 1, overrides);
+
+		// contractACHouse.createMarketSale(contractACHouse1155.address, 1)
+		// .then((f) => {
+		// 	console.log("create", f);
+		// });;
+
 	}
 
 	const mintingNFTs = () => {
@@ -286,6 +335,9 @@ const BuyForm = () => {
 		// setParentApproval();
 		// createMarketItem1155();
 		// fractionalizeMarketItem1155();
+		// createMarketSale();
+
+		// console.log(ethers.utils.formatEther( 0x0a ))
 
 		// createNGO();
 		// contractACHouse
@@ -297,8 +349,20 @@ const BuyForm = () => {
 		contractACHouse
             .fetchItemsCreated()
             .then((f) => {
-			    console.log("unsold market items", f);
+			    console.log("fetch market items", f);
 		});
+
+		contractACHouse
+            .fetchUnSoldMarketItems()
+            .then((f) => {
+			    console.log("fetch unsold items", f);
+		});
+
+		// contractACHouse
+        //     .fetchMyNFTs()
+        //     .then((f) => {
+		// 	    console.log("items purchased", f);
+		// });
 		
         // contractACHouseProvider
         //     .getTokenIds()
@@ -320,6 +384,15 @@ const BuyForm = () => {
 
 		const gasPriceGwei = utils.formatUnits(gasPrice, "gwei");
 		console.log("gas price in gwei: ", gasPriceGwei);
+
+		// const gasPriceGwei = utils.formatUnits(gasPrice, "gwei");
+		// console.log("gas price in gwei: ", gasPriceGwei);
+
+		// let gasUnitsEstimated = await contractACHouse.estimateGas.createMarketSale(contractACHouse1155.address, 1, overrides);
+		// console.log('gasEstimate', parseInt(gasUnitsEstimated, 10));
+
+		// const gasPrice = await provider.getGasPrice();
+		// console.log("Big number: ", gasPrice.toString());
 
 		// await provider.estimateGas({
 		//     // Wrapped ETH address
@@ -380,8 +453,11 @@ const BuyForm = () => {
 								onChange={changeInputETH}
 							/>
 							{errors ? (
-								<div className="alert alert-error">
+								<div className="alert alert-error my-2">
 									<div className="flex-1">
+										<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current"> 
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>                         
+										</svg> 
 										<label>{errors}</label>
 									</div>
 								</div>
@@ -396,9 +472,11 @@ const BuyForm = () => {
 							<input
 								type="text"
 								placeholder="0.0"
-								// value={donationAmtTokens || ""}
+								value={donationAmtTokens ? donationAmtTokens : ""}
 								className="input input-primary input-bordered"
 								inputMode="decimal"
+								pattern="^\d*[.,]?\d*$"
+								onChange={changeInputTokens}
 							/>
 						</div>
 						<div className="py-2">
