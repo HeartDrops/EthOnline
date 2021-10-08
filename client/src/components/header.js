@@ -8,7 +8,7 @@ const HeaderSite = () => {
             <div className="navbar mb-2 shadow-lg bg-primary text-neutral-content">
               <div className="flex-none px-2 mx-2">
                 <span className="text-lg font-bold">
-                        <NavLink to="/">Heart Drops</NavLink>
+                        <NavLink to="/">HEART DROPS</NavLink>
                       </span>
               </div>
               <div className="flex-1 px-2 mx-2">
