@@ -4,15 +4,12 @@ import FrontPage from "./pages/FrontPage";
 import AuctionsPage from "./pages/AuctionsPage";
 import ArtistPage from "./pages/ArtistPage";
 import BuyerPage from "./pages/BuyerPage";
+import CharitiesPage from "./pages/CharitiesPage";
 import Footer from "./components/footer";
 import Header from "./components/header";
 import "./index.css";
 
 const App = (props) => {
-<<<<<<< HEAD
-=======
-
->>>>>>> main
 	return (
 		<>
 			<Router>
@@ -21,13 +18,10 @@ const App = (props) => {
 				<Route path="/auctions" component={AuctionsPage} />
 				<Route path="/create" component={ArtistPage} />
 				<Route path="/donate" component={BuyerPage} />
-        <Footer />
+				<Route path="/charities" component={CharitiesPage} />
+        		<Footer />
 			</Router>
 		</>
 	);
 };
-<<<<<<< HEAD
 export default App;
-=======
-export default App;
->>>>>>> main
