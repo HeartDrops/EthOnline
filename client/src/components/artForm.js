@@ -3,15 +3,11 @@ import FileUpload from './fileUpload';
 import { NFTStorage, File, Blob  } from 'nft.storage';
 import { ethers, Signer, providers, BigNumber, utils } from "ethers";
 import coinGecko from '../api/coinGecko';
-
-import imageToRender from '../assets/pepe.png';
-
-
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
 import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
 
-const ACHouseAddress = "";
+
 
 const ArtForm = () => {
   const [ userName, setUserName ] = useState('');
@@ -38,6 +34,8 @@ const ArtForm = () => {
     nftImage: []
   });
   const [img, setImg] = useState(null);
+  const [uri, setURI] = useState(null);
+  const [stored, setStored] = useState(false);
 
   const token = process.env.API_KEY;
   const endpoint = 'https://api.nft.storage';
@@ -59,26 +57,49 @@ const ArtForm = () => {
   }
 
   const updateUploadedFiles= (files) => {
+    console.log(files);
+    console.log(files[0]);
     setNewFile({ ...newFile, nftImage: files })
+    console.log(URL.createObjectURL(files[0]));
+    setImg(URL.createObjectURL(files[0]));
+    console.log(newFile);
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(newFile);
-    console.log(URL.createObjectURL(newFile.nftImage[0]));
-    setImg(URL.createObjectURL(newFile.nftImage[0]));
-  }
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log(newFile);
+  //   console.log(URL.createObjectURL(newFile.nftImage[0]));
+  //   setImg(URL.createObjectURL(newFile.nftImage[0]));
+  // }
 
   const storeNFT = async () => {
     console.log('storing')
+    console.log(newFile.nftImage[0])
     const client = new NFTStorage({ token: token })
-    const cid = await client.storeBlob(img)
-    console.log('IPFS URL for the Blob:' + cid);
-    // const metadata = await client.store({
-    //   name: 'nft.storage store',
-    //   description: 'ERC-1155 compatible metadata.',
-    //   image: new Blob(img, 'pinpie.jpg', { type: 'image/jpg' }),
-    // })
+    // const cid = await client.storeBlob(img)
+    // setCid(cid);
+    // console.log('IPFS URL for the Blob:' + cid);
+    // if (cid) {
+    //   setStored(true);
+    // } else {
+    //   setStored(false);
+    // }
+    const metadata = await client.store({
+      name: 'Donation',
+      description: 'Art Piece donated on HeartDrops',
+      image: newFile.nftImage[0],
+    })
+    console.log('IPFS URL for the metadata:', metadata.url)
+    console.log('metadata.json contents:\n', metadata.data)
+    console.log('metadata.json with IPFS gateway URLs:\n', metadata.embed())
+
+    if (metadata) {
+      setStored(true);
+      setURI(metadata.url)
+    } else {
+      setStored(false);
+    }
+
   }
 
 
@@ -87,6 +108,7 @@ const ArtForm = () => {
       setStandard(null);
     } else {
       setStandard("ERC721");
+      selectNextHandler();
     }
   };
 
@@ -95,6 +117,7 @@ const ArtForm = () => {
       setStandard(null);
     } else {
       setStandard("ERC1155");
+      selectNextHandler();
     }
   };
 
@@ -234,7 +257,7 @@ const ArtForm = () => {
     console.log(step);
     console.log(standard);
     switch (step < 3) {
-      case step==0 && standard!=null:
+      case step==0:
         setStep((prevActiveStep) => prevActiveStep + 1);
         break
       case step==1:
@@ -267,9 +290,9 @@ const ArtForm = () => {
 
   // Smart Contract Caller functions
 
-  const [ contractACHouse, setContractACHouse ] = useState(null);
-  
-
+  const [ ACHouse, setACHouse] = useState(null);
+  const [ ACHouse1155, setACHouse1155 ] = useState(null);
+  const [ ACHouse721, setACHouse721 ] = useState(null); 
 
  	// CONTRACTS INFORMATION
 	// const ganacheUrl = "http://127.0.0.1:7545"
@@ -291,6 +314,7 @@ const ArtForm = () => {
 
 
   const rpcConnection = async () => {
+
 		const ganacheUrl = "http://127.0.0.1:7545";
 		let provider = new providers.JsonRpcProvider(ganacheUrl);
 		console.log("provider: ", provider);
@@ -314,38 +338,58 @@ const ArtForm = () => {
 		/******************************************************************************* */
 		// This is the only thing i have to hard code. The 5777 value i am not able to find it through ether.js.. so for now this will get you the address regardless
 		// of migrations.
-		const ACHouseAddress = ACHouseContract.networks[5777].address;
-		const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
-		const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
+		// const ACHouseAddress = ACHouseContract.networks[5777].address;
+		// const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
+		// const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
+    const ACHouseAddress = "0xE3d93EA7DFbEbE603b34F14a8D00c1606f0125e3";
+    const ACHouse1155Address = "0xC6f790148595f0DF89A03a104D8A01Cf574bAae8";
+    const ACHouse721Address = "0xAA0897e999EC5E0bED7D8f690c9090B92BEa644A";
 		/******************************************************************************* */
 		const signerOne = provider.getSigner(accountOne);
 
-		contractACHouse = new ethers.Contract(
+		const contractACHouse = new ethers.Contract(
 			ACHouseAddress,
 			ACHouseContract.abi,
 			signerOne
 		);
 
-		contractACHouse1155 = new ethers.Contract(
+		const contractACHouse1155 = new ethers.Contract(
 			ACHouse1155Address,
 			ACHouseToken1155Contract.abi,
 			signerOne
 		);
 
-		contractACHouse721 = new ethers.Contract(
+		const contractACHouse721 = new ethers.Contract(
 			ACHouse721Address,
 			ACHouseToken721Contract.abi,
 			signerOne
 		);
 		console.log("contractACHouse", contractACHouse);
 
-		// setContractACHouse(contractACHouse);
+		setACHouse(contractACHouse);
+    setACHouse1155(contractACHouse1155)
+    setACHouse721(contractACHouse721)
 	};
-	rpcConnection();
+  if (ACHouse == null && ACHouse1155 == null && ACHouse721 == null) {
+    rpcConnection();
+  }
 
 
+  const mint721NFT = async () => {
+    console.log(uri);
+    let tx = await ACHouse.createNFT721(1, uri);
+    const receipt = await tx.wait();
+    console.log(tx);
+    console.log(receipt);
+  }
 
-
+  const mint1155NFT = async () => {
+    console.log(uri);
+    let tx = await ACHouse.createNFT1155(1, uri);
+    const receipt = await tx.wait();
+    console.log(tx);
+    console.log(receipt);
+  }
 
 
   const styles = {divClass: 'text-base hover:scale-110 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200  bg-gray-100 text-gray-700 border duration-200 ease-in-out border-gray-600 transition',
@@ -484,32 +528,23 @@ const ArtForm = () => {
         label="Upload your images(s) to mint an NFT."
         multiple
         updateFilesCb={updateUploadedFiles}
+        blob={img}
       />
-        <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer
-          hover:bg-teal-600
-          bg-purple-500
-          text-white
+        {/* <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
           font-bold
           border duration-200 ease-in-out
           border-teal-600 transition"
           onClick={handleSubmit}
-          >Submit</button>
-        {img && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer
-          hover:bg-teal-600
-          bg-purple-500
-          text-white
-          font-bold
-          border duration-200 ease-in-out
-          border-teal-600 transition"
-          onClick={storeNFT}
-        >Store</button>}
+          >Submit</button> */}
       </div>
     </div>
       }
-      { step==3 &&
+      { step==3 && standard=="ERC721" &&
         <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
-        <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Mint and Fractionalize your NFT!</h2>
-        <p>At Heart Drops we believe that every little bit helps, and everyone should have a chance to contribute to causes they feel passionate about. That is why we have focused on fractionalized NFTs using a smart contract to allow shared ownership of a one of a kind piece of art.</p>
+        <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalizing ERC721</h2>
         <div className=" my-20 flex items-center justify-center">
           <div className="max-w-4xl">
               <div className="p-4 border-b">
@@ -606,8 +641,8 @@ const ArtForm = () => {
                               event.preventDefault();
                             }
                           }}
-                        maxlength="3"
-                        />
+                        maxLength="3"
+                        /> 
                       </p>
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
@@ -647,16 +682,157 @@ const ArtForm = () => {
               </div>
           </div>
         </div>
-        <button
-          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer
-          hover:bg-teal-600
-          bg-purple-500
-          text-white
+        { !stored && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out 
+          border-teal-600 transition"
+          onClick={storeNFT}
+        >Store</button>}
+        { stored && <button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out 
+          border-teal-600 transition"
+          onClick={mintNFT}
+        >Mint</button>}
+      </div>          
+          }
+
+          { step==3 && standard=="ERC1155" &&
+        <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
+        <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700"> Fractionalizing ERC1155</h2>
+        <div className=" my-20 flex items-center justify-center">
+          <div className="max-w-4xl">
+              <div className="p-4 border-b">
+                  <h2 className="text-2xl ">
+                      Please confirm that your information is valid
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                      Personal details and application. 
+                  </p>
+              </div>
+              <div>
+                  <div className={ !isValid ? "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-red-500": "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b"}>
+                      <p className="text-gray-600">
+                          Preferred Name
+                      </p>
+                      <p>
+                          {userName}
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Discord handle
+                      </p>
+                      <p>
+                          {discord}
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Art Piece
+                      </p>
+                      <p>
+                          {artName}
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Standard
+                      </p>
+                      <p>
+                          {standard}
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Description
+                      </p>
+                      <p>
+                          {artDesc}
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Token price
+                      </p>
+                      <p>
+                      <input 
+                        placeholder="50" 
+                        className={`${styles.textBorder} ${!validPrice ? 'border-red-500' : ''}`}
+                        onChange={tokenPriceHandler}
+                        onKeyPress={(event) => {
+                            if (!/^\d*\.?\d*$/.test(event.key)) {
+                              event.preventDefault();
+                            }
+                          }}
+                        maxLength="4"
+                        /> 
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Amount to be raised
+                      </p>
+                      <p>
+                      <input 
+                        placeholder="$50000" 
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onKeyDown={(event) => {
+                          event.preventDefault();
+                        }}
+                        value={`${amtEth.toFixed(2)} ETH/ US$ ${amtUSD.toFixed(2)}`}
+                        />
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p class="text-gray-600">
+                        Deadline (+ 7 days)
+                      </p>
+                      <p>
+                        <input 
+                          type="checkbox" 
+                          checked={deadline ? "checked" : ""} 
+                          class="checkbox" 
+                          onChange={deadlineHandler}
+                        />
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b items-center">
+                      <p class="text-gray-600">
+                        Image
+                      </p>
+                    <img src={URL.createObjectURL(newFile.nftImage[0])}></img>
+                  </div>
+              </div>
+          </div> 
+        </div>
+        { !stored && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out 
+          border-teal-600 transition"
+          onClick={storeNFT}
+        >Store</button>}
+        { stored && <button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
           font-bold
           border duration-200 ease-in-out
           border-teal-600 transition"
-        >Mint</button>
-      </div>
+          onClick={mint721NFT}
+        >Mint</button>}
+      </div>          
           }
 
       <div className="flex p-2 mt-4">
@@ -672,10 +848,10 @@ const ArtForm = () => {
           >Previous
           </button>}
         <div className="flex-auto flex flex-row-reverse">
-          {step!=3 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer
-            hover:bg-teal-600
-            bg-purple-500
-            text-white
+          {step!=3 && step!=0 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+            hover:bg-teal-600  
+            bg-purple-500 
+            text-white 
             font-bold
             border duration-200 ease-in-out
             border-teal-600 transition"

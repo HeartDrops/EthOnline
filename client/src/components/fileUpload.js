@@ -25,8 +25,10 @@ const FileUpload = ({
   label,
   updateFilesCb,
   maxFileSizeInBytes = DEFAULT_MAX_FILE_SIZE_IN_BYTES,
+  blob,
   ...otherProps
 }) => {
+  console.log(blob);
   const fileInputField = useRef(null);
   const [files, setFiles] = useState({});
 
@@ -102,7 +104,7 @@ const FileUpload = ({
                 <div>
                   {isImageFile && (
                     <ImagePreview
-                      src={URL.createObjectURL(file)}
+                      src={blob!=null ? blob : URL.createObjectURL(file)}
                       alt={`file preview ${index}`}
                     />
                   )}

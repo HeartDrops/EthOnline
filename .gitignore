@@ -6,7 +6,6 @@ build/contracts/*
 !build/contracts/ACHouseToken721.json
 
 client/dist/
-
 client/src/contracts/
 
 # misc
