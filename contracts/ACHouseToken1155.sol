@@ -12,6 +12,8 @@ contract ACHouseToken1155 is ERC1155 {
 
     //to track supply of each token via id => total
     mapping(uint256 => uint256) private _totalSupply;
+
+    mapping (uint256 => string) private _tokenURIString;
     
     constructor() ERC1155("") {}
     
@@ -24,6 +26,14 @@ contract ACHouseToken1155 is ERC1155 {
         _setURI(newuri);
     }
 
+    function getURI(uint256 _tokenId) private view returns(string memory){
+        return uri(_tokenId);
+    }
+
+    function getTokenURI(uint256 _tokenId) public view returns(string memory) {
+        return _tokenURIString[_tokenId];
+    }
+
     function mintNFT(address _ownerAddress, uint256 _id, uint256 amount ) public {
        // using erc 1155 to creat NFT
        // mint will create NFT and send it to the address. IF address is parent contract then it will throw error unless IERC1155Receiver.onERC1155BatchReceived is implemented. 
@@ -32,6 +42,8 @@ contract ACHouseToken1155 is ERC1155 {
        tokensIdscreated.push(_id);
 
        _totalSupply[_id] = amount;
+
+       _tokenURIString[_id] = getURI(_id); 
 
        //apprvove parent contract to handle tokens and transactions.
         setApprovalForAll(parentAddress, true);
