@@ -33,8 +33,7 @@ const FrontPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-20">
           <div className="card shadow-2xl lg:card-side bg-neutral text-primary-content">
             <div className="card-body">
-              <p>The Heart Drops mission is to create an egalitarian and inclusive global community of Artists, Collectors and NGOs who want to bring about a better future using Fractionalized NFTs as the catalyst for change.
-</p>
+              <p>The Heart Drops mission is to create an egalitarian and inclusive global community of Artists, Collectors and NGOs who want to bring about a better future using Fractionalized NFTs as the catalyst for change.</p>
             </div>
           </div>
           <div className="card shadow-2xl lg:card-side bg-neutral text-primary-content">
@@ -75,33 +74,33 @@ const FrontPage = () => {
       <h2 className="my-5 text-5xl font-bold text-center">Get involved</h2>
       <div className="container mx-auto p-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
-          <div class="card shadow-2xl lg:card-side bg-accent text-secondary-content">
-            <div class="card-body">
-            <h2 class="text-xl font-bold">Artists, Donators & Collectors</h2>
+          <div className="card shadow-2xl lg:card-side bg-accent text-secondary-content">
+            <div className="card-body">
+            <h2 className="text-xl font-bold">Artists, Donators & Collectors</h2>
             <p>We are so happy you want to be a part of the mission! We welcome the <a href="#">gifted artist</a>, <a href="#">generous donors</a> who already own a piece they want to give, and the <a href="#">collectors</a> who buy the incredible art and invest into a better the future.</p>
 
-              <div class="justify-end card-actions">
-                <button class="btn btn-secondary text-primary-content">
+              <div className="justify-end card-actions">
+                <button className="btn btn-secondary text-primary-content">
                       Learn more
 
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 ml-2 stroke-current">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 ml-2 stroke-current">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                   </svg>
                 </button>
               </div>
             </div>
           </div>
-          <div class="card shadow-2xl lg:card-side bg-accent text-secondary-content">
-            <div class="card-body">
-            <h1 class="text-xl font-bold">Charities</h1>
+          <div className="card shadow-2xl lg:card-side bg-accent text-secondary-content">
+            <div className="card-body">
+            <h1 className="text-xl font-bold">Charities</h1>
             <p>Heart Drops is here to help you make the future a better place. Existing charties can find out how to get involved <a href="#">here</a>, and we’ll get you set up with our community DAO. Make sure that you have yourself set up with a <a href="#">Crypto Wallet</a> that will allow you to receive the funds raised for your cause.</p>
 
-              <div class="justify-end card-actions">
-                <button class="btn btn-secondary text-primary-content">
+              <div className="justify-end card-actions">
+                <button className="btn btn-secondary text-primary-content">
                       Learn more
 
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 ml-2 stroke-current">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-6 h-6 ml-2 stroke-current">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                   </svg>
                 </button>
               </div>
