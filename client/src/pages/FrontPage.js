@@ -15,7 +15,7 @@ const FrontPage = () => {
       A Decentralized Philanthropy (AKA “DePhi”) platform focused on bringing people together who want to make a difference in the world through life-changing NFT Drops.
           </p>
           <Link to="/auctions" className="btn bg-accent mr-2">Discover Heart Drops</Link>
-          <Link to="/create" className="btn btn-secondary text-primary-content">Create an Heart Drops</Link>
+          <Link to="/create" className="btn btn-secondary text-primary-content">Create an Heart Drop</Link>
     </div>
   </div>
 </div>
