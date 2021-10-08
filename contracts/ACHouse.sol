@@ -67,6 +67,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint256 price;
     uint256 amount;
     uint256 charityId;
+    uint256 auctionTime;
     bool sold;
     bool isMultiToken;
     bool isRemoved;
@@ -84,7 +85,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   mapping ( address => uint256) userPurchasedCountMapping;
   
   event MarketItemCreated(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
-    address seller, address owner, uint256 price, uint256 amount, uint256 charityId, bool sold, bool isMultiToken, bool isRemoved);
+    address seller, address owner, uint256 price, uint256 amount, uint256 charityId, uint256 auctionTime, bool sold, bool isMultiToken, bool isRemoved);
   
   event MarketItemSold(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
     address seller, address owner, uint256 price, bool sold);
@@ -128,36 +129,36 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   
   /***************************************************************************************************************************************/
   /**MarketPlace functionality */
-  function create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId) public payable nonReentrant returns (uint256){
+  function create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime) public payable nonReentrant returns (uint256){
     //   require(price > 0, "Price must be at least 1 wei");
     //   require(msg.value == listingPrice, "Price must be equal to l_charityId
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
 
-    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, false, true, false); // amount will always be 1. 
+    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false); // amount will always be 1. 
     idToMarketItem[itemId] = item;
 
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
 
-    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, amount, _charityId, false, true, false);
+    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, amount, _charityId, auctionTime, false, true, false);
 
     return itemId;
   }
 
-  function create721MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 _charityId ) public payable nonReentrant returns (uint256){
+  function create721MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 _charityId, uint256 auctionTime ) public payable nonReentrant returns (uint256){
     // require(price > 0, "Price must be at least 1 wei");
     // require(msg.value == listingPrice, "Price must be equal to listing price");
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
 
-    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, false, true, false); // amount will always be 1. 
+    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false); // amount will always be 1. 
     idToMarketItem[itemId] = item;
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
-    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, 1, _charityId, false, false, false);
+    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, 1, _charityId, auctionTime, false, false, false);
 
     return itemId;
   }
