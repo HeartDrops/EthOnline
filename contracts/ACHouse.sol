@@ -217,24 +217,31 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   }
 
   /* Returns all unsold market items */
-  function fetchUnSoldMarketItems() public view returns(MarketItem[] memory) {
+  function fetchUnSoldMarketItems() public view returns(string[] memory) {
     
     uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
-    MarketItem[] memory items = new MarketItem[](totalUnSoldCount);
+    MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
+    
     uint unsoldCurrentIndex = 0;
     
     uint totalItemCount = _itemIds.current();
+    
+    string[] memory marketItemId;
     
     for(uint i=0; i < totalItemCount; i++){
         // only way i found to iterate through a mapping. 
         if(idToMarketItem[i+1].owner == address(0) && idToMarketItem[i+1].isRemoved == false ) { 
             uint currentID = i+1;
             items[unsoldCurrentIndex] = idToMarketItem[currentID];
+            
+           marketItemId[unsoldCurrentIndex] = uint2str(idToMarketItem[currentID].itemId);
+            // items.push(idToMarketItem[currentID]);
+            
             unsoldCurrentIndex +=1;
         }
     }
     
-    return items; 
+    return marketItemId; 
   }
 
   /* Returns only items that a user has purchased */
@@ -409,5 +416,25 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     }
     return (false); // user is not registered.
   }
+  
+   function uint2str(uint v) public pure returns (string memory) {
+        if(v == 0){
+            return '0';
+        }
+        uint maxlength = 100;
+        bytes memory reversed = new bytes(maxlength);
+        uint i = 0;
+        while (v != 0) {
+            uint remainder = v % 10;
+            v = v / 10;
+            reversed[i++] = bytes1(uint8(48 + remainder));
+        }
+        bytes memory s = new bytes(i); // i + 1 is inefficient
+        for (uint j = 0; j < i; j++) {
+            s[j] = reversed[i - j - 1]; // to avoid the off-by-one error
+        }
+        string memory str = string(s);  // memory isn't implicitly convertible to storage
+        return str;
+    }
   
 }
