@@ -16,6 +16,15 @@ const HeaderSite = () => {
                   <nav>
                       <NavLink to="/auctions" activeClassName="active" className="btn btn-ghost btn-sm rounded-btn">Auctions</NavLink>
                   </nav>
+                  <nav>
+                      <NavLink to="/artists" activeClassName="active" className="btn btn-ghost btn-sm rounded-btn">Artists</NavLink>
+                  </nav>
+                  <nav>
+                      <NavLink to="/charities" activeClassName="active" className="btn btn-ghost btn-sm rounded-btn">Charities</NavLink>
+                  </nav>
+                  <nav>
+                      <NavLink to="/about" activeClassName="active" className="btn btn-ghost btn-sm rounded-btn">About</NavLink>
+                  </nav>
                 </div>
               </div>
               <div className="flex-1 lg:flex-none">
