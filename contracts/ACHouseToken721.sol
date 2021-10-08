@@ -9,6 +9,15 @@ contract ACHouseToken721 is ERC721URIStorage {
     address parentAddress;
 
     uint256[] tokensIdscreated;
+
+    struct NFTToken{
+        uint256 id;
+        string name;
+        string symbol;
+        string uri;
+    }
+
+    mapping (uint256 => NFTToken) idToNFTMapping;
     
     constructor() ERC721("","") {
     }
@@ -17,21 +26,36 @@ contract ACHouseToken721 is ERC721URIStorage {
         parentAddress = _address;
     }
 
-    function mintNFT(address _ownerAddress, uint256 _id, string memory _tokenUri) public {
+    function setParentApproval() public {
+        //apprvove parent contract to handle tokens and transactions.
+        setApprovalForAll(parentAddress, true);
+    }
+
+    function mintNFT(address _ownerAddress, uint256 _id, string memory _tokenUri, string memory _name, string memory _symbol) public {
        // using erc 721 to creat NFT
        // mint will create NFT and send it to the address. 
 
+       _name = _name;
+       _symbol = _symbol;
+
+        NFTToken memory token = NFTToken(_id, _name, _symbol, _tokenUri );
        _safeMint(_ownerAddress, _id, ""); 
        _setTokenURI(_id, _tokenUri);
        
        tokensIdscreated.push(_id);
-       
-       //apprvove parent contract to handle tokens and transactions.
-       setApprovalForAll(parentAddress, true);
+       idToNFTMapping[_id] = token;
     }
 
     function getTokenUri(uint256 tokenId) public view returns(string memory){
-        return tokenURI(tokenId);
+        return idToNFTMapping[tokenId].uri;
+    }
+
+    function getTokenName(uint256 tokenId) public view returns(string memory){
+        return idToNFTMapping[tokenId].name;
+    }
+
+    function getTokenSymbol(uint256 tokenId) public view returns(string memory){
+        return idToNFTMapping[tokenId].symbol;
     }
 
     //get tokens totalnumber. 

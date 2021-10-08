@@ -112,6 +112,9 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   constructor(address _mToken, address _nToken) {
     _multiToken = ACHouseToken1155(_mToken);
     _nftToken = ACHouseToken721(_nToken);
+    
+    _multiToken.setParentAddress(address(this));
+    _nftToken.setParentAddress(address(this));
     owner = payable(msg.sender);
   }
 
@@ -372,8 +375,8 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   
   /**ERC721 functionzlity *************************************************/
   // mint 721 NFT - set supply to 1. 
-  function createNFT721(uint256 _id, string memory uri) public {
-    _nftToken.mintNFT(msg.sender, _id, uri);
+  function createNFT721(uint256 _id, string memory uri, string memory name, string memory symbol) public {
+    _nftToken.mintNFT(msg.sender, _id, uri, name, symbol);
   }
 
   //get tokens totalnumber. 
@@ -383,6 +386,14 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   //returns the array of all tokenids. 
   function get721TokenIds() public view returns(uint256[] memory) {
     return _nftToken.getTokenIds();
+  }
+
+  function get721TokenName(uint256 _id) public view returns(string memory){
+    return _nftToken.getTokenName(_id);
+  }
+
+  function get721TokenSymbol(uint256 _id) public view returns(string memory){
+    return _nftToken.getTokenSymbol(_id);
   }
 
   function get721TokenURI(uint256 _id) public view returns(string memory) {
