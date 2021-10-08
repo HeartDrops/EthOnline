@@ -1,6 +1,10 @@
 node_modules
 
 build/contracts/
+!build/contracts/ACHouse.json
+!build/contracts/ACHouseToken1155.json
+!build/contracts/ACHouseToken721.json
+
 
 client/dist/
 
