@@ -6,7 +6,7 @@ import ArtistPage from "./pages/ArtistPage";
 import ArtistsPage from "./pages/ArtistsPage";
 import BuyerPage from "./pages/BuyerPage";
 import CharitiesPage from "./pages/CharitiesPage";
-import AboutPage from "./pages/CharitiesPage";
+import AboutPage from "./pages/AboutPage";
 import Footer from "./components/footer";
 import Header from "./components/header";
 import "./index.css";
