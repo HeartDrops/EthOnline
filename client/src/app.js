@@ -9,6 +9,10 @@ import Header from "./components/header";
 import "./index.css";
 
 const App = (props) => {
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 	return (
 		<>
 			<Router>
@@ -22,4 +26,8 @@ const App = (props) => {
 		</>
 	);
 };
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> main
