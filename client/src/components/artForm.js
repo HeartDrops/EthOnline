@@ -293,6 +293,8 @@ const ArtForm = () => {
   const [ ACHouse, setACHouse] = useState(null);
   const [ ACHouse1155, setACHouse1155 ] = useState(null);
   const [ ACHouse721, setACHouse721 ] = useState(null); 
+  const [ minted, setMinted ] = useState(false);
+  const [ fractionalized, setFractionalized ] = useState(false);
 
  	// CONTRACTS INFORMATION
 	// const ganacheUrl = "http://127.0.0.1:7545"
@@ -377,19 +379,68 @@ const ArtForm = () => {
 
   const mint721NFT = async () => {
     console.log(uri);
-    let tx = await ACHouse.createNFT721(1, uri);
+    // (uint256 _id, string memory uri, string memory name, string memory symbol)
+    let tx = await ACHouse.createNFT721(1, uri, artName, tokenSymbol);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);
+    if (receipt) {
+      setMinted(true);
+    } else {
+      setMinted(false);
+    }
   }
+
+  const fractionalize721NFT = async () => {
+    console.log(tokenPrice);
+    console.log(tokenSupply);
+    console.log(uri);
+    console.log(ACHouse721.address)
+    // (address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri)
+    let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
+    let tx = await ACHouse.fractionalize721NFT(ACHouse721.address, 1, 1, adjustedPrice, tokenSupply, uri);
+    const receipt = await tx.wait();
+    console.log(tx);
+    console.log(receipt);
+    if (receipt) {
+      setFractionalized(true);
+    } else {
+      setFractionalized(false);
+    }
+  };
 
   const mint1155NFT = async () => {
     console.log(uri);
+    // (uint256 _id, uint256 _amount) 
     let tx = await ACHouse.createNFT1155(1, uri);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);
+    if (receipt) {
+      setMinted(true);
+    } else {
+      setMinted(false);
+    }
   }
+
+  
+  const fractionalize1155NFT = async () => {
+    console.log(tokenPrice);
+    console.log(tokenSupply);
+    console.log(uri);
+    console.log(ACHouse721.address)
+    // (address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri)
+    let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
+    let tx = await ACHouse.fractionalize1155NFT(ACHouse721.address, 1, 1, tokenPrice, tokenSupply, uri);
+    const receipt = await tx.wait();
+    console.log(tx);
+    console.log(receipt);
+    if (receipt) {
+      setFractionalized(true);
+    } else {
+      setFractionalized(false);
+    }
+  };
 
 
   const styles = {divClass: 'text-base hover:scale-110 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200  bg-gray-100 text-gray-700 border duration-200 ease-in-out border-gray-600 transition',
@@ -447,9 +498,9 @@ const ArtForm = () => {
     {step==1 &&
           <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
             <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Required Information</h2>
-            <div class="alert alert-info">
-              <div class="flex-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-6 h-6 mx-2 stroke-current">
+            <div className="alert alert-info">
+              <div className="flex-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                 </svg>
                 <label>We want to make sure you are fully aware of the following: By clicking NEXT, you are transferring ownership of the NFT to Heart Drops until it has found its new fractionalized homes. We promise to take good care of your contribution and we greatly appreciate this act of kindness!</label>
@@ -519,10 +570,10 @@ const ArtForm = () => {
    }
 
   { step==2 &&
-    <div class="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
+    <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
       <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Upload your art piece</h2>
       <h3 className="title text-xl mb-8 my-2 mx-auto text-center text-purple-700">Supported files: JPG, PNG, JPEG, GIF</h3>
-      <div class="m-7 my-20">
+      <div className="m-7 my-20">
         <FileUpload
         accept=".jpg,.png,.jpeg,.gif"
         label="Upload your images(s) to mint an NFT."
@@ -555,9 +606,10 @@ const ArtForm = () => {
                   </p>
               </div>
               <div>
+              <p className="text-red-600	">Fields marked with * are required.</p>
                   <div className={ !isValid ? "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-red-500": "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b"}>
                       <p className="text-gray-600">
-                          Preferred Name
+                          Preferred Name*
                       </p>
                       <p>
                           {userName}
@@ -573,7 +625,7 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Art Piece
+                          Art Piece*
                       </p>
                       <p>
                           {artName}
@@ -581,7 +633,7 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Standard
+                          Standard*
                       </p>
                       <p>
                           {standard}
@@ -597,18 +649,19 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                        Token symbol
+                        Token symbol*
                       </p>
                       <input
                         placeholder="PUNKS"
                         className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
                         onChange={tokenSymbolHandler}
                         maxLength="8"
+                        pattern="[a-zA-Z]+"
                         />
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Token supply<br />
+                          Token supply*<br />
                           <div className="text-xs">The token supply number allows you to choose how many community members get a chance to invest in your donated NFT.</div>
                       </p>
 
@@ -629,7 +682,7 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Token price
+                          Token price*
                       </p>
                       <p>
                       <input
@@ -661,21 +714,21 @@ const ArtForm = () => {
                       </p>
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
+                      <p className="text-gray-600">
                         Deadline (+ 7 days)
                       </p>
                       <p>
                         <input
                           type="checkbox"
                           checked={deadline ? "checked" : ""}
-                          class="checkbox"
+                          className="checkbox"
                           onChange={deadlineHandler}
                         />
                       </p>
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b items-center">
-                      <p class="text-gray-600">
-                        Image
+                      <p className="text-gray-600">
+                        Image*
                       </p>
                     <img src={URL.createObjectURL(newFile.nftImage[0])}></img>
                   </div>
@@ -691,7 +744,7 @@ const ArtForm = () => {
           border-teal-600 transition"
           onClick={storeNFT}
         >Store</button>}
-        { stored && <button 
+        { stored && !minted && <button 
           className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
           hover:bg-teal-600  
           bg-purple-500 
@@ -699,8 +752,18 @@ const ArtForm = () => {
           font-bold
           border duration-200 ease-in-out 
           border-teal-600 transition"
-          onClick={mintNFT}
+          onClick={mint721NFT}
         >Mint</button>}
+        { stored && minted && <button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out
+          border-teal-600 transition"
+          onClick={fractionalize721NFT}
+        >Fractionalize</button>}
       </div>          
           }
 
@@ -718,9 +781,10 @@ const ArtForm = () => {
                   </p>
               </div>
               <div>
+                  <p className="text-red-600	">Fields marked with * are required.</p>
                   <div className={ !isValid ? "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-red-500": "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b"}>
                       <p className="text-gray-600">
-                          Preferred Name
+                          Preferred Name*
                       </p>
                       <p>
                           {userName}
@@ -736,7 +800,7 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Art Piece
+                          Art Piece*
                       </p>
                       <p>
                           {artName}
@@ -744,7 +808,7 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Standard
+                          Standard*
                       </p>
                       <p>
                           {standard}
@@ -760,11 +824,44 @@ const ArtForm = () => {
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Token price
+                        Token symbol*
+                      </p>
+                      <input
+                        placeholder="PUNKS"
+                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        onChange={tokenSymbolHandler}
+                        maxLength="8"
+                        pattern="[a-zA-Z]+"
+                        />
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Token supply*<br />
+                          <div className="text-xs">The token supply number allows you to choose how many community members get a chance to invest in your donated NFT.</div>
+                      </p>
+
+
+                      <p>
+                      <input
+                        placeholder="1000"
+                        className={`${styles.textBorder} ${!validSupply ? 'border-red-500' : ''}`}
+                        onChange={tokenSupplyHandler}
+                        onKeyPress={(event) => {
+                            if (!/[0-9]/.test(event.key)) {
+                              event.preventDefault();
+                            }
+                          }}
+                        maxLength="5"
+                        />
+                      </p>
+                  </div>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Token price*
                       </p>
                       <p>
-                      <input 
-                        placeholder="50" 
+                      <input
+                        placeholder="50"
                         className={`${styles.textBorder} ${!validPrice ? 'border-red-500' : ''}`}
                         onChange={tokenPriceHandler}
                         onKeyPress={(event) => {
@@ -772,13 +869,13 @@ const ArtForm = () => {
                               event.preventDefault();
                             }
                           }}
-                        maxLength="4"
+                        maxLength="3"
                         /> 
                       </p>
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
                       <p className="text-gray-600">
-                          Amount to be raised
+                          Amount to be raised*
                       </p>
                       <p>
                       <input 
@@ -792,20 +889,20 @@ const ArtForm = () => {
                       </p>
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p class="text-gray-600">
+                      <p className="text-gray-600">
                         Deadline (+ 7 days)
                       </p>
                       <p>
                         <input 
                           type="checkbox" 
                           checked={deadline ? "checked" : ""} 
-                          class="checkbox" 
+                          className="checkbox" 
                           onChange={deadlineHandler}
                         />
                       </p>
                   </div>
                   <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b items-center">
-                      <p class="text-gray-600">
+                      <p className="text-gray-600">
                         Image
                       </p>
                     <img src={URL.createObjectURL(newFile.nftImage[0])}></img>
@@ -822,7 +919,7 @@ const ArtForm = () => {
           border-teal-600 transition"
           onClick={storeNFT}
         >Store</button>}
-        { stored && <button 
+        { stored && !minted && <button 
           className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
           hover:bg-teal-600  
           bg-purple-500 
@@ -830,8 +927,18 @@ const ArtForm = () => {
           font-bold
           border duration-200 ease-in-out
           border-teal-600 transition"
-          onClick={mint721NFT}
+          onClick={mint1155NFT}
         >Mint</button>}
+          { stored && minted && <button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out
+          border-teal-600 transition"
+          onClick={fractionalize1155NFT}
+        >Fractionalize</button>}
       </div>          
           }
 
