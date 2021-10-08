@@ -356,7 +356,6 @@ const ArtForm = () => {
     <>
     <div className="p-5 my-20">
     <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalize</h2>
-    <img src={imageToRender}></img>
     <ul className="w-full steps">
       <li data-content={step==0 ? "?" : "✓"} className={step==0 ? "step" : "step step-info"}>Information</li> 
       <li data-content={step<1 ? "?" : "✓"} className={step<1 ? "step" : "step step-info"}>Details</li> 
