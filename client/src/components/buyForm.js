@@ -235,7 +235,7 @@ const BuyForm = () => {
 		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
 		// Same applies for NFT create outside of our system.
 		contractACHouse
-			.create1155MarketItem(contractACHouse1155.address, 1, 10, 200, 1)
+			.create1155MarketItem(contractACHouse1155.address, 1, 10, 1, 1, 1634309818)
 			.then((f) => {
 				console.log("after create 1155 MarketItem", f);
 			});
@@ -262,17 +262,44 @@ const BuyForm = () => {
 		//  -- 
 	};
 
+	const createNGO = () => {
+		const addr = "0xbAF4F56323F3b57b4a1E1191ac62F19b7Fd549C4";
+		const name = 'ABC'
+		
+		// contractACHouse
+		// 	.addCharity(addr, name)
+		// 	.then((f) => {
+		// 	console.log("add charity", f);
+		// });
+	};
+	const setParentApproval = () => {
+		contractACHouse1155
+            .setParentApproval()
+            .then((f) => {
+			    console.log("parent address", f);
+		});
+	}
+
 	const mintingNFTs = () => {
 		console.log("Calling MintNFT1155");
 		// mintNFT1155();
+		// setParentApproval();
 		// createMarketItem1155();
 		// fractionalizeMarketItem1155();
 
+		// createNGO();
 		// contractACHouse
-        //     .fetchUnSoldMarketItems()
-        //     .then((f) => {
-		// 	    console.log("unsold market items", f);
-		// });
+		// 	.getCharityInfo(1)
+		// 	.then((f) => {
+		// 	console.log("get charity", f);
+		// }); // get charity "ABC"
+
+		contractACHouse
+            .fetchItemsCreated()
+            .then((f) => {
+			    console.log("unsold market items", f);
+		});
+		
         // contractACHouseProvider
         //     .getTokenIds()
         //     .then((f) => {
