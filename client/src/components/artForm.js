@@ -412,7 +412,7 @@ const ArtForm = () => {
   const mint1155NFT = async () => {
     console.log(uri);
     // (uint256 _id, uint256 _amount) 
-    let tx = await ACHouse.createNFT1155(1, uri);
+    let tx = await ACHouse.createNFT1155(1, 1);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);
@@ -431,7 +431,7 @@ const ArtForm = () => {
     console.log(ACHouse721.address)
     // (address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri)
     let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
-    let tx = await ACHouse.fractionalize1155NFT(ACHouse721.address, 1, 1, tokenPrice, tokenSupply, uri);
+    let tx = await ACHouse.fractionalize1155NFT(ACHouse721.address, 1, 1, adjustedPrice, tokenSupply, uri);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);

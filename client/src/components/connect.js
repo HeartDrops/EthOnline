@@ -32,7 +32,6 @@ const Connect = (props) => {
     if (signer._isSigner) {
       const userAddy = await signer.getAddress();
       const signature = await generateSignature(signer, userAddy);
-      props.onConnect(true, userAddy);
       setConnected(true);
     } else {
       console.log('error');
@@ -42,7 +41,7 @@ const Connect = (props) => {
   return (
     <>
     <button 
-        className="btn btn-accent"
+        className="btn btn-info"
         onClick={Connection}
     >
     {!connected ? <p>Connect wallet</p> : <p>Connected</p>}

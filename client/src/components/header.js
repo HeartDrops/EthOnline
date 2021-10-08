@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import Connect from './connect';
 
 const HeaderSite = () => {
 
@@ -48,7 +49,7 @@ const HeaderSite = () => {
                   </div>
               </div>
               <div className="flex-none">
-                  <button className="btn btn-info">Connect Wallet</button>
+                  <Connect />
               </div>
             </div>
 
