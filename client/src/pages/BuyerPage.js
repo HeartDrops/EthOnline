@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import BuyForm from '../components/buyForm';
 import Countdown from '../components/countdown';
+import DB from '../db.json';
 
 const BuyerPage = () => { 
+    
+    // info on auction selected
+	const [charityID, setCharityID] = useState(null);
+    
+    useEffect(() => {
+        
+        // fetch data of charity
+        setCharityID(0);
 
-    const supplyToken = 250; // total nb of supply token
-    // get information on artists + charity 
+    });
 
   return (
     <>
@@ -26,19 +34,29 @@ const BuyerPage = () => {
                 <div className="">
                     <div className="card shadow-2xl p-7">
                         <div className=""> 
-                            <div className="text-center">
-                                <h2 className="card-title">Donate to charity X
+                            <div className="text-center mb-2">
+                                {DB.charities && DB.charities.length>0 && DB.charities.map((item) => item.id == charityID &&
+                                <h2 className="card-title" key={item.id}>Donate to {item.name}
                                     <div className="badge mx-2 badge-secondary">ONGOING</div>
                                 </h2>
+                                )}
                             </div> 
                         </div>
                         <div className=""> 
-                            <div>Information on charity</div>
-                            <div className="center-cnt">
+                            {DB.charities && DB.charities.length>0 && DB.charities.map((item) => item.id == charityID &&
+                                    <div className="mb-2" key={item.id}>
+                                        <p>{item.description}</p>
+                                    </div>
+                                    )}
+                            <div className="center-cnt my-3">
                                 <a href="/donate#my-modal" className="btn btn-primary">More information on charity</a> 
                                 <div id="my-modal" className="modal">
                                     <div className="modal-box">
-                                        <p>Enim dolorem dolorum omnis atque necessitatibus. Consequatur aut adipisci qui iusto illo eaque. Consequatur repudiandae et. Nulla ea quasi eligendi. Saepe velit autem minima.</p> 
+                                        {DB.charities && DB.charities.length>0 && DB.charities.map((item) => item.id == charityID &&
+                                        <div className="mb-2" key={item.id}>
+                                            <p>{item.long_description}</p>
+                                        </div>
+                                        )}
                                         <div className="modal-action">
                                             <a href="/donate#" className="btn">Close</a>
                                         </div>
@@ -46,13 +64,10 @@ const BuyerPage = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className=""> 
-                            <span>Total supply token : {supplyToken} $TOKEN</span>
-                        </div>
 
                         <div className="divider"></div> 
 
-                        <div className="center-cnt">
+                        <div className="center-cnt mb-5">
                             <Countdown />
                         </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Connect from "./connect";
 import { ethers, Signer, providers, BigNumber, utils } from "ethers";
+import coinGecko from '../api/coinGecko';
 
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
@@ -11,50 +12,32 @@ const BuyForm = () => {
 	const [balance, setBalance] = useState(0);
 	const [errors, setErrors] = useState(null);
 	const [timer, setTimer] = useState(null);
+	const [step, setStep] = useState(0); // setStep to change page
 
-	// setStep to change page
-	const [step, setStep] = useState(0);
+	const [ ethPrice, setEthPrice ] = useState(null);
 
-	// info on auction selected
-	const [charityID, setCharityID] = useState(null);
-	const [balanceFloor, setBalanceFloor] = useState(200); // nb of tokens restants
-
-	const [donation, setDonation] = useState(0); // donation in ETH
-	// nb of tokens received for a given amount of eth
-	const [minReceivedToken, setMinReceivedTokens] = useState(0);
-	// amount given to the charity
-	const [donationAmount, setDonationAmount] = useState(0);
-	// fees calculated depending of current gas fees
+	const [ tokenSupply, setTokenSupply ] = useState(200); // remaining amount of tokens
+	const [ validSupply, setValidSupply ] = useState(true);
+	const [ tokenPrice, setTokenPrice ] = useState(null); // value of 1 token for a given marketitem
+	const [ tokenSymbol, setTokenSymbol ] = useState(null);
+	const [ donationAmtUSD, setDonationAmtUSD ] = useState(null);
+  	const [ donationAmtEth, setDonationAmtEth ] = useState(0);
+	const [ donationAmtTokens, setDonationAmtTokens ] = useState(null);
+	const [ deadline, setDeadline ] = useState(false); 
+	// Gas fees
 	const [gasFeesETH, setGasFeesETH] = useState(0);
-	const [gasFeesDollars, setGasFeesDollars] = useState(0);
-
-	const [valueTokens, setValueTokens] = useState(null);
-
+	const [gasFeesUSD, setGasFeesUSD] = useState(0);
 	// tx information
 	const [transactionSucceeded, setTransactionSucceeded] = useState(null);
 
 	// setting global var for ACHousContract.
 	let contractACHouse,
 		contractACHouse1155,
-		contractACHouse721 = null;
+		contractACHouse721,
+        contractACHouseProvider = null;
 
-	// CONTRACTS INFORMATION
-	// const ganacheUrl = "http://127.0.0.1:7545"
-
-	// let abi = JSON.parse(JSON.stringify(ACHouseContract.abi));
-	// let abi1155 = JSON.parse(JSON.stringify(ACHouseToken1155Contract.abi));
-	// // console.log('abi:', ACHouseContract);
-
-	// const varNetwork = ACHouseContract.networks;
-	// const ACHouseAddress = varNetwork.address;
-	// console.log(ACHouseAddress);
-
-	// // let provider = new ethers.providers.Web3Provider(window.ethereum);
-	// let provider = new providers.JsonRpcProvider(ganacheUrl);
-	// console.log('provider: ', provider);
-
-	// const signer = provider.getSigner('0x8D36Ff81065D054a9F3495Ec680CC4720b1c0b10');
-	// console.log('signer: ', signer._address);
+	// nb of tokens received for a given amount of eth
+	const [minReceivedToken, setMinReceivedTokens] = useState(0);
 
 	const rpcConnection = async () => {
 		const ganacheUrl = "http://127.0.0.1:7545";
@@ -92,6 +75,12 @@ const BuyForm = () => {
 			signerOne
 		);
 
+        contractACHouseProvider = new ethers.Contract(
+			ACHouseAddress,
+			ACHouseContract.abi,
+			provider
+		);
+
 		contractACHouse1155 = new ethers.Contract(
 			ACHouse1155Address,
 			ACHouseToken1155Contract.abi,
@@ -109,25 +98,34 @@ const BuyForm = () => {
 	};
 	rpcConnection();
 
-	const selectNextHandler = () => {
-		if (step < 2) {
-			setStep((prevActiveStep) => prevActiveStep + 1);
-			console.log("next");
-		} else {
-			console.log("no");
-		}
-	};
+	// Price of ETH
+	const getEthPrice = async () => {
+		const ethPrice = await
+		  coinGecko.get(`/simple/price/`, {
+			params: {
+			  ids: "ethereum",
+			  vs_currencies: 'usd',
+			},
+		  });
+		setEthPrice(ethPrice.data.ethereum.usd);
+	}
+	
+	if (ethPrice == null) {
+		getEthPrice();
+	}
 
-	const selectPrevHandler = () => {
-		if (step > 0) {
-			setStep((prevActiveStep) => prevActiveStep - 1);
-			console.log("next");
-		} else {
-			console.log("no");
-		}
-	};
+	const getMarketItemInfoHandler = () => {
 
-	useEffect(() => {
+		setTokenSupply(200);
+		setTokenPrice(0.015); 
+		setTokenSymbol('$HEART');
+		setDeadline(true);
+
+	};
+	
+
+	useEffect(() => {       
+
 		async function getUserInfo() {
 			// if (
 			// 	typeof window.ethereum !== "undefined" ||
@@ -161,12 +159,35 @@ const BuyForm = () => {
 			// }
 		}
 		// getUserInfo();
-		getNFTDataTest();
+
+		// get marketItemInformation
+		getMarketItemInfoHandler();
+
 	});
+
+	const selectNextHandler = () => {
+		if (step < 2) {
+			setStep((prevActiveStep) => prevActiveStep + 1);
+			console.log("next");
+		} else {
+			console.log("no");
+		}
+	};
+
+	const selectPrevHandler = () => {
+		if (step > 0) {
+			setStep((prevActiveStep) => prevActiveStep - 1);
+			console.log("next");
+		} else {
+			console.log("no");
+		}
+	};
 
 	const changeInputETH = (e) => {
 		setErrors(null);
-		setValueTokens(null);
+		setDonationAmtEth(null);
+		setDonationAmtTokens(null);
+		setDonationAmtUSD(null);
 
 		if (timer) {
 			clearTimeout(timer);
@@ -174,39 +195,24 @@ const BuyForm = () => {
 		}
 		setTimer(
 			setTimeout(() => {
-				// console.log('input has changed');
-				// console.log('value entered : ', e.target.value);
 
-				// Check if input is a number
-				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/; // check if number
-				const ETHamount = e.target.value;
+				mintingNFTs();
 
-				if (pattern.test(ETHamount)) {
-					// input is a number
+				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
+				if (pattern.test(e.target.value)) { // check if input is a valid number
 
-					console.log("Setting Donation");
-					setDonation(ETHamount);
-					console.log("Get No of Tokens");
-					getNbOfTokens(ETHamount);
+					const priceInEth = e.target.value;
+					setDonationAmtEth(priceInEth);
+					setDonationAmtUSD(priceInEth * ethPrice);
 
-					// check that amount is covered by wallet of user ?
-					//if (balance > 0 && ETHamount > balance) {
-					// console.log('oops you don\' have enough in your wallet');
-					//const newError = "Oops ! You don' have enough in your wallet";
-					//setErrors(newError);
-
-					// mais calculer quand même combien ça vaut
-					//} else {
-					// console.log('you have enough in your wallet');
-
-					// setValueTokens("new amount of tokens");
+					// get nb of tokens for given amount of eth
+					const nbTokens = +priceInEth / +tokenPrice;
+					setDonationAmtTokens(nbTokens);
 
 					// calculate estimated fees
-					// check wallet has enough
 
-					// calculate implied valuation
 					// calculate donation amount to charity
-					//}
+					
 				} else {
 					// input is not a number
 					// console.log('PAS un nombre');
@@ -218,11 +224,6 @@ const BuyForm = () => {
 	};
 
 	const mintNFT1155 = () => {
-		// let contractAChouse = new ethers.Contract(
-		// 	"0x786b07E6368f4086cF732d8057a0281DB90EFefB",
-		// 	abi,
-		// 	signer
-		// );
 
 		contractACHouse.createNFT1155(1, 1).then((f) => {
 			console.log("after calling CreateNFT1155", f);
@@ -230,51 +231,62 @@ const BuyForm = () => {
 	};
 
 	const createMarketItem1155 = () => {
-		// let contractACHouse = new ethers.Contract(
-		// 	"0x786b07E6368f4086cF732d8057a0281DB90EFefB",
-		// 	abi,
-		// 	signer
-		// );
-		// console.log("contractACHouse:", contractACHouse);
 
 		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
 		// Same applies for NFT create outside of our system.
 		contractACHouse
-			.create1155MarketItem(contractACHouse1155.address, 1, 10, 200)
+			.create1155MarketItem(contractACHouse1155.address, 1, 10, 200, 1)
 			.then((f) => {
 				console.log("after create 1155 MarketItem", f);
 			});
 	};
 
-	const getNbOfTokens = (amount) => {
+    const fractionalizeMarketItem1155 = () => {
+        // fractionalize721NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri) => uint256
+		contractACHouse
+			.fractionalize1155NFT(contractACHouse.address, 1, 1, 2, 200, 'test' )
+			.then((f) => {
+				console.log("fractionalize1155NFT", f);
+			});
+        // get an error 
+
+        // QUESTIONS : 
+        //  -- how to get list of current auctions ? 
+        //  -- where does the person who fractionalize an NFT set the charities it goes to ? (so I can fetch the right charity in the buyer page)
+		//  -- identify the right MarketItem in a given auction page 
+		//		(in order to get :
+		//			- the total supply of tokens 
+		// 			- remaining nb of tokens + their price (is the price in ETH ?)
+		// 			- the right charity it goes to
+		// 			- end date of the auction
+		//  -- 
+	};
+
+	const mintingNFTs = () => {
 		console.log("Calling MintNFT1155");
-		mintNFT1155();
+		// mintNFT1155();
 		// createMarketItem1155();
+		// fractionalizeMarketItem1155();
 
-		// estimateFees();
-
-		// let contractAChouse = new ethers.Contract('0x786b07E6368f4086cF732d8057a0281DB90EFefB', abi, provider);
-		// let contractAChouse1155 = new ethers.Contract('0x72BcC182029a4096CA03BEA1aC403761fD78092e', abi1155, provider);
-		// console.log("contract:", contractAChouse);
-
-		// contractAChouse.fetchUnSoldMarketItems().then((f) => {
-		//     console.log(f);
-		//   });
+		// contractACHouse
+        //     .fetchUnSoldMarketItems()
+        //     .then((f) => {
+		// 	    console.log("unsold market items", f);
+		// });
+        // contractACHouseProvider
+        //     .getTokenIds()
+        //     .then((f) => {
+		// 	    console.log("Get token Ids", f);
+		// });
+        // contractACHouseProvider
+        //     .getTokenSupply(1)
+        //     .then((f) => {
+		// 	    console.log("Get token supply for marketItemId = 1", f);
+		// });
 	};
-	const getNFTDataTest = () => {
-		// take _NFTname as identifiers
-		// let provider = ethers.getDefaultProvider();
-		// console.log('provider: ', provider);
-		// let contract = new ethers.Contract('0x786b07E6368f4086cF732d8057a0281DB90EFefB', abi, provider);
-		// console.log(contract);
-		// var callPromise = contract.getNFTData;
-		// console.log('callPromise: ', callPromise);
-	};
-
-	// getfracNftData
 
 	const estimateFees = async () => {
-		// function to calculate estimated fees based
+		// function to calculate estimated fees
 
 		const gasPrice = await provider.getGasPrice();
 		console.log("Big number: ", gasPrice);
@@ -309,11 +321,15 @@ const BuyForm = () => {
 		// and get nb of TOKENS owned + amount donated to charity
 
 		// 4. show conclusion page
-		setTransactionSucceeded(true);
+		// setTransactionSucceeded(true);
 	};
 
 	const handleTransaction = () => {
+
 		// connect to smart contract to handle transaction
+
+		// if success 
+		selectNextHandler();		
 	};
 
 	return (
@@ -322,22 +338,20 @@ const BuyForm = () => {
 				<>
 					<form className="" onSubmit={handleSubmit}>
 						<div className="form-control">
-							<label className="label">
-								<span className="label-text">Pay</span>
-								<span>Balance: {balance} ETH</span>
+							<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
+								<span className="label-text">Pay (in ETH)</span>
+								{ donationAmtUSD ? <span> ({donationAmtUSD} USD)</span> : "" }
+								{/* <span>Balance user: {balance} ETH</span> */}
 							</label>
-							<div>
-								<input
-									type="text"
-									placeholder="0.0"
-									className="input input-primary input-bordered"
-									required
-									inputMode="decimal"
-									pattern="^\d*[.,]?\d*$"
-									onChange={changeInputETH}
-								/>
-								<span className=""> ETH</span>
-							</div>
+							<input
+								type="text"
+								placeholder="0.0"
+								className="input input-primary input-bordered"
+								required
+								inputMode="decimal"
+								pattern="^\d*[.,]?\d*$"
+								onChange={changeInputETH}
+							/>
 							{errors ? (
 								<div className="alert alert-error">
 									<div className="flex-1">
@@ -348,39 +362,38 @@ const BuyForm = () => {
 								""
 							)}
 						</div>
-						<div className="form-control">
-							<label className="label">
-								<span className="label-text">Receive</span>
-								<span>Balance floor: {balanceFloor} tokens</span>
+						<div className="form-control mb-5">
+							<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
+								<span className="label-text">Receive {tokenSymbol}</span>
 							</label>
-							<div className="input-primary input-bordered">
-								<input
-									type="text"
-									placeholder="0.0"
-									value={valueTokens || ""}
-									className="input input-primary input-bordered"
-									disabled="disabled"
-									inputMode="decimal"
-								/>
-								<span className=""> $TOKENS</span>
-							</div>
+							<input
+								type="text"
+								placeholder="0.0"
+								// value={donationAmtTokens || ""}
+								className="input input-primary input-bordered"
+								inputMode="decimal"
+							/>
 						</div>
 						<div className="py-2">
-							<span>
-								Estimated fees: {gasFeesETH} ETH / {gasFeesDollars}$
-							</span>
+							<p>Remaining nb of tokens:<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase"> {tokenSupply} {tokenSymbol}</span></p>
 						</div>
 						<div className="py-2">
-							<span>Min. received: X$</span>
+							<p>Estimate ETH price of 1 {tokenSymbol}: <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">{tokenPrice} ETH</span></p>
 						</div>
 						<div className="py-2">
-							<span>Implied valuation: X$</span>
+							<p>Estimated fees: <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">{gasFeesETH} ETH / {gasFeesUSD}$</span></p>
 						</div>
 						<div className="py-2">
-							<span>Donation amount to charity: X$</span>
+							{ donationAmtTokens ? 
+								<p>Min. received: <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">{donationAmtTokens} {tokenSymbol}</span></p>
+							: <span>Min. received: -</span>
+							}
+						</div>
+						<div className="py-2">
+							<span>Donation amount to charity: { donationAmtEth && donationAmtUSD ? <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">{donationAmtEth} ETH - {donationAmtUSD} $</span>: <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">-</span>}</span>
 						</div>
 						<div className="center-cnt py-2">
-							{connected ? (
+							{!connected ? (
 								<button className="btn btn-secondary btn-wide">Donate</button>
 							) : (
 								<Connect />
@@ -391,44 +404,34 @@ const BuyForm = () => {
 			)}
 			{step == 1 && (
 				<>
-					<div class=" my-20 flex items-center justify-center">
-						<div class="max-w-4xl  bg-white rounded-lg shadow-xl">
-							<div class="p-4 border-b">
-								<h2 class="text-2xl ">
-									Please confirm that your information is valid
+					<div className=" my-20 flex items-center justify-center">
+						<div className="max-w-4xl  bg-white rounded-lg shadow-xl">
+							<div className="p-4 border-b">
+								<h2 className="text-2xl ">
+									Please confirm your transaction information
 								</h2>
-								<p class="text-sm text-gray-500">
-									Personal details and application.
-								</p>
+								<p className="text-sm text-gray-500"></p>
 							</div>
 							<div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">Preferred Name</p>
-									<p>Jane Doe</p>
+								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+									<p className="text-gray-600">Wallet</p>
+									<p>Wallet address</p>
 								</div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">NFT URI</p>
+								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+									<p className="text-gray-600">NFT URI</p>
 									<p>Insert URI</p>
 								</div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">Discord Handle</p>
-									<p>sendmeat#5744</p>
+								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+									<p className="text-gray-600">Donation amount</p>
+									<p>$ {donationAmtUSD} / {donationAmtEth}ETH</p>
 								</div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">To be raised</p>
-									<p>$ 12000 / 3ETH</p>
+								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+									<p className="text-gray-600">Number of tokens purchased</p>
+									<p>200 {tokenSymbol}</p>
 								</div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">Token supply</p>
-									<p>200</p>
-								</div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">Token symbol</p>
-									<p>$PUNK</p>
-								</div>
-								<div class="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p class="text-gray-600">Timeline</p>
-									<p>True</p>
+								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+									<p className="text-gray-600">Estimated fees </p>
+									<p>Gas fees (eth and USD)</p>
 								</div>
 							</div>
 						</div>
@@ -436,13 +439,13 @@ const BuyForm = () => {
 					<div className="center-cnt py-2">
 						<button
 							className="btn btn-secondary btn-wide mx-2"
-							onClick="selectPrevHandler"
+							onClick={selectPrevHandler}
 						>
 							Previous
 						</button>
 						<button
 							className="btn btn-primary btn-wide mx-2"
-							onClick="handleTransaction"
+							onClick={handleTransaction}
 						>
 							Validate transaction
 						</button>
