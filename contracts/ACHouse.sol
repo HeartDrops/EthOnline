@@ -109,7 +109,9 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   mapping(uint256 => FractionalizeToken) idToFracToken;
   //user purchase to id to amount purchased
   mapping (address => mapping(uint256 => uint256)) userShardPurchaseAmount;
-
+  
+  string[] itemIdStr;
+    
 
   constructor(address _mToken, address _nToken) {
     _multiToken = ACHouseToken1155(_mToken);
@@ -140,7 +142,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
-
+    
     MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false); // amount will always be 1. 
     idToMarketItem[itemId] = item;
 
@@ -189,7 +191,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint price = item.price;
     uint tokenId = item.tokenId;
     bool isMultiToken = item.isMultiToken;
-    // require(msg.value == price, "Please submit the asking price in order to complete the purchase");
+    require(msg.value == price, "Please submit the asking price in order to complete the purchase");
 
     // transfer funds
     item.seller.transfer(msg.value);
@@ -223,13 +225,12 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   }
 
   /* Returns all unsold market items */
-  function fetchUnSoldMarketItems() public view returns(MarketItem[] memory) {
+  function fetchUnSoldMarketItems() public returns(string[] memory) {
     
-    uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
-    MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
+    // uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
+    // MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
     
     uint unsoldCurrentIndex = 0;
-    mItems = [];
     
     uint totalItemCount = _itemIds.current();
       
@@ -237,15 +238,18 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
         // only way i found to iterate through a mapping. 
         if(idToMarketItem[i+1].owner == address(0) && idToMarketItem[i+1].isRemoved == false ) { 
             uint currentID = i+1;
-            items[unsoldCurrentIndex] = idToMarketItem[currentID];
-
-            mItems.push(idToMarketItem[currentID]);
+            // items[unsoldCurrentIndex] = idToMarketItem[currentID];
+            
+            uint itemId =idToMarketItem[currentID].itemId;
+            string memory str =  uint2str(itemId);
+            
+            itemIdStr.push(str);
             
             unsoldCurrentIndex +=1;
         }
     }
     
-    return mItems; 
+    return itemIdStr; 
   }
 
   /* Returns only items that a user has purchased */
