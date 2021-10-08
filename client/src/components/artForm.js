@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import FileUpload from './fileUpload';
 import { NFTStorage, File, Blob  } from 'nft.storage';
-import { ethers } from 'ethers';
+import { ethers, Signer, providers, BigNumber, utils } from "ethers";
 import coinGecko from '../api/coinGecko';
+
+import imageToRender from '../assets/pepe.png';
+
+
+import ACHouseContract from "../contracts/ACHouse.json";
+import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
+import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
+
+const ACHouseAddress = "";
 
 const ArtForm = () => {
   const [ userName, setUserName ] = useState('');
@@ -207,9 +216,6 @@ const ArtForm = () => {
     }
   }, [tokenPrice, tokenSupply]);
 
-
-
-
   // Helper functions
 
   const range = (start, stop, step) => {
@@ -259,6 +265,86 @@ const ArtForm = () => {
     }
   };
 
+  // Smart Contract Caller functions
+
+  const [ contractACHouse, setContractACHouse ] = useState(null);
+  
+
+
+ 	// CONTRACTS INFORMATION
+	// const ganacheUrl = "http://127.0.0.1:7545"
+
+	// let abi = JSON.parse(JSON.stringify(ACHouseContract.abi));
+	// let abi1155 = JSON.parse(JSON.stringify(ACHouseToken1155Contract.abi));
+	// // console.log('abi:', ACHouseContract);
+
+	// const varNetwork = ACHouseContract.networks;
+	// const ACHouseAddress = varNetwork.address;
+	// console.log(ACHouseAddress);
+
+	// // let provider = new ethers.providers.Web3Provider(window.ethereum);
+	// let provider = new providers.JsonRpcProvider(ganacheUrl);
+	// console.log('provider: ', provider);
+
+	// const signer = provider.getSigner('0x8D36Ff81065D054a9F3495Ec680CC4720b1c0b10');
+	// console.log('signer: ', signer._address);
+
+
+  const rpcConnection = async () => {
+		const ganacheUrl = "http://127.0.0.1:7545";
+		let provider = new providers.JsonRpcProvider(ganacheUrl);
+		console.log("provider: ", provider);
+
+		let chainId = await provider.getNetwork();
+		console.log("chainId: ", chainId);
+
+		let networkId = await window.ethereum.request({
+			method: "net_version",
+		});
+		console.log("networkId: " + networkId);
+
+		let providerAccounts = await provider.listAccounts();
+		console.log("providerAccts: ", providerAccounts);
+
+		const accountOne = providerAccounts[1]; // ganache account at index 1
+		const accountTwo = providerAccounts[2]; // ganache account at index 2
+
+		console.log("accountOne: " + accountOne + ", accountTwo: " + accountTwo);
+
+		/******************************************************************************* */
+		// This is the only thing i have to hard code. The 5777 value i am not able to find it through ether.js.. so for now this will get you the address regardless
+		// of migrations.
+		const ACHouseAddress = ACHouseContract.networks[5777].address;
+		const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
+		const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
+		/******************************************************************************* */
+		const signerOne = provider.getSigner(accountOne);
+
+		contractACHouse = new ethers.Contract(
+			ACHouseAddress,
+			ACHouseContract.abi,
+			signerOne
+		);
+
+		contractACHouse1155 = new ethers.Contract(
+			ACHouse1155Address,
+			ACHouseToken1155Contract.abi,
+			signerOne
+		);
+
+		contractACHouse721 = new ethers.Contract(
+			ACHouse721Address,
+			ACHouseToken721Contract.abi,
+			signerOne
+		);
+		console.log("contractACHouse", contractACHouse);
+
+		// setContractACHouse(contractACHouse);
+	};
+	rpcConnection();
+
+
+
 
 
 
@@ -266,11 +352,11 @@ const ArtForm = () => {
                   textBorder: 'bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u'
                 }
 
-
   return (
     <>
     <div className="p-5 my-20">
     <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalize</h2>
+    <img src={imageToRender}></img>
     <ul className="w-full steps">
       <li data-content={step==0 ? "?" : "✓"} className={step==0 ? "step" : "step step-info"}>Information</li> 
       <li data-content={step<1 ? "?" : "✓"} className={step<1 ? "step" : "step step-info"}>Details</li> 
