@@ -23,11 +23,14 @@ module.exports = {
                 ],
             },
             {
-                test: /\.(png|jpe?g|gif)$/i,
+                test: /\.(png|svg|jpg|jpeg|gif|ico)$/,
                 use: [{
-                    loader: 'file-loader'
+                    loader: 'url-loader',
+                    options: {
+                        limit: 10000,
+                    }
                 }],
-            }
+            },
         ]
     },
     devServer: {

@@ -16,6 +16,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   Counters.Counter private _itemIds;
   Counters.Counter private _itemsSold;
   Counters.Counter private _fracItemIds;
+  Counters.Counter private _ngoIds;
 
   address owner;
 
@@ -38,6 +39,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   struct NGO {
     uint256 id;
     string name;
+    address charityAddress;
   }
 
   uint auctionPlaceCount = 0;
@@ -51,7 +53,8 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   mapping(address => AuctionPlace) AuctionPlaceMapping;
   mapping(address => Artist) ArtistMapping;
   mapping(address => Participant) ParticipantMapping;
-  mapping(address => NGO) NgoMapping;
+
+  mapping(uint256 => NGO) NgoMapping;
   // User address maps to - Chaities and the donation amount. 
   mapping(address => mapping(address => uint256)) UserNGODonation;
 
@@ -63,6 +66,8 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     address payable owner;
     uint256 price;
     uint256 amount;
+    uint256 charityId;
+    uint256 auctionTime;
     bool sold;
     bool isMultiToken;
     bool isRemoved;
@@ -80,7 +85,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   mapping ( address => uint256) userPurchasedCountMapping;
   
   event MarketItemCreated(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
-    address seller, address owner, uint256 price, uint256 amount, bool sold, bool isMultiToken);
+    address seller, address owner, uint256 price, uint256 amount, uint256 charityId, uint256 auctionTime, bool sold, bool isMultiToken, bool isRemoved);
   
   event MarketItemSold(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
     address seller, address owner, uint256 price, bool sold);
@@ -109,39 +114,51 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     _nftToken = ACHouseToken721(_nToken);
     owner = payable(msg.sender);
   }
+
+  function addCharity(address charityAddress, string memory name) public {
+    _ngoIds.increment();
+    uint256 id = _ngoIds.current();
+    NGO memory charity = NGO(id, name, charityAddress);
+
+    NgoMapping[id] = charity;
+  }
+
+  function getCharityInfo(uint256 _id) public view returns(NGO memory) {
+    return NgoMapping[_id];
+  }
   
   /***************************************************************************************************************************************/
   /**MarketPlace functionality */
-  function create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount) public payable nonReentrant returns (uint256){
+  function create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime) public payable nonReentrant returns (uint256){
     //   require(price > 0, "Price must be at least 1 wei");
-    //   require(msg.value == listingPrice, "Price must be equal to listing price");
+    //   require(msg.value == listingPrice, "Price must be equal to l_charityId
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
 
-    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, amount, false, true, false);
+    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false); // amount will always be 1. 
     idToMarketItem[itemId] = item;
 
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
 
-    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, amount, false, true);
+    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, amount, _charityId, auctionTime, false, true, false);
 
     return itemId;
   }
 
-  function create721MarketItem(address nftContract, uint256 tokenId, uint256 price ) public payable nonReentrant returns (uint256){
+  function create721MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 _charityId, uint256 auctionTime ) public payable nonReentrant returns (uint256){
     // require(price > 0, "Price must be at least 1 wei");
     // require(msg.value == listingPrice, "Price must be equal to listing price");
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
 
-    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, false, true, false); // amount will always be 1. 
+    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false); // amount will always be 1. 
     idToMarketItem[itemId] = item;
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
-    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, 1, false, false);
+    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, address(0), price, 1, _charityId, auctionTime, false, false, false);
 
     return itemId;
   }
@@ -186,6 +203,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     //increament itemSold counter.
     _itemsSold.increment();
     
+    idToMarketItem[itemId] = item;
     // mapp user address to itemSold [] and purchased[]
     userSoldItemMapping[item.seller].push(itemId);
     
