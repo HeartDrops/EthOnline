@@ -8,7 +8,6 @@ import coinGecko from '../api/coinGecko';
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
 import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
-import axios from "axios";
 
 
 
@@ -18,12 +17,14 @@ const ArtForm = () => {
   const [ artDesc, setArtDesc ] = useState('');
   const [ ethAddress, setEthAddress ] = useState('');
   const [ discord, setDiscord ] = useState('');
+  const [ dscValid, setDscValid ] = useState(true);
   const [ deadline, setDeadline ] = useState(false);
   const [ charityId, setCharityId] = useState(null);
+  const [ charityName, setCharityName ] = useState('');
   const [ isValid, setIsValid ] = useState({
     username: true,
     artname: true,
-    ethadd: true
+    ethadd: true,
   });
   const [ ethPrice, setEthPrice ] = useState(null);
 
@@ -61,24 +62,11 @@ const ArtForm = () => {
   }
 
   const updateUploadedFiles= (files) => {
-    console.log(files);
-    console.log(files[0]);
     setNewFile({ ...newFile, nftImage: files })
-    console.log(URL.createObjectURL(files[0]));
     setImg(URL.createObjectURL(files[0]));
-    console.log(newFile);
   }
 
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   console.log(newFile);
-  //   console.log(URL.createObjectURL(newFile.nftImage[0]));
-  //   setImg(URL.createObjectURL(newFile.nftImage[0]));
-  // }
-
   const storeNFT = async () => {
-    console.log('storing')
-    console.log(newFile.nftImage[0])
     const client = new NFTStorage({ token: token })
     // const cid = await client.storeBlob(img)
     // setCid(cid);
@@ -155,7 +143,8 @@ const ArtForm = () => {
     let userValid = false;
     let addrValid = false;
     let artValid = false;
-    let descValid = false
+    let descValid = false;
+    let discordValid = false;
     // username
     if (range(3,14,1).includes(userName.length)) {
       userValid = true;
@@ -175,7 +164,13 @@ const ArtForm = () => {
     } else {
       descValid = true
     }
-    return [userValid, addrValid, artValid, descValid];
+
+    if (discord.match(/\w+#\d{4}/i)) {
+      discordValid = true;
+    } else {
+      discordValid = false
+    }
+    return [userValid, addrValid, artValid, descValid, discordValid];
 
   };
 
@@ -184,6 +179,8 @@ const ArtForm = () => {
   const [ tokenPrice, setTokenPrice ] = useState(null);
   const [ validPrice, setValidPrice ] = useState(true);
   const [ tokenSymbol, setTokenSymbol ] = useState(null);
+  const [ validSymbol, setValidSymbol ] = useState(true);
+  const [ invalid, setInvalid ] = useState(false);
   const [ amtUSD, setAmtUSD ] = useState(0);
   const [ amtEth, setAmtEth ] = useState(0)
 
@@ -192,6 +189,7 @@ const ArtForm = () => {
 
   const tokenSupplyHandler = (e) => {
     const tokensupply = +e.target.value;
+    setInvalid(false);
     if (tokensupply > 10 ) {
       setTokenSupply(tokensupply);
       setValidSupply(true);
@@ -203,6 +201,7 @@ const ArtForm = () => {
 
   const tokenPriceHandler = (e) => {
     const tokenprice = +e.target.value;
+    setInvalid(false);
     if (tokenprice < 1 && tokenprice > 0) {
       setTokenPrice(tokenprice);
       setValidPrice(true);
@@ -212,19 +211,21 @@ const ArtForm = () => {
   }
 
   const tokenSymbolHandler = (e) => {
-    const tokenSymbol = '$' + e.target.value.trim().toUpperCase();
-    setTokenSymbol(tokenSymbol);
+    const tokenSymbol = e.target.value.trim().toUpperCase();
+    setInvalid(false);
+    if (tokenSymbol.match(/^[a-zA-Z]+$/)) {
+      setValidSymbol(true)
+      setTokenSymbol('$' + tokenSymbol);
+    } else {
+      setValidSymbol(false);
+    }
   }
 
   const deadlineHandler = () => {
+    setInvalid(false);
     console.log(!deadline);
     setDeadline(!deadline);
   }
-
-  // const generateAmtUSD = () => {
-  //   const priceInEth = +tokenSupply * +tokenPrice;
-  //   setAmtUSD(priceInEth * getEthPrice())
-  // }
 
   useEffect(() => {
     const generateAmtUSD = () => {
@@ -268,15 +269,20 @@ const ArtForm = () => {
         setStep((prevActiveStep) => prevActiveStep + 1);
         break
       case step==2:
-        const [userValid, addrValid, artValid, descValid] = verifyFormData();
+        const [userValid, addrValid, artValid, descValid, discordValid] = verifyFormData();
         console.log(userValid);
         console.log(addrValid);
         console.log(artValid);
+        console.log(descValid);
+        console.log(discordValid);
         setIsValid({
             username: userValid,
             artname: artValid,
             ethadd: addrValid,
           });
+        if (discord.length > 0) { 
+          setDscValid(discordValid);
+        }
         if (userValid && addrValid && artValid && descValid) {
           setStep((prevActiveStep) => prevActiveStep + 1);
         }
@@ -302,25 +308,6 @@ const ArtForm = () => {
   const [ ACHouse721, setACHouse721 ] = useState(null); 
   const [ minted, setMinted ] = useState(false);
   const [ fractionalized, setFractionalized ] = useState(false);
-
- 	// CONTRACTS INFORMATION
-	// const ganacheUrl = "http://127.0.0.1:7545"
-
-	// let abi = JSON.parse(JSON.stringify(ACHouseContract.abi));
-	// let abi1155 = JSON.parse(JSON.stringify(ACHouseToken1155Contract.abi));
-	// // console.log('abi:', ACHouseContract);
-
-	// const varNetwork = ACHouseContract.networks;
-	// const ACHouseAddress = varNetwork.address;
-	// console.log(ACHouseAddress);
-
-	// // let provider = new ethers.providers.Web3Provider(window.ethereum);
-	// let provider = new providers.JsonRpcProvider(ganacheUrl);
-	// console.log('provider: ', provider);
-
-	// const signer = provider.getSigner('0x8D36Ff81065D054a9F3495Ec680CC4720b1c0b10');
-	// console.log('signer: ', signer._address);
-
 
   const rpcConnection = async () => {
 
@@ -425,10 +412,52 @@ const ArtForm = () => {
 		const receipt = await tx.wait();
     if (receipt) {
       setItemCreated(true);
+      console.log('item created!')
     } else {
       setItemCreated(false);
     }
 	};
+
+
+  // const listItem = async () => {
+  //   console.log(validPrice)
+  //   console.log(validSupply)
+  //   console.log(validSymbol)
+  //   if (validPrice && validSupply && validSymbol && tokenPrice!=null && tokenSupply!=null && tokenSymbol!=null) {
+  //     if (standard=="ERC721") {
+  //       console.log('Storing...')
+  //       const res = await storeNFT().then((res) => {
+
+  //       })
+  //       console.log('Minting...')
+  //       await mint721NFT()
+  //       console.log('Fractionalizing...');
+  //       await fractionalize721NFT()
+  //       console.log('Listing...')
+  //       await createMarketItem721()
+  //     } else if (standard=="ERC1155") {
+  //       console.log('Storing...')
+  //       await storeNFT();
+  //       console.log('Minting...')
+  //       await mint721NFT()
+  //       console.log('Fractionalizing...');
+  //       await fractionalize721NFT()
+  //       console.log('Listing...')
+  //       await createMarketItem721()
+  //     } else {
+  //       console.log('err');
+  //       setInvalid(true);
+  //     }
+  //   } else {
+  //     console.log('err');
+  //     setInvalid(true);
+  //   }
+  // };
+
+
+  // const listItem = () => new Promise((resolve, reject) => {
+
+  // })
 
   const mint1155NFT = async () => {
     console.log(uri);
@@ -472,6 +501,7 @@ const ArtForm = () => {
 		const receipt = await tx.wait();
     if (receipt) {
       setItemCreated(true);
+      console.log('item created!')
     } else {
       setItemCreated(false);
     }
@@ -499,7 +529,7 @@ const ArtForm = () => {
       <li data-content={step<1 ? "2" : "✓"} className={step<1 ? "step" : "step step-info"}>Details</li>
       <li data-content={step<2 ? "3" : "✓"} className={step<2 ? "step" : "step step-info"}>Details</li>
       <li data-content={step<3 ? "4" : "✓"} className={step<3 ? "step" : "step step-info"}>Upload Image</li>
-      <li data-content={step<4 ? "5" : "✓"} className={step<4 ? "step" : "step step-info"}>Mint & Fractionalize</li>
+      <li data-content={step<4 ? "5" : "✓"} className={step<4 ? "step" : "step step-info"}>List NFT</li>
     </ul>
     {step==0 &&
     <>
@@ -543,8 +573,10 @@ const ArtForm = () => {
     <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
       <div className="flex flex-col md:flex-row">
         {DB.charities && DB.charities.length>0 && DB.charities.map((item) => {
-          const selectCharityHandler = (id) => {
-            setCharityId(id)
+          const selectCharityHandler = (id, name) => {
+            setCharityId(id);
+            setCharityName(name);
+            selectNextHandler();
           };
           return (<div className="w-full mx-2 flex-1 svelte-1l8159u">
             <ShowcaseCharities 
@@ -566,7 +598,7 @@ const ArtForm = () => {
             <div className="alert alert-info">
               <div className="flex-1">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                 </svg>
                 <label>We want to make sure you are fully aware of the following: By clicking NEXT, you are transferring ownership of the NFT to Heart Drops until it has found its new fractionalized homes. We promise to take good care of your contribution and we greatly appreciate this act of kindness!</label>
               </div>
@@ -608,7 +640,7 @@ const ArtForm = () => {
                 </div>
                 <div className="w-full mx-2 flex-1 svelte-1l8159u">
                     <div className="font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">Discord</div>
-                    <div className="bg-white my-2 p-1 flex border border-gray-200 rounded svelte-1l8159u">
+                    <div className={`${styles.textBorder} ${dscValid ? '' : 'border-red-500'}`}>
                       <input
                         placeholder="sendmeat#5744"
                         className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
@@ -657,9 +689,9 @@ const ArtForm = () => {
       </div>
     </div>
       }
-      { step==4 && standard=="ERC721" &&
+      { step==4 &&
         <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
-        <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalizing ERC721</h2>
+        {<h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">List Your NFT Donation!</h2>}
         <div className=" my-20 flex items-center justify-center">
           <div className="max-w-4xl">
               <div className="p-4 border-b">
@@ -671,6 +703,14 @@ const ArtForm = () => {
               </div>
               <div>
               <p className="text-red-600	">Fields marked with * are required.</p>
+                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+                      <p className="text-gray-600">
+                          Charity
+                      </p>
+                      <p>
+                          {charityName}
+                      </p>
+                  </div>
                   <div className={ !isValid ? "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-red-500": "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b"}>
                       <p className="text-gray-600">
                           Preferred Name*
@@ -717,7 +757,7 @@ const ArtForm = () => {
                       </p>
                       <input
                         placeholder="PUNKS"
-                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        className={`${styles.textBorder} ${invalid ? 'border-red-500' : ''}`}
                         onChange={tokenSymbolHandler}
                         maxLength="8"
                         pattern="[a-zA-Z]+"
@@ -728,12 +768,10 @@ const ArtForm = () => {
                           Token supply*<br />
                           <div className="text-xs">The token supply number allows you to choose how many community members get a chance to invest in your donated NFT.</div>
                       </p>
-
-
                       <p>
                       <input
                         placeholder="1000"
-                        className={`${styles.textBorder} ${!validSupply ? 'border-red-500' : ''}`}
+                        className={`${styles.textBorder} ${invalid ? 'border-red-500' : ''}`}
                         onChange={tokenSupplyHandler}
                         onKeyPress={(event) => {
                             if (!/[0-9]/.test(event.key)) {
@@ -751,7 +789,7 @@ const ArtForm = () => {
                       <p>
                       <input
                         placeholder="50"
-                        className={`${styles.textBorder} ${!validPrice ? 'border-red-500' : ''}`}
+                        className={`${styles.textBorder} ${invalid ? 'border-red-500' : ''}`}
                         onChange={tokenPriceHandler}
                         onKeyPress={(event) => {
                             if (!/^\d*\.?\d*$/.test(event.key)) {
@@ -769,7 +807,7 @@ const ArtForm = () => {
                       <p>
                       <input
                         placeholder="$50000"
-                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
+                        className={`${styles.textBorder} ${invalid ? 'border-red-500' : ''}`}
                         onKeyDown={(event) => {
                           event.preventDefault();
                         }}
@@ -799,7 +837,7 @@ const ArtForm = () => {
               </div>
           </div>
         </div>
-        { !stored && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+        {/* { !stored && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
           hover:bg-teal-600  
           bg-purple-500 
           text-white 
@@ -827,163 +865,9 @@ const ArtForm = () => {
           border duration-200 ease-in-out
           border-teal-600 transition"
           onClick={fractionalize721NFT}
-        >Fractionalize</button>}
-      </div>          
-          }
-
-          { step==4 && standard=="ERC1155" &&
-        <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
-        <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700"> Fractionalizing ERC1155</h2>
-        <div className=" my-20 flex items-center justify-center">
-          <div className="max-w-4xl">
-              <div className="p-4 border-b">
-                  <h2 className="text-2xl ">
-                      Please confirm that your information is valid
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                      Personal details and application. 
-                  </p>
-              </div>
-              <div>
-                  <p className="text-red-600	">Fields marked with * are required.</p>
-                  <div className={ !isValid ? "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-red-500": "md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b"}>
-                      <p className="text-gray-600">
-                          Preferred Name*
-                      </p>
-                      <p>
-                          {userName}
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Discord handle
-                      </p>
-                      <p>
-                          {discord}
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Art Piece*
-                      </p>
-                      <p>
-                          {artName}
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Standard*
-                      </p>
-                      <p>
-                          {standard}
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Description
-                      </p>
-                      <p>
-                          {artDesc}
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                        Token symbol*
-                      </p>
-                      <input
-                        placeholder="PUNKS"
-                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
-                        onChange={tokenSymbolHandler}
-                        maxLength="8"
-                        pattern="[a-zA-Z]+"
-                        />
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Token supply*<br />
-                          <div className="text-xs">The token supply number allows you to choose how many community members get a chance to invest in your donated NFT.</div>
-                      </p>
-
-
-                      <p>
-                      <input
-                        placeholder="1000"
-                        className={`${styles.textBorder} ${!validSupply ? 'border-red-500' : ''}`}
-                        onChange={tokenSupplyHandler}
-                        onKeyPress={(event) => {
-                            if (!/[0-9]/.test(event.key)) {
-                              event.preventDefault();
-                            }
-                          }}
-                        maxLength="5"
-                        />
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Token price*
-                      </p>
-                      <p>
-                      <input
-                        placeholder="50"
-                        className={`${styles.textBorder} ${!validPrice ? 'border-red-500' : ''}`}
-                        onChange={tokenPriceHandler}
-                        onKeyPress={(event) => {
-                            if (!/^\d*\.?\d*$/.test(event.key)) {
-                              event.preventDefault();
-                            }
-                          }}
-                        maxLength="3"
-                        /> 
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                          Amount to be raised*
-                      </p>
-                      <p>
-                      <input 
-                        placeholder="$50000" 
-                        className="p-1 px-2 appearance-none outline-none w-full text-gray-800"
-                        onKeyDown={(event) => {
-                          event.preventDefault();
-                        }}
-                        value={`${amtEth.toFixed(2)} ETH/ US$ ${amtUSD.toFixed(2)}`}
-                        />
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-                      <p className="text-gray-600">
-                        Deadline (+ 7 days)
-                      </p>
-                      <p>
-                        <input 
-                          type="checkbox" 
-                          checked={deadline ? "checked" : ""} 
-                          className="checkbox" 
-                          onChange={deadlineHandler}
-                        />
-                      </p>
-                  </div>
-                  <div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b items-center">
-                      <p className="text-gray-600">
-                        Image
-                      </p>
-                    <img src={URL.createObjectURL(newFile.nftImage[0])}></img>
-                  </div>
-              </div>
-          </div> 
-        </div>
-        { !stored && <button className="text-base ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
-          hover:bg-teal-600  
-          bg-purple-500 
-          text-white 
-          font-bold
-          border duration-200 ease-in-out 
-          border-teal-600 transition"
-          onClick={storeNFT}
-        >Store</button>}
-        { stored && !minted && <button 
+        >Fractionalize</button>} */}
+        
+          <button 
           className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
           hover:bg-teal-600  
           bg-purple-500 
@@ -991,18 +875,9 @@ const ArtForm = () => {
           font-bold
           border duration-200 ease-in-out
           border-teal-600 transition"
-          onClick={mint1155NFT}
-        >Mint</button>}
-          { stored && minted && <button 
-          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
-          hover:bg-teal-600  
-          bg-purple-500 
-          text-white 
-          font-bold
-          border duration-200 ease-in-out
-          border-teal-600 transition"
-          onClick={fractionalize1155NFT}
-        >Fractionalize</button>}
+          onClick={listItem}
+        >List NFT</button>
+        
       </div>          
           }
 
@@ -1019,7 +894,7 @@ const ArtForm = () => {
           >Previous
           </button>}
         <div className="flex-auto flex flex-row-reverse">
-          {step!=4 && step!=0 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          {step!=4 && step!=0 && step!=1 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
             hover:bg-teal-600  
             bg-purple-500 
             text-white 

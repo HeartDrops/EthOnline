@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 const ShowcaseCharities = ({item, onSelectCharity, checkCharity=false}) => {
     const selectCharity = () => {
         if (checkCharity) {
-            onSelectCharity(item.id)
+            onSelectCharity(item.id, item.name)
         } else {
             return None;
         }
