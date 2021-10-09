@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import Connect from "./connect";
 import { ethers, Signer, providers, BigNumber, utils } from "ethers";
 import coinGecko from "../api/coinGecko";
+import axios from 'axios';
+import DB from '../db.json';
+import Countdown from '../components/countdown';
 
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
@@ -9,30 +12,53 @@ import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
 
 const BuyForm = (props) => {
 
-	console.log('props', props);
+	const data = props.props.items;
 
+	// console.log('props buyer', data);
+
+	const tokenId = data.tokenId;
+	const [nftUri, setNftUri] = useState(null);
+	const [nftMetadata, setNftMetadata] = useState(null);
 
 	const [connected, setConnected] = useState(false);
-	const [balance, setBalance] = useState(0);
 	const [errors, setErrors] = useState(null);
 	const [timer, setTimer] = useState(null);
 	const [step, setStep] = useState(0); // setStep to change page
-
 	const [ethPrice, setEthPrice] = useState(null);
 
-	const [tokenSupply, setTokenSupply] = useState(200); // remaining amount of tokens
-	const [validSupply, setValidSupply] = useState(true);
+	const [charityInfo, setCharityInfo] = useState({
+        id: null,
+        name: null,
+        domain: null
+    });
+
+	const [artistInfo, setArtistInfo] = useState({
+        id: null,
+        name: null,
+        bio: null,
+		image: null
+    });
+
+	const [tokenSupply, setTokenSupply] = useState(null); // remaining amount of tokens
+	// const [validSupply, setValidSupply] = useState(true);
 	const [tokenPrice, setTokenPrice] = useState(null); // value of 1 token for a given marketitem
 	const [tokenSymbol, setTokenSymbol] = useState(null);
+	const [tokenName, setTokenName] = useState(null);
 	const [donationAmtUSD, setDonationAmtUSD] = useState(null);
 	const [donationAmtEth, setDonationAmtEth] = useState(0);
 	const [donationAmtTokens, setDonationAmtTokens] = useState(null);
-	const [deadline, setDeadline] = useState(false);
+	const [deadlineAuction, setDeadlineAuction] = useState(false);
 	// Gas fees
 	const [gasFeesETH, setGasFeesETH] = useState(0);
 	const [gasFeesUSD, setGasFeesUSD] = useState(0);
 	// tx information
+	const [txReceipt, setTxReceipt] = useState(null);
 	const [transactionSucceeded, setTransactionSucceeded] = useState(null);
+
+	const [fractInfo, setFractInfo] = useState(null);
+	const [marketItemInfo, setMarketItemInfo] = useState(null); 
+	
+	const [balance, setBalance] = useState(0); 
 
 	// setting global var for ACHousContract.
 	let contractACHouse,
@@ -42,9 +68,13 @@ const BuyForm = (props) => {
 		contractACHouseProvider,
 		accountOneSigner,
 		accountTwoSigner = null;
+	const [ ACHouse, setACHouse] = useState(null);
+	const [ ACHouse1155, setACHouse1155 ] = useState(null);
+	const [ ACHouse721, setACHouse721 ] = useState(null); 
+	const [ ACHouseBuyer, setACHouseBuyer ] = useState(null); 
 
 	// nb of tokens received for a given amount of eth
-	const [minReceivedToken, setMinReceivedTokens] = useState(0);
+	// const [minReceivedToken, setMinReceivedTokens] = useState(0);
 
 	const rpcConnection = async () => {
 		const ganacheUrl = "http://127.0.0.1:7545";
@@ -109,11 +139,16 @@ const BuyForm = (props) => {
 			ACHouseToken721Contract.abi,
 			signerOne
 		);
-		// console.log("contractACHouse", contractACHouse);
 
-		// setContractACHouse(contractACHouse);
+		setACHouse(contractACHouse);
+		setACHouse1155(contractACHouse1155);
+		setACHouse721(contractACHouse721);
+		setACHouseBuyer(contractACHouseBuyer);
+
 	};
-	rpcConnection();
+	if (ACHouse == null && ACHouse1155 == null && ACHouse721 == null && ACHouseBuyer == null) {
+		rpcConnection();
+	}
 
 	// Price of ETH
 	const getEthPrice = async () => {
@@ -130,14 +165,8 @@ const BuyForm = (props) => {
 		getEthPrice();
 	}
 
-	const getMarketItemInfoHandler = () => {
-		setTokenSupply(200);
-		setTokenPrice(0.015);
-		setTokenSymbol("$HEART");
-		setDeadline(true);
-	};
-
 	useEffect(() => {
+		console.log('data', data);
 		async function getUserInfo() {
 			// if (
 			// 	typeof window.ethereum !== "undefined" ||
@@ -172,25 +201,130 @@ const BuyForm = (props) => {
 		}
 		// getUserInfo();
 
-		// get marketItemInformation
-		getMarketItemInfoHandler();
-	});
+		if (data.seller && artistInfo.id == null) {
+			const artists = DB.artists;
+			artists.map((i) => {
+				console.log('i', i);
+				if(i.address == data.seller) {
+					setArtistInfo({
+						id: i.id,
+						name: i.name,
+						image: i.profile,
+						bio: i.bio,
+					})
+				}
+			});
+        };
+		if (data.charityId && charityInfo.id == null) {
+            setCharityInfo({
+                id: data.charityId,
+                name: DB.charities[data.charityId].name,
+                domain: DB.charities[data.charityId].domain,
+                description: DB.charities[data.charityId].description,
+                long_description: DB.charities[data.charityId].long_description
+            });
+        };
+		if (props.props.nft_supply) {
+			setTokenSupply(props.props.nft_supply);
+		} else {
+			setTokenSupply(1);
+		}
+		if (tokenName == null) { // que pour 721
+			if (!data.isMultiToken) {
+				get721TokenName(tokenId);
+			} else {
+				setTokenName('Token Name');
+			}
+		}
+		if (tokenSymbol == null) { // que pour 721
+			if (!data.isMultiToken) {
+				get721TokenSymbol(tokenId);
+			} else {
+				setTokenSymbol('$SYMBOL');
+			}
+		}
+		if (data.auctionTime != 0) {
+			setDeadlineAuction(true);
+		} else {
+			setDeadlineAuction(false);
+		}
+		if (data.price) {
+			setTokenPrice(data.price);
+		} else {
+			setTokenPrice(0.015);
+		}
+
+	}, [charityInfo.id, tokenSupply, tokenName, deadlineAuction, tokenPrice]);
+
+	if (ACHouse != null && marketItemInfo == null && tokenId != null) {
+		fetchMarketItem(tokenId);
+	}
+	if ( ACHouse != null && tokenId != null && fractInfo == null && marketItemInfo != null) {
+		if(marketItemInfo[0].isFrac) {
+			getFractionalInformation(tokenId);
+		}
+	}
+	if( ACHouse != null && tokenId != null && nftUri == null ) {
+		if (data.isMultiToken) {
+	 		getNftUri1155(tokenId);
+		} else {
+			get721TokenURI(tokenId);
+		}
+	}
+	if (ACHouse != null && tokenId != null && nftUri != null && nftMetadata == null) {
+		loadNFT();
+	}
+
+	async function loadNFT() {
+		// const tokenUri = 'ipfs://bafyreih76tru7mgvpjqszqfjnipbqf5hbit2x37cddpu57slid7kwkeyxy/metadata.json';
+		// console.log("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
+		const meta = await axios.get("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
+		// console.log('meta', meta.data);
+		setNftMetadata(meta.data);
+	};
+
+	// ---- get info on token for 1155 -----
+	async function getNftUri1155(id) {
+		let data = await ACHouse.getTokenURI(id).then((f) => {
+			// console.log("Token URI 1155: ", f);
+			// if string then f.toString();
+			setNftUri(f);
+		});
+	}; 
+
+	// ---- get info on token for 721 -----
+	async function get721TokenName(id) {
+		let data = await ACHouse.get721TokenName(id).then((f) => {
+			setTokenName(f);
+		});
+	}
+	async function get721TokenSymbol(id) {
+		let data = await ACHouse.get721TokenSymbol(id).then((f) => {
+			setTokenSymbol(f);
+		});
+	}
+	async function get721TokenURI(id) {
+		let data = await ACHouse.get721TokenURI(id).then((f) => {
+			// console.log("721Token URI: ", f);
+			setNftUri(f);
+		});
+	}
 
 	const selectNextHandler = () => {
 		if (step < 2) {
 			setStep((prevActiveStep) => prevActiveStep + 1);
-			console.log("next");
+			// console.log("next");
 		} else {
-			console.log("no");
+			// console.log("no");
 		}
 	};
 
 	const selectPrevHandler = () => {
 		if (step > 0) {
 			setStep((prevActiveStep) => prevActiveStep - 1);
-			console.log("next");
+			// console.log("next");
 		} else {
-			console.log("no");
+			// console.log("no");
 		}
 	};
 
@@ -206,6 +340,7 @@ const BuyForm = (props) => {
 		}
 		setTimer(
 			setTimeout(() => {
+				
 				mintingNFTs();
 
 				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
@@ -222,7 +357,7 @@ const BuyForm = (props) => {
 					setDonationAmtTokens(nbTokens);
 
 					// calculate estimated fees
-					// estimateFees();
+					estimateFees();
 				} else if (e.target.value) {
 					// input is not a number
 					const newError = "Please enter a decimal number";
@@ -329,13 +464,11 @@ const BuyForm = (props) => {
 
 	const createNGO = () => {
 		const addr = "0xbAF4F56323F3b57b4a1E1191ac62F19b7Fd549C4";
-		const name = "ABC";
+		const name = "XYZ";
 
-		// contractACHouse
-		// 	.addCharity(addr, name)
-		// 	.then((f) => {
-		// 	console.log("add charity", f);
-		// });
+		ACHouse.addCharity(addr, name).then((f) => {
+			console.log("add charity", f);
+		});
 	};
 
 	const set721ParentApproval = () => {
@@ -364,20 +497,27 @@ const BuyForm = (props) => {
 	// };
 
 	async function createMarketSale() {
+
 		let overrides = {
 			value: ethers.utils.parseEther(".000000000000000002"),
 		};
 		// console.log(ethers.utils.parseEther("2"));
 		// console.log(ethers.utils.parseEther("2000000000000000000"));
-		// console.log(ethers.utils.parseEther(".000000000000000002"));
+		console.log(ethers.utils.parseEther(".000000000000000002"));
 
-		let tx = await contractACHouseBuyer.createMarketSale(
-			contractACHouse1155.address,
+		let tx = await ACHouseBuyer.createMarketSale(
+			ACHouse1155.address,
 			2,
 			overrides
 		);
-
+		const receipt = await tx.wait();
+		if (receipt) {
+			setTransactionSucceeded(true);
+		} else {
+			setTransactionSucceeded(false);
+		}
 		console.log("tx", tx);
+		console.log("receipt", receipt);
 	}
 
 	const mintingNFTs = () => {
@@ -388,7 +528,7 @@ const BuyForm = (props) => {
 		// fractionalizeMarketItem1155();
 		// createMarketItem1155Frac(); // for fractional token. update with frac id
 
-		// getFractionalInformation(1);
+		getFractionalInformation(tokenId);
 		// createMarketSale();
 
 		// ERC1155 functions
@@ -398,7 +538,7 @@ const BuyForm = (props) => {
 
 		// getTokenIds();
 
-		// getTokenSupply(1);
+		getTokenSupply(tokenId);
 
 		// ERC721 functions
 		// mintNFT721();
@@ -417,13 +557,13 @@ const BuyForm = (props) => {
 
 		// console.log(ethers.utils.formatEther( 0x0a ))
 
-		fetchUnSoldMarketItems();
+		// fetchUnSoldMarketItems();
 
-		fetchMyNFTs();
+		// fetchMyNFTs();
 
-		fetchItemsCreated();
+		// fetchItemsCreated();
 
-		// fetchMarketItem(1);
+		fetchMarketItem(tokenId);
 
 		// createNGO();
 		// contractACHouse
@@ -473,36 +613,37 @@ const BuyForm = (props) => {
 		console.log("721tokenIds: ", tokenIds);
 	}
 
-	async function get721TokenName(id) {
-		let data = await contractACHouse.get721TokenName(id).then((f) => {
-			console.log("Token Name for id", f);
-			return f;
-		});
-	}
+	// async function get721TokenName(id) {
+	// 	let data = await contractACHouse.get721TokenName(id).then((f) => {
+	// 		console.log("Token Name for id", f);
+	// 		return f;
+	// 	});
+	// }
 
-	async function get721TokenSymbol(id) {
-		let data = await contractACHouse.get721TokenSymbol(id).then((f) => {
-			console.log("Token Symbol for id", f);
-			return f;
-		});
-	}
+	// async function get721TokenSymbol(id) {
+	// 	let data = await contractACHouse.get721TokenSymbol(id).then((f) => {
+	// 		console.log("Token Symbol for id", f);
+	// 		return f;
+	// 	});
+	// }
 
-	async function get721TokenURI(id) {
-		let data = await contractACHouse.get721TokenURI(id).then((f) => {
-			console.log("721Token URI: ", f);
-			// if string then f.toString();
-			return f;
-		});
-	}
+	// async function get721TokenURI(id) {
+	// 	let data = await contractACHouse.get721TokenURI(id).then((f) => {
+	// 		console.log("721Token URI: ", f);
+	// 		// if string then f.toString();
+	// 		return f;
+	// 	});
+	// }
 
 	/******************************ERC1155 FUNCTIONALITY********************** */
-	async function getTokenURI(id) {
-		let data = await contractACHouse.getTokenURI(id).then((f) => {
-			console.log("Token URI: ", f);
-			// if string then f.toString();
-			return f;
-		});
-	}
+	// async function getTokenURI(id) {
+	// 	console.log('id', id);
+	// 	let data = await contractACHouse.getTokenURI(id).then((f) => {
+	// 		console.log("Token URI: ", f);
+	// 		// if string then f.toString();
+	// 		return f;
+	// 	});
+	// }
 
 	// get total number of tokens.
 	async function getTokenCount() {
@@ -528,7 +669,7 @@ const BuyForm = (props) => {
 	}
 
 	async function getTokenSupply(id) {
-		let data = await contractACHouse.getTokenSupply(id).then((f) => {
+		let data = await ACHouse.getTokenSupply(id).then((f) => {
 			console.log("Token Supply for id", f.toNumber());
 			return f.toNumber();
 		});
@@ -537,12 +678,11 @@ const BuyForm = (props) => {
 	/******************************MARKET PLACE FUNCTIONALITY********************** */
 	async function fetchMarketItem(id) {
 		let data = [];
-		await contractACHouse.fetchMarketItem(id).then((f) => {
-			console.log("Fetch marketItem by Id", f);
+		await ACHouse.fetchMarketItem(id).then((f) => {
+			// console.log("Fetch marketItem by Id", f);
 			data.push(f);
 		});
-
-		console.log("data: ", data);
+		// console.log("data : ", data);
 
 		const items = await Promise.all(
 			data.map(async (i) => {
@@ -564,11 +704,12 @@ const BuyForm = (props) => {
 				return item;
 			})
 		);
-		console.log("items: ", items);
+		setMarketItemInfo(items);
+		// console.log("market item: ", items);
 	}
 
 	async function fetchUnSoldMarketItems() {
-		let data = await contractACHouse.fetchUnSoldMarketItems().then((f) => {
+		let data = await ACHouse.fetchUnSoldMarketItems().then((f) => {
 			// console.log("unsold market items", f);
 			return f;
 		});
@@ -599,7 +740,7 @@ const BuyForm = (props) => {
 	}
 
 	async function fetchMyNFTs() {
-		let data = await contractACHouseBuyer.fetchMyNFTs().then((f) => {
+		let data = await ACHouseBuyer.fetchMyNFTs().then((f) => {
 			// console.log("Fetch NFT created by user", f);
 			return f;
 		});
@@ -630,7 +771,7 @@ const BuyForm = (props) => {
 	}
 
 	async function fetchItemsCreated() {
-		let data = await contractACHouse.fetchItemsCreated().then((f) => {
+		let data = await ACHouse.fetchItemsCreated().then((f) => {
 			// console.log("Fetch Items created by user", f);
 			return f;
 		});
@@ -663,8 +804,8 @@ const BuyForm = (props) => {
 	/******************************MARKET PLACE FUNCTIONALITY********************** */
 	async function getFractionalInformation(id) {
 		let data = [];
-		await contractACHouse.getFractionalInformation(id).then((f) => {
-			console.log("get FractionalINfo by Id", f);
+		await ACHouse.getFractionalInformation(id).then((f) => {
+			// console.log("get FractionalINfo by Id", f);
 			data.push(f);
 		});
 
@@ -687,255 +828,311 @@ const BuyForm = (props) => {
 				return item;
 			})
 		);
-		console.log("items: ", items);
+		// console.log("items fract: ", items);
+		setFractInfo(items);
 	}
 
 	const estimateFees = async () => {
-		// function to calculate estimated fees
+		const ganacheUrl = "http://127.0.0.1:7545";
+		let provider = new providers.JsonRpcProvider(ganacheUrl);
 
-		const gasPrice = await provider.getGasPrice();
-		console.log("Big number: ", gasPrice);
+		let tx = await provider.getGasPrice();
 
-		const gasPriceGwei = utils.formatUnits(gasPrice, "gwei");
-		console.log("gas price in gwei: ", gasPriceGwei);
+		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "wei"));
+		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "gwei"));
+		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "ether"));
 
-		// const gasPriceGwei = utils.formatUnits(gasPrice, "gwei");
-		// console.log("gas price in gwei: ", gasPriceGwei);
+		const feesEth = ethers.utils.formatUnits(tx.toString(), "ether");
+		const feesUSD = feesEth * ethPrice
 
-		// let gasUnitsEstimated = await contractACHouse.estimateGas.createMarketSale(contractACHouse1155.address, 1, overrides);
-		// console.log('gasEstimate', parseInt(gasUnitsEstimated, 10));
-
-		// const gasPrice = await provider.getGasPrice();
-		// console.log("Big number: ", gasPrice.toString());
-
-		// await provider.estimateGas({
-		//     // Wrapped ETH address
-		//     to: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-
-		//     // `function deposit() payable`
-		//     data: "0xd0e30db0",
-
-		//     // 1 ether
-		//     value: parseEther("1.0")
-		//   });
-
-		setGasFeesETH(gasPriceGwei);
+		setGasFeesETH(feesEth);
+		setGasFeesUSD(feesUSD.toFixed(6));
 	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		console.log("form submitted");
 		selectNextHandler();
-
-		// 1. check that all variables are ok
-
-		// 2. effectuer la transaction
-
-		// 3. check that transaction was complete
-		// and get nb of TOKENS owned + amount donated to charity
-
-		// 4. show conclusion page
-		// setTransactionSucceeded(true);
 	};
 
 	const handleTransaction = () => {
 		// connect to smart contract to handle transaction
+		// createMarketSale();
+		// selectNextHandler();
+		// console.log(ethers.utils.parseEther(".000000000000000002"));
+		// console.log(ethers.utils.parseEther("0.000000000000000002"));
+		console.log(donationAmtEth);
+		const price = 2;
+		// let gwei = ethers.utils.formatUnits(price.toString(), "gwei");
+		// let wei = ethers.utils.formatUnits(price.toString(), "wei");
 
-		// if success
-		selectNextHandler();
+		let wei = ethers.utils.parseEther(price.toString());
+
+		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "wei"));
+		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "gwei"));
+		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "ether"));
+		// test = (donationAmtEth + "").split(".");
+		console.log('test', wei);
 	};
 
 	return (
 		<>
-			{step == 0 && (
-				<>
-					<form className="" onSubmit={handleSubmit}>
-						<div className="form-control">
-							<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
-								<span className="label-text">Pay (in ETH)</span>
-								{donationAmtUSD ? <span> ({donationAmtUSD} USD)</span> : ""}
-								{/* <span>Balance user: {balance} ETH</span> */}
-							</label>
-							<input
-								type="text"
-								placeholder="0.0"
-								className="input input-primary input-bordered"
-								required
-								inputMode="decimal"
-								pattern="^\d*[.,]?\d*$"
-								onChange={changeInputETH}
-							/>
-							{errors ? (
-								<div className="alert alert-error my-2">
-									<div className="flex-1">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-											className="w-6 h-6 mx-2 stroke-current"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth="2"
-												d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-											></path>
-										</svg>
-										<label>{errors}</label>
+
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
+                <div className="card shadow-2xl">
+                    <figure>
+                        <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" />
+                    </figure> 
+                    <div className="card-body">
+                        <h2 className="card-title">{nftMetadata && nftMetadata.name}</h2> 
+                        <p> created and donated by {artistInfo.name}</p> 
+                        <p>{nftMetadata && nftMetadata.description}</p> 
+
+						{/* <div className="avatar">
+							<div className="mb-8 rounded-full w-24 h-24">
+								<img src={artistInfo.image} />
+							</div>
+						</div>  */}
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
+                                {data.isMultiToken ? <div className="font-bold">ERC 1155</div> : <div className="font-bold">ERC 721</div>}
+                            </div>
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                                <div className="font-bold">{tokenName}</div>
+                            </div>
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
+                                <div className="font-bold">{tokenSymbol}</div>
+                            </div>
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
+                                {fractInfo && fractInfo.supplyMinted ? <div className="font-bold">{fractInfo.supplyMinted}</div> : data.isMultiToken ? <div className="font-bold">{tokenSupply}</div> : ""}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="">
+                    <div className="card shadow-2xl p-7">
+                        <div className=""> 
+                            <div className="text-center mb-2">
+                                <h2 className="card-title">Donate to {charityInfo.name}
+                                    <div className="badge mx-2 badge-secondary">ONGOING</div>
+                                </h2>
+                            </div> 
+                        </div>
+                        <div className=""> 
+                            <div className="mb-2">
+                                <p>{charityInfo.long_description}</p>
+                            </div>
+                        </div>
+
+                        <div className="divider"></div> 
+
+						{ step ==0 && (
+							<div className="center-cnt mb-5">
+							 	<Countdown end={data.auctionTime} />
+						 	</div>
+						)}
+
+						{step == 0 && (
+							<>
+								<form className="" onSubmit={handleSubmit}>
+									<div className="form-control">
+										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
+											<span className="label-text">Pay (in ETH)</span>
+											{donationAmtUSD ? <span> ({donationAmtUSD} USD)</span> : ""}
+											{/* <span>Balance user: {balance} ETH</span> */}
+										</label>
+										<input
+											type="text"
+											placeholder="0.0"
+											className="input input-primary input-bordered"
+											required
+											inputMode="decimal"
+											pattern="^\d*[.,]?\d*$"
+											onChange={changeInputETH}
+										/>
+										{errors ? (
+											<div className="alert alert-error my-2">
+												<div className="flex-1">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														fill="none"
+														viewBox="0 0 24 24"
+														className="w-6 h-6 mx-2 stroke-current"
+													>
+														<path
+															strokeLinecap="round"
+															strokeLinejoin="round"
+															strokeWidth="2"
+															d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+														></path>
+													</svg>
+													<label>{errors}</label>
+												</div>
+											</div>
+										) : (
+											""
+										)}
+									</div>
+									<div className="form-control mb-5">
+										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
+											<span className="label-text">Receive {tokenSymbol}</span>
+										</label>
+										<input
+											type="text"
+											placeholder="0.0"
+											value={donationAmtTokens ? donationAmtTokens : ""}
+											className="input input-primary input-bordered"
+											inputMode="decimal"
+											pattern="^\d*[.,]?\d*$"
+											onChange={changeInputTokens}
+										/>
+									</div>
+									<div className="py-2">
+										<p>
+											Remaining number of tokens:
+											<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+												{" "}
+												{fractInfo ? fractInfo.supplyRemaining : tokenSupply} {tokenSymbol}
+											</span>
+										</p>
+									</div>
+									<div className="py-2">
+										<p>
+											Price of 1 {tokenSymbol} (in ETH):{" "}
+											<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+												{tokenPrice} ETH
+											</span>
+										</p>
+									</div>
+									<div className="py-2">
+										<p>
+											Estimated fees:{" "}
+											{gasFeesETH && gasFeesUSD ? (
+												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+												{gasFeesETH} ETH / $ {gasFeesUSD}
+											</span>
+											) : (
+												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+													-
+												</span>
+											)}
+										</p>
+									</div>
+									<div className="py-2">
+										<span>
+											Donation amount to charity:{" "}
+											{donationAmtEth && donationAmtUSD ? (
+												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+													{donationAmtEth} ETH - {donationAmtUSD} $
+												</span>
+											) : (
+												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+													-
+												</span>
+											)}
+										</span>
+									</div>
+									<div className="center-cnt py-2">
+										{!connected ? (
+											<button className="btn btn-secondary btn-wide">Donate</button>
+										) : (
+											<Connect />
+										)}
+									</div>
+								</form>
+							</>
+						)}
+						{step == 1 && (
+							<>
+								<div className=" my-5 flex items-center justify-center">
+									<div className="max-w-4xl  bg-white rounded-lg shadow-xl">
+										<div className="p-4 border-b">
+											<h2 className="text-2xl ">
+												Please confirm your transaction information
+											</h2>
+											<p className="text-sm text-gray-500"></p>
+										</div>
+										<div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">Wallet</p>
+												<p>Wallet address</p>
+											</div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">NFT</p>
+												<p>{nftMetadata.name}</p>
+											</div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">Donation amount</p>
+												<p>
+													$ {donationAmtUSD} / {donationAmtEth}ETH
+												</p>
+											</div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">To</p>
+												<p>
+													{charityInfo.name}
+												</p>
+											</div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">Number of tokens purchased</p>
+												<p>{donationAmtTokens} {tokenSymbol}</p>
+											</div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">Estimated fees </p>
+												<p>{gasFeesETH} ETH / $ {gasFeesUSD}</p>
+											</div>
+										</div>
 									</div>
 								</div>
-							) : (
-								""
-							)}
-						</div>
-						<div className="form-control mb-5">
-							<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
-								<span className="label-text">Receive {tokenSymbol}</span>
-							</label>
-							<input
-								type="text"
-								placeholder="0.0"
-								value={donationAmtTokens ? donationAmtTokens : ""}
-								className="input input-primary input-bordered"
-								inputMode="decimal"
-								pattern="^\d*[.,]?\d*$"
-								onChange={changeInputTokens}
-							/>
-						</div>
-						<div className="py-2">
-							<p>
-								Remaining nb of tokens:
-								<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-									{" "}
-									{tokenSupply} {tokenSymbol}
-								</span>
-							</p>
-						</div>
-						<div className="py-2">
-							<p>
-								Estimate ETH price of 1 {tokenSymbol}:{" "}
-								<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-									{tokenPrice} ETH
-								</span>
-							</p>
-						</div>
-						<div className="py-2">
-							<p>
-								Estimated fees:{" "}
-								<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-									{gasFeesETH} ETH / {gasFeesUSD}$
-								</span>
-							</p>
-						</div>
-						<div className="py-2">
-							{donationAmtTokens ? (
-								<p>
-									Min. received:{" "}
-									<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-										{donationAmtTokens} {tokenSymbol}
-									</span>
-								</p>
-							) : (
-								<span>Min. received: -</span>
-							)}
-						</div>
-						<div className="py-2">
-							<span>
-								Donation amount to charity:{" "}
-								{donationAmtEth && donationAmtUSD ? (
-									<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-										{donationAmtEth} ETH - {donationAmtUSD} $
-									</span>
-								) : (
-									<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-										-
-									</span>
-								)}
-							</span>
-						</div>
-						<div className="center-cnt py-2">
-							{!connected ? (
-								<button className="btn btn-secondary btn-wide">Donate</button>
-							) : (
-								<Connect />
-							)}
-						</div>
-					</form>
-				</>
-			)}
-			{step == 1 && (
-				<>
-					<div className=" my-20 flex items-center justify-center">
-						<div className="max-w-4xl  bg-white rounded-lg shadow-xl">
-							<div className="p-4 border-b">
-								<h2 className="text-2xl ">
-									Please confirm your transaction information
-								</h2>
-								<p className="text-sm text-gray-500"></p>
-							</div>
-							<div>
-								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p className="text-gray-600">Wallet</p>
-									<p>Wallet address</p>
-								</div>
-								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p className="text-gray-600">NFT URI</p>
-									<p>Insert URI</p>
-								</div>
-								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p className="text-gray-600">Donation amount</p>
-									<p>
-										$ {donationAmtUSD} / {donationAmtEth}ETH
-									</p>
-								</div>
-								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p className="text-gray-600">Number of tokens purchased</p>
-									<p>200 {tokenSymbol}</p>
-								</div>
-								<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-									<p className="text-gray-600">Estimated fees </p>
-									<p>Gas fees (eth and USD)</p>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div className="center-cnt py-2">
-						<button
-							className="btn btn-secondary btn-wide mx-2"
-							onClick={selectPrevHandler}
-						>
-							Previous
-						</button>
-						<button
-							className="btn btn-primary btn-wide mx-2"
-							onClick={handleTransaction}
-						>
-							Validate transaction
-						</button>
-					</div>
-				</>
-			)}
-			{step == 2 && (
-				<>
-					<div>
-						{!transactionSucceeded ? (
-							<div>transaction failed</div>
-						) : (
-							<div>
-								<div className="py-3 text-center">
-									Congratulations ! You now own XX $TOKENS
-								</div>
-								<div className="py-3 text-center">
-									You donated YYY ETH to CHARITY_NAME
-								</div>
 								<div className="center-cnt py-2">
-									<button className="btn btn-secondary btn-wide">Share</button>
+									<button
+										className="btn btn-secondary btn-wide mx-2"
+										onClick={selectPrevHandler}
+									>
+										Previous
+									</button>
+									<button
+										className="btn btn-primary btn-wide mx-2"
+										onClick={handleTransaction}
+									>
+										Validate transaction
+									</button>
 								</div>
-							</div>
+							</>
 						)}
-					</div>
-				</>
-			)}
+						{step == 2 && (
+							<>
+								<div>
+									{!transactionSucceeded ? (
+										<div>
+											<div className="py-3 text-center">
+												Oops ! Your transaction failed..
+											</div>
+										</div>
+									) : (
+										<div>
+											<div className="py-3 text-center">
+												Congratulations ! You now own {donationAmtTokens} {tokenSymbol}
+											</div>
+											<div className="py-3 text-center">
+												You donated {donationAmtEth} ETH ($ {donationAmtUSD}) to {charityInfo.name}. Thanks for supporting them !
+											</div>
+											<div className="center-cnt py-2">
+												<button className="btn btn-secondary btn-wide">Share</button>
+											</div>
+										</div>
+									)}
+								</div>
+							</>
+						)}
+                    </div>
+                </div>
+            </div>
 		</>
 	);
 };
