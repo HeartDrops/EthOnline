@@ -32,6 +32,7 @@ const BuyForm = () => {
 
 	// setting global var for ACHousContract.
 	let contractACHouse,
+		contractACHouseBuyer,
 		contractACHouse1155,
 		contractACHouse721,
 		contractACHouseProvider = null;
@@ -68,11 +69,18 @@ const BuyForm = () => {
 		const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
 		/******************************************************************************* */
 		const signerOne = provider.getSigner(accountOne);
+		const signerTwo = provider.getSigner(accountTwo);
 
 		contractACHouse = new ethers.Contract(
 			ACHouseAddress,
 			ACHouseContract.abi,
 			signerOne
+		);
+
+		contractACHouseBuyer = new ethers.Contract(
+			ACHouseAddress,
+			ACHouseContract.abi,
+			signerTwo
 		);
 
 		contractACHouseProvider = new ethers.Contract(
@@ -260,6 +268,7 @@ const BuyForm = () => {
 	const createMarketItem1155 = () => {
 		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
 		// Same applies for NFT create outside of our system.
+		// create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime, bool isFrac)
 		contractACHouse
 			.create1155MarketItem(
 				contractACHouse1155.address,
@@ -269,6 +278,25 @@ const BuyForm = () => {
 				1,
 				1634309818,
 				false
+			) // false for isFrac
+			.then((f) => {
+				console.log("after create 1155 MarketItem", f);
+			});
+	};
+
+	const createMarketItem1155Frac = () => {
+		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
+		// Same applies for NFT create outside of our system.
+		// create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime, bool isFrac)
+		contractACHouse
+			.create1155MarketItem(
+				contractACHouse1155.address,
+				1,
+				2,
+				50,
+				1,
+				1634309818,
+				true
 			) // false for isFrac
 			.then((f) => {
 				console.log("after create 1155 MarketItem", f);
@@ -330,9 +358,9 @@ const BuyForm = () => {
 		let overrides = {
 			value: ethers.utils.parseEther("10"),
 		};
-		let tx = await contractACHouse.createMarketSale(
+		let tx = await contractACHouseBuyer.createMarketSale(
 			contractACHouse1155.address,
-			1,
+			2,
 			overrides
 		);
 
@@ -348,9 +376,10 @@ const BuyForm = () => {
 		// setParentApproval();
 		// createMarketItem1155();
 		// fractionalizeMarketItem1155();
+		// createMarketItem1155Frac(); // for fractional token. update with frac id
 
-		getFractionalInformation(1);
-		// createMarketSale();
+		// getFractionalInformation(1);
+		createMarketSale();
 
 		// ERC1155 functions
 		// getTokenURI(1);
@@ -378,7 +407,7 @@ const BuyForm = () => {
 
 		// console.log(ethers.utils.formatEther( 0x0a ))
 
-		// fetchUnSoldMarketItems();
+		fetchUnSoldMarketItems();
 
 		// fetchMyNFTs();
 
@@ -520,6 +549,7 @@ const BuyForm = () => {
 					sold: i.sold,
 					isMultiToken: i.isMultiToken,
 					isRemoved: i.isRemoved,
+					isFrac: i.isFrac,
 				};
 				return item;
 			})
@@ -550,6 +580,7 @@ const BuyForm = () => {
 					sold: i.sold,
 					isMultiToken: i.isMultiToken,
 					isRemoved: i.isRemoved,
+					isFrac: i.isFrac,
 				};
 				return item;
 			})
@@ -580,6 +611,7 @@ const BuyForm = () => {
 					sold: i.sold,
 					isMultiToken: i.isMultiToken,
 					isRemoved: i.isRemoved,
+					isFrac: i.isFrac,
 				};
 				return item;
 			})
@@ -610,6 +642,7 @@ const BuyForm = () => {
 					sold: i.sold,
 					isMultiToken: i.isMultiToken,
 					isRemoved: i.isRemoved,
+					isFrac: i.isFrac,
 				};
 				return item;
 			})
@@ -621,11 +654,11 @@ const BuyForm = () => {
 	async function getFractionalInformation(id) {
 		let data = [];
 		await contractACHouse.getFractionalInformation(id).then((f) => {
-			console.log("Fetch marketItem by Id", f);
+			console.log("get FractionalINfo by Id", f);
 			data.push(f);
 		});
 
-		console.log("data: ", data);
+		// console.log("data: ", data);
 
 		const items = await Promise.all(
 			data.map(async (i) => {

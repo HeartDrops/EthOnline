@@ -145,7 +145,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
     
-    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
+    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, amount, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
     idToMarketItem[itemId] = item;
 
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
