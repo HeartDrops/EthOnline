@@ -110,7 +110,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   //user purchase to id to amount purchased
   mapping (address => mapping(uint256 => uint256)) userShardPurchaseAmount;
   
-  string[] itemIdStr;
+  // string[] itemIdStr;
     
 
   constructor(address _mToken, address _nToken) {
@@ -225,10 +225,10 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   }
 
   /* Returns all unsold market items */
-  function fetchUnSoldMarketItems() public returns(string[] memory) {
+  function fetchUnSoldMarketItems() public view returns(MarketItem[] memory) {
     
-    // uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
-    // MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
+    uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
+    MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
     
     uint unsoldCurrentIndex = 0;
     
@@ -238,18 +238,20 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
         // only way i found to iterate through a mapping. 
         if(idToMarketItem[i+1].owner == address(0) && idToMarketItem[i+1].isRemoved == false ) { 
             uint currentID = i+1;
-            // items[unsoldCurrentIndex] = idToMarketItem[currentID];
+
+            MarketItem storage currentItem = idToMarketItem[currentID];
+            items[unsoldCurrentIndex] = currentItem;
             
-            uint itemId =idToMarketItem[currentID].itemId;
-            string memory str =  uint2str(itemId);
+            // uint itemId =idToMarketItem[currentID].itemId;
+            // string memory str =  uint2str(itemId);
             
-            itemIdStr.push(str);
+            // itemIdStr.push(str);
             
             unsoldCurrentIndex +=1;
         }
     }
     
-    return itemIdStr; 
+    return items; 
   }
 
   /* Returns only items that a user has purchased */
@@ -266,10 +268,6 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
         items[i] = idToMarketItem[userPurchasedIds[i]];
     }
     return items;
-  }
-
-  function fetchMyItemSold() public view returns (uint256[] memory){
-    return userSoldItemMapping[msg.sender];
   }
 
   /* Returns only items a user has created */
