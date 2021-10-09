@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 
-function calculateTimeLeft() {
-    const endDate = new Date('October 10, 2021 00:00:00').getTime();
-    const difference = endDate - new Date().getTime();
-    let timeLeft = {};
-  
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60)
-      };
-    }
-    return timeLeft;
-};
-
 const Countdown = (props) => {
     
     const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    function calculateTimeLeft() {
+        const endDate = new Date(props.end * 1000);
+        const difference = endDate - new Date().getTime();
+        let timeLeft = {};
+      
+        if (difference > 0) {
+          timeLeft = {
+            days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.floor((difference / 1000 / 60) % 60),
+            seconds: Math.floor((difference / 1000) % 60)
+          };
+        }
+        return timeLeft;
+    };
 
     useEffect(() => {
         const id = setTimeout(() => {

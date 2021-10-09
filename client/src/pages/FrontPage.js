@@ -1,17 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ShowcaseAuctions from '../components/showcaseAuctions'
+import ShowcaseAuctions from '../components/showcaseAuctions';
+import Countdown from '../components/countdown';
 
 const FrontPage = () => {
   return (
     <>
 
-    <div class="hero min-h-screen bg-primary">
-  <div class="text-center hero-content text-primary-content">
-    <div class="max-w-lg">
-      <center><img class="mb-6" height="100" width="200" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></center>
-      <img class="mt-6 mb-6" src="https://freight.cargo.site/t/thumbnail/w/100/i/887ac2e88349f644bf4718496c686b8d9101eb1b295bf3b0852f54e68dcf9d76/logotype-heart-drops.svg" />
-      <p class="mb-5">
+    <div className="hero min-h-screen bg-primary">
+  <div className="text-center hero-content text-primary-content">
+    <div className="max-w-lg">
+      <center><img className="mb-6" height="100" width="200" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></center>
+      <img className="mt-6 mb-6" src="https://freight.cargo.site/t/thumbnail/w/100/i/887ac2e88349f644bf4718496c686b8d9101eb1b295bf3b0852f54e68dcf9d76/logotype-heart-drops.svg" />
+      <p className="mb-5">
       A Decentralized Philanthropy (AKA “DePhi”) platform focused on bringing people together who want to make a difference in the world through life-changing NFT Drops.
           </p>
           <Link to="/auctions" className="btn bg-accent mr-2">Discover Heart Drops</Link>
@@ -22,7 +23,57 @@ const FrontPage = () => {
 
 
 
-    <ShowcaseAuctions />
+    {/* <ShowcaseAuctions /> */}
+    <div className="py-5">
+        <div className="container mx-auto p-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
+            <div className="card bordered shadow-2xl">
+                    <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered" />
+                <div className="card-body">
+                    <h2 className="card-title">NFT NAME <span className="">by ARTIST_NAME</span> 
+                        <div className="badge mx-2 badge-secondary">ONGOING</div>
+                        <div className="badge mx-2 badge-accent">Human Rights</div>
+                    </h2> 
+                    <div className="mx-2 my-3">
+                        <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
+                    </div>
+                    <div className="mx-2 my-3">
+                        <span>Donated by DONOR_NAME</span>
+                        <span>  for Charity_NAME</span>
+                    </div>
+
+                    <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
+                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
+                            <div className="font-bold">ERC 721</div>
+                        </div>
+                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                            <div className="font-bold">$HEARTS</div>
+                        </div>
+                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
+                            <div className="font-bold">100</div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
+                         <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
+                            <Countdown end="1634309818" size="small" />
+                        </div>
+
+                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                            <div className="justify-end card-actions">
+                                <Link className="btn btn-secondary" to='/'>Donate</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        </div>
+        </div>
 
 
 
