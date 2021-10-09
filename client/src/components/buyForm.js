@@ -35,7 +35,9 @@ const BuyForm = () => {
 		contractACHouseBuyer,
 		contractACHouse1155,
 		contractACHouse721,
-		contractACHouseProvider = null;
+		contractACHouseProvider,
+		accountOneSigner,
+		accountTwoSigner = null;
 
 	// nb of tokens received for a given amount of eth
 	const [minReceivedToken, setMinReceivedTokens] = useState(0);
@@ -70,6 +72,9 @@ const BuyForm = () => {
 		/******************************************************************************* */
 		const signerOne = provider.getSigner(accountOne);
 		const signerTwo = provider.getSigner(accountTwo);
+
+		accountOneSigner = signerOne;
+		accountTwoSigner = signerTwo;
 
 		contractACHouse = new ethers.Contract(
 			ACHouseAddress,
@@ -351,24 +356,41 @@ const BuyForm = () => {
 		});
 	};
 
-	const createMarketSale = async () => {
-		const ganacheUrl = "http://127.0.0.1:7545";
-		let provider = new providers.JsonRpcProvider(ganacheUrl);
+	// const createMarketSale = async () => {
+	// 	const ganacheUrl = "http://127.0.0.1:7545";
+	// 	let provider = new providers.JsonRpcProvider(ganacheUrl);
 
+	// 	let overrides = {
+	// 		value: ethers.utils.parseEther("2"),
+	// 	};
+	// 	let tx = await contractACHouseBuyer
+	// 		.createMarketSale(contractACHouse1155.address, 2, overrides);
+
+	// 	// await accountTwoSigner.getBalance().then((f) => {
+	// 	// 	console.log("Balance: ", ethers.utils.formatUnits(f.toString(), "ether"));
+	// 	// });
+	// 	// contractACHouse.createMarketSale(contractACHouse1155.address, 1)
+	// 	// .then((f) => {
+	// 	// 	console.log("create", f);
+	// 	// });;
+	// };
+
+	async function createMarketSale() {
 		let overrides = {
-			value: ethers.utils.parseEther("10"),
+			value: ethers.utils.parseEther(".000000000000000002"),
 		};
+		// console.log(ethers.utils.parseEther("2"));
+		// console.log(ethers.utils.parseEther("2000000000000000000"));
+		// console.log(ethers.utils.parseEther(".000000000000000002"));
+
 		let tx = await contractACHouseBuyer.createMarketSale(
 			contractACHouse1155.address,
 			2,
 			overrides
 		);
 
-		// contractACHouse.createMarketSale(contractACHouse1155.address, 1)
-		// .then((f) => {
-		// 	console.log("create", f);
-		// });;
-	};
+		console.log("tx", tx);
+	}
 
 	const mintingNFTs = () => {
 		console.log("Calling MintNFT1155");
@@ -379,7 +401,7 @@ const BuyForm = () => {
 		// createMarketItem1155Frac(); // for fractional token. update with frac id
 
 		// getFractionalInformation(1);
-		createMarketSale();
+		// createMarketSale();
 
 		// ERC1155 functions
 		// getTokenURI(1);
@@ -409,9 +431,9 @@ const BuyForm = () => {
 
 		fetchUnSoldMarketItems();
 
-		// fetchMyNFTs();
+		fetchMyNFTs();
 
-		// fetchItemsCreated();
+		fetchItemsCreated();
 
 		// fetchMarketItem(1);
 
@@ -559,11 +581,11 @@ const BuyForm = () => {
 
 	async function fetchUnSoldMarketItems() {
 		let data = await contractACHouse.fetchUnSoldMarketItems().then((f) => {
-			console.log("unsold market items", f);
+			// console.log("unsold market items", f);
 			return f;
 		});
 
-		console.log("data: ", data);
+		// console.log("data: ", data);
 
 		const items = await Promise.all(
 			data.map(async (i) => {
@@ -589,12 +611,12 @@ const BuyForm = () => {
 	}
 
 	async function fetchMyNFTs() {
-		let data = await contractACHouse.fetchMyNFTs().then((f) => {
-			console.log("Fetch NFT created by user", f);
+		let data = await contractACHouseBuyer.fetchMyNFTs().then((f) => {
+			// console.log("Fetch NFT created by user", f);
 			return f;
 		});
 
-		console.log("data: ", data);
+		// console.log("data: ", data);
 
 		const items = await Promise.all(
 			data.map(async (i) => {
@@ -621,11 +643,11 @@ const BuyForm = () => {
 
 	async function fetchItemsCreated() {
 		let data = await contractACHouse.fetchItemsCreated().then((f) => {
-			console.log("Fetch Items created by user", f);
+			// console.log("Fetch Items created by user", f);
 			return f;
 		});
 
-		console.log("data: ", data);
+		// console.log("data: ", data);
 
 		const items = await Promise.all(
 			data.map(async (i) => {
