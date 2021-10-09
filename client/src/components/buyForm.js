@@ -7,7 +7,11 @@ import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
 import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
 
-const BuyForm = () => {
+const BuyForm = (props) => {
+
+	console.log('props', props);
+
+
 	const [connected, setConnected] = useState(false);
 	const [balance, setBalance] = useState(0);
 	const [errors, setErrors] = useState(null);
@@ -321,17 +325,6 @@ const BuyForm = () => {
 			.then((f) => {
 				console.log("fractionalize1155NFT", f);
 			});
-
-		// QUESTIONS :
-		//  -- how to get list of current auctions ?
-		//  -- where does the person who fractionalize an NFT set the charities it goes to ? (so I can fetch the right charity in the buyer page)
-		//  -- identify the right MarketItem in a given auction page
-		//		(in order to get :
-		//			- the total supply of tokens
-		// 			- remaining nb of tokens + their price (is the price in ETH ?)
-		// 			- the right charity it goes to
-		// 			- end date of the auction
-		//  --
 	};
 
 	const createNGO = () => {
@@ -343,11 +336,6 @@ const BuyForm = () => {
 		// 	.then((f) => {
 		// 	console.log("add charity", f);
 		// });
-	};
-	const setParentApproval = () => {
-		contractACHouse1155.setParentApproval().then((f) => {
-			console.log("parent address", f);
-		});
 	};
 
 	const set721ParentApproval = () => {

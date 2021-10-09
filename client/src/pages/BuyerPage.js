@@ -1,18 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRouter } from 'react';
 import BuyForm from '../components/buyForm';
 import Countdown from '../components/countdown';
 import DB from '../db.json';
 
-const BuyerPage = () => { 
-    
-    // info on auction selected
-	const [charityID, setCharityID] = useState(null);
-    
-    useEffect(() => {
-        
-        // fetch data of charity
-        setCharityID(0);
+const BuyerPage = ({match, location}) => { 
 
+    console.log('state', location);
+    const data = location.state;
+    const pathModal = location.pathname;
+    
+    const [charityInfo, setCharityInfo] = useState({
+        id: null,
+        name: null,
+        domain: null
+    });
+
+    useEffect(() => {
+
+        // fetch data of charity
+        if (data.item.charityId && charityInfo.id == null) {
+            setCharityInfo({
+                id: data.item.charityId,
+                name: DB.charities[data.item.charityId].name,
+                domain: DB.charities[data.item.charityId].domain,
+                description: DB.charities[data.item.charityId].description,
+                long_description: DB.charities[data.item.charityId].long_description
+            });
+        }
     });
 
   return (
@@ -24,54 +38,34 @@ const BuyerPage = () => {
                         <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" />
                     </figure> 
                     <div className="card-body">
-                        <h2 className="card-title">Info on artist and NFT</h2> 
-                        <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos. Sit sit necessitatibus veritatis sed molestiae voluptates incidunt iure sapiente.</p> 
-                        {/* <div className="justify-center card-actions">
-                            <button className="btn btn-secondary">More info</button>
-                        </div> */}
+                        <h2 className="card-title">{data.nft_metadata && data.nft_metadata.name}</h2> 
+                        <p> created by ARTIST_NAME</p> 
+                        <p> created by DONATOR_NAME</p> 
+                        <p>{data.nft_metadata && data.nft_metadata.description}</p> 
                     </div>
                 </div>
                 <div className="">
                     <div className="card shadow-2xl p-7">
                         <div className=""> 
                             <div className="text-center mb-2">
-                                {DB.charities && DB.charities.length>0 && DB.charities.map((item) => item.id == charityID &&
-                                <h2 className="card-title" key={item.id}>Donate to {item.name}
+                                <h2 className="card-title">Donate to {charityInfo.name}
                                     <div className="badge mx-2 badge-secondary">ONGOING</div>
                                 </h2>
-                                )}
                             </div> 
                         </div>
                         <div className=""> 
-                            {DB.charities && DB.charities.length>0 && DB.charities.map((item) => item.id == charityID &&
-                                    <div className="mb-2" key={item.id}>
-                                        <p>{item.description}</p>
-                                    </div>
-                                    )}
-                            <div className="center-cnt my-3">
-                                <a href="/donate#my-modal" className="btn btn-primary">More information on charity</a> 
-                                <div id="my-modal" className="modal">
-                                    <div className="modal-box">
-                                        {DB.charities && DB.charities.length>0 && DB.charities.map((item) => item.id == charityID &&
-                                        <div className="mb-2" key={item.id}>
-                                            <p>{item.long_description}</p>
-                                        </div>
-                                        )}
-                                        <div className="modal-action">
-                                            <a href="/donate#" className="btn">Close</a>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div className="mb-2">
+                                <p>{charityInfo.long_description}</p>
                             </div>
                         </div>
 
                         <div className="divider"></div> 
 
                         <div className="center-cnt mb-5">
-                            <Countdown />
+                            <Countdown end={data.end_date.timestamp} size="small" />
                         </div>
 
-                        <BuyForm />
+                        <BuyForm props={data} />
 
                     </div>
 
