@@ -608,6 +608,36 @@ const BuyForm = () => {
 		console.log("items: ", items);
 	}
 
+	/******************************MARKET PLACE FUNCTIONALITY********************** */
+	async function getFractionalInformation(id) {
+		let data = [];
+		await contractACHouse.getFractionalInformation(id).then((f) => {
+			console.log("Fetch marketItem by Id", f);
+			data.push(f);
+		});
+
+		console.log("data: ", data);
+
+		const items = await Promise.all(
+			data.map(async (i) => {
+				let item = {
+					itemId: i.itemId.toNumber(),
+					nftContract: i.nftContract,
+					tokenId: i.tokenId.toNumber(),
+					seller: i.seller,
+					owner: i.owner,
+					fractionalContract: i.fractionalContract,
+					shardId: i.shardId.toNumber(),
+					supplyMinted: i.supplyMinted.toNumber(),
+					supplyRemaining: i.supplyRemaining.toNumber(),
+					isMultiToken: i.isMultiToken,
+				};
+				return item;
+			})
+		);
+		console.log("items: ", items);
+	}
+
 	const estimateFees = async () => {
 		// function to calculate estimated fees
 
