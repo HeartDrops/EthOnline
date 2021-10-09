@@ -261,20 +261,27 @@ const BuyForm = () => {
 		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
 		// Same applies for NFT create outside of our system.
 		contractACHouse
-			.create1155MarketItem(contractACHouse1155.address, 2, 1, 1, 1, 1634309818)
+			.create1155MarketItem(
+				contractACHouse1155.address,
+				1,
+				1,
+				1,
+				1,
+				1634309818,
+				false
+			) // false for isFrac
 			.then((f) => {
 				console.log("after create 1155 MarketItem", f);
 			});
 	};
 
 	const fractionalizeMarketItem1155 = () => {
-		// fractionalize721NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri) => uint256
+		// fractionalize1155NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri) => uint256
 		contractACHouse
 			.fractionalize1155NFT(
-				contractACHouse.address,
-				1,
-				1,
+				contractACHouse1155.address,
 				2,
+				1,
 				200,
 				"ipfs://bafyreih76tru7mgvpjqszqfjnipbqf5hbit2x37cddpu57slid7kwkeyxy/metadata.json"
 			)
@@ -341,6 +348,8 @@ const BuyForm = () => {
 		// setParentApproval();
 		// createMarketItem1155();
 		// fractionalizeMarketItem1155();
+
+		getFractionalInformation(1);
 		// createMarketSale();
 
 		// ERC1155 functions

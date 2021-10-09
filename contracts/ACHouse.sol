@@ -356,12 +356,12 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
   //hold NFT and trasnfer ownership to ACHouse. 
   // ACHouse will mint 1155 then set it to orig owner of nft. 
-  function fractionalize1155NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri, bool isMultiToken) public returns (uint256) {
+  function fractionalize1155NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri) public returns (uint256) {
     _fracItemIds.increment();
     uint fracId = _fracItemIds.current();
 
     FractionalizeToken memory fracItem = FractionalizeToken(fracId, nftContract, tokenId, payable(msg.sender), 
-      payable(address(0)), address(_multiToken), shardId, supplyToCreate, supplyToCreate, isMultiToken); // supplyMinted and SupplyRemaining will be set as same for now. 
+      payable(address(0)), address(_multiToken), shardId, supplyToCreate, supplyToCreate, true); // supplyMinted and SupplyRemaining will be set as same for now. 
     
     idToFracToken[fracId] = fracItem;
 
@@ -372,19 +372,19 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     setURI1155(uri); // call functiont to set uRL in 1155 token
     _multiToken.mintNFT(msg.sender, fracId, supplyToCreate); //shard tokens created and ownership set to msg.sender ( person who decided to frac nft.)
     
-    emit FractionalTokenCreated(fracId, nftContract, tokenId, msg.sender, address(_multiToken), shardId, supplyToCreate, supplyToCreate, isMultiToken);
+    emit FractionalTokenCreated(fracId, nftContract, tokenId, msg.sender, address(_multiToken), shardId, supplyToCreate, supplyToCreate, true);
     
     return fracId;
     
     
   }
 
-  function fractionalize721NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri, bool isMultiToken) public returns (uint256) {
+  function fractionalize721NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri) public returns (uint256) {
     _fracItemIds.increment();
     uint fracId = _fracItemIds.current();
     
      FractionalizeToken memory fracItem = FractionalizeToken(fracId, nftContract, tokenId, payable(msg.sender), 
-      payable(address(0)), address(_multiToken), shardId, supplyToCreate, supplyToCreate, isMultiToken); // supplyMinted and SupplyRemaining will be set as same for now. 
+      payable(address(0)), address(_multiToken), shardId, supplyToCreate, supplyToCreate, false); // supplyMinted and SupplyRemaining will be set as same for now. 
     
     idToFracToken[fracId] = fracItem;
 
@@ -395,7 +395,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     setURI1155(uri); // call functiont to set uRL in 1155 token
     _multiToken.mintNFT(msg.sender, fracId, supplyToCreate); //shard tokens created and ownership set to msg.sender ( person who decided to frac nft.)
     
-    emit FractionalTokenCreated(fracId, nftContract, tokenId, msg.sender, address(_multiToken), shardId, supplyToCreate, supplyToCreate, isMultiToken);
+    emit FractionalTokenCreated(fracId, nftContract, tokenId, msg.sender, address(_multiToken), shardId, supplyToCreate, supplyToCreate, false);
     
     return fracId;
   }
