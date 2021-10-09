@@ -5,7 +5,7 @@
 			"name": "NGO #1",
 			"domain" : "Environment",
 			"description": "Mjölnir, the legendary hammer of the Norse god of thunder. Mjölnir, the legendary hammer of the Norse god of thunder. Mjölnir, the legendary hammer of the Norse god of thunder. Mjölnir, the legendary hammer of the Norse god of thunder.",
-			"long_description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur iaculis nisl lorem, non pellentesque ligula porta eu. Pellentesque iaculis euismod tortor ac cursus. Vivamus tristique, odio nec ornare dapibus, lectus magna vulputate sapien, at tincidunt lacus dui non turpis. Donec sapien purus, tristique ac arcu sit amet, tincidunt dapibus tellus. In quam lorem, gravida eget enim a, faucibus tempor enim. Nam sodales elementum pellentesque. Curabitur sed ipsum iaculis, condimentum augue eget, malesuada risus. Pellentesque tempus diam urna, et mattis enim dictum ac. Sed mauris enim, dapibus nec leo mattis, egestas aliquet sem. Nunc hendrerit vulputate augue ut luctus. Integer dictum rhoncus est. Quisque vestibulum nunc elit, nec gravida risus rutrum vitae.", 
+			"long_description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur iaculis nisl lorem, non pellentesque ligula porta eu. Pellentesque iaculis euismod tortor ac cursus. Vivamus tristique, odio nec ornare dapibus, lectus magna vulputate sapien, at tincidunt lacus dui non turpis. Donec sapien purus, tristique ac arcu sit amet, tincidunt dapibus tellus. In quam lorem, gravida eget enim a, faucibus tempor enim. Nam sodales elementum pellentesque. Curabitur sed ipsum iaculis, condimentum augue eget, malesuada risus. Pellentesque tempus diam urna, et mattis enim dictum ac. Sed mauris enim, dapibus nec leo mattis, egestas aliquet sem. Nunc hendrerit vulputate augue ut luctus. Integer dictum rhoncus est. Quisque vestibulum nunc elit, nec gravida risus rutrum vitae.",
 			"image": "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/thors-hammer-mjolnir-is-seen-during-thor-ragnarok-paris-news-photo-865171312-1560960203.jpg"
 		},
 		{
@@ -13,20 +13,68 @@
 			"name": "NGO #2",
 			"domain" : "Human Rights",
 			"description": "Ancient Katar knife of Sikh Empire. Also known as punching knife",
-			"long_description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur iaculis nisl lorem, non pellentesque ligula porta eu. Pellentesque iaculis euismod tortor ac cursus. Vivamus tristique, odio nec ornare dapibus, lectus magna vulputate sapien, at tincidunt lacus dui non turpis. Donec sapien purus, tristique ac arcu sit amet, tincidunt dapibus tellus. In quam lorem, gravida eget enim a, faucibus tempor enim. Nam sodales elementum pellentesque. Curabitur sed ipsum iaculis, condimentum augue eget, malesuada risus. Pellentesque tempus diam urna, et mattis enim dictum ac. Sed mauris enim, dapibus nec leo mattis, egestas aliquet sem. Nunc hendrerit vulputate augue ut luctus. Integer dictum rhoncus est. Quisque vestibulum nunc elit, nec gravida risus rutrum vitae.", 
+			"long_description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur iaculis nisl lorem, non pellentesque ligula porta eu. Pellentesque iaculis euismod tortor ac cursus. Vivamus tristique, odio nec ornare dapibus, lectus magna vulputate sapien, at tincidunt lacus dui non turpis. Donec sapien purus, tristique ac arcu sit amet, tincidunt dapibus tellus. In quam lorem, gravida eget enim a, faucibus tempor enim. Nam sodales elementum pellentesque. Curabitur sed ipsum iaculis, condimentum augue eget, malesuada risus. Pellentesque tempus diam urna, et mattis enim dictum ac. Sed mauris enim, dapibus nec leo mattis, egestas aliquet sem. Nunc hendrerit vulputate augue ut luctus. Integer dictum rhoncus est. Quisque vestibulum nunc elit, nec gravida risus rutrum vitae.",
 			"image": "https://cdn.shopify.com/s/files/1/1597/7419/products/Antique_Vintage_India_Indian_Scissors_Katar_Dagger_Fighting_Knife1_1024x1024.jpeg"
 		}
 	],
     "artists": [
 		{
 			"id": 1,
-			"name": "Artist #1",
-			"description": "Mjölnir, the legendary hammer of the Norse god of thunder."
+			"name": "aaron.eth",
+			"profile": "img.png",
+			"bio": "Mjölnir, the legendary hammer of the Norse god of thunder."
 		},
 		{
 			"id": 2,
-			"name": "Artist #2",
-			"description": "Ancient Katar knife of Sikh Empire. Also known as punching knife"
+			"name": "adamsimms.eth",
+			"profile": "https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1358097393893-O5DKU3GCSQNLYL9PXD85/73549_455062256895_2945838_n.jpg",
+			"bio": "Adam creates immersive experiences that combine photography, new media, and the Internet of Things to explore the intable elements of Newfoundland culture."
+		}
+	],
+		"auctions": [
+		{
+			"id": 1,
+			"artist": "aaron.eth",
+			"donator": "aaron.eth",
+			"nft": "https://pinchards.is/heartdrops/aaron-suft.jpg",
+			"title": "Title",
+			"description": "Mjölnir, the legendary hammer of the Norse god of thunder.",
+			"token": "AARON",
+			"charity": "XYZ",
+			"end-date": "31-12-2021"
+		},
+		{
+			"id": 2,
+			"artist": "adamsimms.eth",
+			"donator": "adamsimms.eth",
+			"nft": "https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif",
+			"title": "Light House",
+			"description": "Atlantic Ocean Light House",
+			"token": "ADAM",
+			"charity": "XYZ",
+			"end-date": "31-12-2021"
+		},
+		{
+			"id": 3,
+			"artist": "adamsimms.eth",
+			"donator": "adamsimms.eth",
+			"nft": "https://pinchards.is/heartdrops/adam-cloudberry.gif",
+			"title": "Cloudberry",
+			"description": "Machine learning generative landscapes.",
+			"token": "ADAM",
+			"charity": "XYZ",
+			"end-date": "31-12-2021"
+		},
+		{
+			"id": 4,
+			"artist": "adamsimms.eth",
+			"donator": "adamsimms.eth",
+			"nft": "https://pinchards.is/heartdrops/adam-house.png",
+			"title": "Adrift",
+			"description": "My Grandmother's Home",
+			"token": "ADAM",
+			"charity": "XYZ",
+			"end-date": "31-12-2021"
 		}
 	]
 }
