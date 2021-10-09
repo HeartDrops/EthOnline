@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import FileUpload from './fileUpload';
+import DB from '../db.json';
+import ShowcaseCharities from './showcaseCharities';
 import { NFTStorage, File, Blob  } from 'nft.storage';
 import { ethers, Signer, providers, BigNumber, utils } from "ethers";
 import coinGecko from '../api/coinGecko';
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
 import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
+import axios from "axios";
 
 
 
@@ -16,6 +19,7 @@ const ArtForm = () => {
   const [ ethAddress, setEthAddress ] = useState('');
   const [ discord, setDiscord ] = useState('');
   const [ deadline, setDeadline ] = useState(false);
+  const [ charityId, setCharityId] = useState(null);
   const [ isValid, setIsValid ] = useState({
     username: true,
     artname: true,
@@ -256,11 +260,14 @@ const ArtForm = () => {
   const selectNextHandler = () => {
     console.log(step);
     console.log(standard);
-    switch (step < 3) {
+    switch (step < 4) {
       case step==0:
         setStep((prevActiveStep) => prevActiveStep + 1);
         break
       case step==1:
+        setStep((prevActiveStep) => prevActiveStep + 1);
+        break
+      case step==2:
         const [userValid, addrValid, artValid, descValid] = verifyFormData();
         console.log(userValid);
         console.log(addrValid);
@@ -274,7 +281,7 @@ const ArtForm = () => {
           setStep((prevActiveStep) => prevActiveStep + 1);
         }
         break
-      case step==2 && img!=null:
+      case step==3 && img!=null:
         setStep((prevActiveStep) => prevActiveStep + 1);
     }
   };
@@ -396,9 +403,9 @@ const ArtForm = () => {
     console.log(tokenSupply);
     console.log(uri);
     console.log(ACHouse721.address)
-    // (address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri)
+    // (address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri, bool isMultiToken)
     let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
-    let tx = await ACHouse.fractionalize721NFT(ACHouse721.address, 1, 1, adjustedPrice, tokenSupply, uri);
+    let tx = await ACHouse.fractionalize721NFT(ACHouse721.address, 1, 1, tokenSupply, uri, true);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);
@@ -408,6 +415,20 @@ const ArtForm = () => {
       setFractionalized(false);
     }
   };
+
+  const createMarketItem721 = async () => {
+		//Since you used ACHouse721 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
+		// Same applies for NFT create outside of our system.
+    // (address nftContract, uint256 tokenId, uint256 price, uint256 _charityId, uint256 auctionTime )
+    let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
+		let tx = ACHouse.create721MarketItem(ACHouse721.address, 1, adjustedPrice, charityId, `${ deadline ? 1634309818 : 0}`)
+		const receipt = await tx.wait();
+    if (receipt) {
+      setItemCreated(true);
+    } else {
+      setItemCreated(false);
+    }
+	};
 
   const mint1155NFT = async () => {
     console.log(uri);
@@ -428,10 +449,10 @@ const ArtForm = () => {
     console.log(tokenPrice);
     console.log(tokenSupply);
     console.log(uri);
-    console.log(ACHouse721.address)
+    console.log(ACHouse721.address);
     // (address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri)
     let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
-    let tx = await ACHouse.fractionalize1155NFT(ACHouse721.address, 1, 1, adjustedPrice, tokenSupply, uri);
+    let tx = await ACHouse.fractionalize1155NFT(ACHouse1155.address, 1, 1, adjustedPrice, tokenSupply, uri);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);
@@ -441,6 +462,28 @@ const ArtForm = () => {
       setFractionalized(false);
     }
   };
+
+  const createMarketItem1155 = async () => {
+		//Since you used ACHouse1155 contract to create the Tokens, you should pass the address of the contract where the token resides (was created).
+		// Same applies for NFT create outside of our system.
+    // (address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime)
+    let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
+		let tx = ACHouse.create1155MarketItem(ACHouse1155.address, 1, adjustedPrice, tokenSupply, charityId, `${ deadline ? 1634309818 : 0}`)
+		const receipt = await tx.wait();
+    if (receipt) {
+      setItemCreated(true);
+    } else {
+      setItemCreated(false);
+    }
+	};
+  
+
+  // const loadNFT = async () => {
+
+  //   console.log("https://ipfs.infura.io/ipfs/" + uri.slice(7))
+  //   const meta = await axios.get("https://ipfs.infura.io/ipfs/" + uri.slice(7))
+  //   console.log(meta);
+  // };
 
 
   const styles = {divClass: 'text-base hover:scale-110 focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer hover:bg-gray-200  bg-gray-100 text-gray-700 border duration-200 ease-in-out border-gray-600 transition',
@@ -454,8 +497,9 @@ const ArtForm = () => {
     <ul className="w-full steps">
       <li data-content={step==0 ? "1" : "✓"} className={step==0 ? "step" : "step step-info"}>Information</li>
       <li data-content={step<1 ? "2" : "✓"} className={step<1 ? "step" : "step step-info"}>Details</li>
-      <li data-content={step<2 ? "3" : "✓"} className={step<2 ? "step" : "step step-info"}>Upload Image</li>
-      <li data-content={step<3 ? "4" : "✓"} className={step<3 ? "step" : "step step-info"}>Mint & Fractionalize</li>
+      <li data-content={step<2 ? "3" : "✓"} className={step<2 ? "step" : "step step-info"}>Details</li>
+      <li data-content={step<3 ? "4" : "✓"} className={step<3 ? "step" : "step step-info"}>Upload Image</li>
+      <li data-content={step<4 ? "5" : "✓"} className={step<4 ? "step" : "step step-info"}>Mint & Fractionalize</li>
     </ul>
     {step==0 &&
     <>
@@ -494,8 +538,29 @@ const ArtForm = () => {
           </div>
         </div>
         </>}
-
-    {step==1 &&
+        { step==1 &&
+    <>
+    <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
+      <div className="flex flex-col md:flex-row">
+        {DB.charities && DB.charities.length>0 && DB.charities.map((item) => {
+          const selectCharityHandler = (id) => {
+            setCharityId(id)
+          };
+          return (<div className="w-full mx-2 flex-1 svelte-1l8159u">
+            <ShowcaseCharities 
+              key={item.id} 
+              item={item}
+              onSelectCharity={selectCharityHandler}
+              checkCharity={true}
+            />
+          </div>)
+        }
+          )}
+        </div>
+      </div>
+    </>
+  }
+    {step==2 &&
           <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
             <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Required Information</h2>
             <div className="alert alert-info">
@@ -568,8 +633,7 @@ const ArtForm = () => {
               </div>
         </div>
    }
-
-  { step==2 &&
+  { step==3 &&
     <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl">
       <h2 className="title text-3xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Upload your art piece</h2>
       <h3 className="title text-xl mb-8 my-2 mx-auto text-center text-purple-700">Supported files: JPG, PNG, JPEG, GIF</h3>
@@ -593,7 +657,7 @@ const ArtForm = () => {
       </div>
     </div>
       }
-      { step==3 && standard=="ERC721" &&
+      { step==4 && standard=="ERC721" &&
         <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
         <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700">Fractionalizing ERC721</h2>
         <div className=" my-20 flex items-center justify-center">
@@ -767,7 +831,7 @@ const ArtForm = () => {
       </div>          
           }
 
-          { step==3 && standard=="ERC1155" &&
+          { step==4 && standard=="ERC1155" &&
         <div className="card shadow-2xl mx-40 my-20 py-20 px-10 h-full md:text-xl items-center">
         <h2 className="title text-3xl mb-8 mx-auto text-center font-bold text-purple-700"> Fractionalizing ERC1155</h2>
         <div className=" my-20 flex items-center justify-center">
@@ -955,7 +1019,7 @@ const ArtForm = () => {
           >Previous
           </button>}
         <div className="flex-auto flex flex-row-reverse">
-          {step!=3 && step!=0 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          {step!=4 && step!=0 && <button className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
             hover:bg-teal-600  
             bg-purple-500 
             text-white 
