@@ -19,7 +19,9 @@ const ShowcaseAuctions = (props) => {
     });
     const [artistInfo, setArtistInfo] = useState({
         id: null,
-        name: null,
+		name: null,
+		image: null,
+		bio: null
     });
     const [nftUri, setNftUri] = useState(null);
     const [nftSupply, setNftSupply] = useState(null);
@@ -78,8 +80,8 @@ const ShowcaseAuctions = (props) => {
         if (props.item.seller && artistInfo.id == null) {
 			const artists = DB.artists;
 			artists.map((i) => {
-				console.log('i', i);
 				if(i.address == props.item.seller) {
+                    console.log('i', i);
 					setArtistInfo({
 						id: i.id,
 						name: i.name,
@@ -177,43 +179,47 @@ const ShowcaseAuctions = (props) => {
                     <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered" />
                     {/* <img src={nftMetadata && nftMetadata.image} /> */}
                 <div className="card-body">
-                    <h2 className="card-title">{nftMetadata && nftMetadata.name}<span className=""> created by {artistInfo.name}</span> 
-                        {endDate.ongoing ? <div className="badge mx-2 badge-secondary">ONGOING</div> : <div className="badge mx-2 badge-accent">FINISHED</div>}
-                        <div className="badge mx-2 badge-accent">{charityInfo.domain}</div>
+                    <h2 className="card-title">{nftMetadata && nftMetadata.name}<span className=""> created by {artistInfo && artistInfo.name}</span> 
+                        {endDate.ongoing ? <div className="badge mx-2 badge-secondary text-primary-content">ONGOING</div> : <div className="badge mx-2 badge-accent text-primary-content">FINISHED</div>}
                     </h2> 
-                    <div className="mx-2 my-3">
+                    <div className="my-3">
                         <p>{nftMetadata && nftMetadata.description}.</p> 
                     </div>
-                    <div className="mx-2 my-3">
+                    <div className="my-3">
                         <span>Donated by {artistInfo.name}</span>{' '}
                         <span>for {charityInfo.name}</span>
+                        <div className="badge badge-accent text-primary-content uppercase mx-2">for {charityInfo.domain}</div>
                     </div>
 
-                    <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                    <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer">
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
                             {props.item.isMultiToken ? <div className="font-bold">ERC 1155</div> : <div className="font-bold">ERC 721</div>}
                         </div>
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                            <div className="font-bold">{nftTokenName}</div>
+                        </div>
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
+                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
                             <div className="font-bold">{nftTokenSymbol}</div>
                         </div>
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
                             {props.item.isMultiToken ? <div className="font-bold">{nftSupply}</div> : ""}
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
+                    <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer">
                         {endDate.timestamp ? 
-                         <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                         <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
                             <Countdown end={endDate.timestamp} size="small" />
                         </div> : ''}
 
                         <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
                             <div className="justify-end card-actions">
-                                <Link className="btn btn-secondary" to={{ pathname: `/donate/${props.item.itemId}`, state : statesToPass }}>Donate</Link>
+                                <Link className="btn btn-secondary text-primary-content" to={{ pathname: `/donate/${props.item.itemId}`, state : statesToPass }}>Donate</Link>
                             </div>
                         </div>
                     </div>

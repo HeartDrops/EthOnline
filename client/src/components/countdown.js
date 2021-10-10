@@ -37,30 +37,30 @@ const Countdown = (props) => {
                 ? <span>Auction finished !</span>
                 : <> 
                     <div>
-                        <div className="grid grid-flow-col gap-5 text-center auto-cols-max">
-                            <div className="flex flex-col p-2 bg-neutral rounded-box text-neutral-content">
-                                <span className="font-mono text-5xl countdown">
+                        <div className="grid grid-flow-col gap-4 text-center auto-cols-max">
+                            <div className="flex flex-col p-2 bg-primary rounded-box text-neutral-content">
+                                <span className="font-mono text-3xl countdown">
                                     <span style={{'--value':`${timeLeft.days}`}}></span>
                                 </span>
                                     days
                                 
                             </div> 
-                            <div className="flex flex-col p-2 bg-neutral rounded-box text-neutral-content">
-                                <span className="font-mono text-5xl countdown">
+                            <div className="flex flex-col p-2 bg-primary rounded-box text-neutral-content">
+                                <span className="font-mono text-3xl countdown">
                                 <span style={{'--value':`${timeLeft.hours}`}}></span>
                                 </span>
                                     hours
                                 
                             </div> 
-                            <div className="flex flex-col p-2 bg-neutral rounded-box text-neutral-content">
-                                <span className="font-mono text-5xl countdown">
+                            <div className="flex flex-col p-2 bg-primary rounded-box text-neutral-content">
+                                <span className="font-mono text-3xl countdown">
                                 <span style={{'--value':`${timeLeft.minutes}`}}></span>
                                 </span>
                                     min
                                 
                             </div> 
-                            <div className="flex flex-col p-2 bg-neutral rounded-box text-neutral-content">
-                                <span className="font-mono text-5xl countdown">
+                            <div className="flex flex-col p-2 bg-primary rounded-box text-neutral-content">
+                                <span className="font-mono text-3xl countdown">
                                 <span style={{'--value':`${timeLeft.seconds}`}}></span>
                                 </span>
                                     sec

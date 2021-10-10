@@ -31,41 +31,41 @@ const FrontPage = () => {
                     <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered" />
                 <div className="card-body">
                     <h2 className="card-title">NFT NAME <span className="">by ARTIST_NAME</span> 
-                        <div className="badge mx-2 badge-secondary">ONGOING</div>
-                        <div className="badge mx-2 badge-accent">Human Rights</div>
+                        <div className="badge mx-2 badge-secondary text-primary-content">ONGOING</div>
+                        <div className="badge badge-accent text-primary-content">FOR HUMAN RIGHTS</div>
                     </h2> 
-                    <div className="mx-2 my-3">
+                    <div className="my-3">
                         <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
                     </div>
-                    <div className="mx-2 my-3">
+                    <div className="my-3">
                         <span>Donated by DONOR_NAME</span>
                         <span>  for Charity_NAME</span>
                     </div>
 
                     <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
                             <div className="font-bold">ERC 721</div>
                         </div>
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
                             <div className="font-bold">$HEARTS</div>
                         </div>
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                        <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
                             <div className="font-bold">100</div>
                         </div>
                     </div>
 
                     <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
-                         <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                         <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
                             <Countdown end="1634309818" size="small" />
                         </div>
 
                         <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
                             <div className="justify-end card-actions">
-                                <Link className="btn btn-secondary" to='/'>Donate</Link>
+                                <Link className="btn btn-secondary text-primary-content" to='/'>Donate</Link>
                             </div>
                         </div>
                     </div>
