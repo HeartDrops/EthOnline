@@ -183,20 +183,38 @@ const ShowcaseAuctions = (props) => {
             <div className="card shadow-2xl" key={props.item.itemId}>
                 <div className="px-10 pt-4">
                     {endDate.ongoing ? <div className="badge badge-secondary text-primary-content font-bold">ONGOING</div> : <div className="badge mx-2 badge-accent text-primary-content">FINISHED</div>}
-                    <div className="badge badge-accent text-primary-content uppercase mx-2 font-bold">for {charityInfo.domain}</div>
+                    <div className="badge badge-primary text-primary-content uppercase mx-2 font-bold">for {charityInfo.domain}</div>
                     <figure className="pt-4">
                         {nftMetadata && nftMetadata.image && <img src={nftMetadata.url} className="cnt-centered rounded-xl" />}
                     </figure>
                 </div>
                 <div className="card-body">
-                    <h2 className="card-title px-2">{nftMetadata && nftMetadata.name}<span className=""> created by {artistInfo && artistInfo.name}</span> </h2> 
+                    <h2 className="card-title px-2 text-center">{nftMetadata && nftMetadata.name}<span className=""> created by {artistInfo && artistInfo.name}</span> </h2> 
                     {/* <div className="my-3 px-2">
                         <p>{nftMetadata && nftMetadata.description}.</p> 
                     </div> */}
-                    <div className="my-3 px-2">
+                    <div className="mb-4 px-2 text-center">
                         <span>Donated by {artistInfo.name}</span>{' '}
                         <span>for {charityInfo.name}</span>
                     </div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            {endDate.timestamp ? 
+                            <div className="mb-4 lg:mb-0 flex-shrink-0 text-center">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
+                                <div className="center-cnt mb-5">
+                                <Countdown end={endDate.timestamp} />
+								</div>
+                            </div> : ''}
+
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="justify-end card-actions">
+                                    <Link className="btn btn-primary text-primary-content" to={{ pathname: `/donate/${props.item.itemId}`, state : statesToPass }}>Donate <img className="ml-2" height="10" width="20" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t-2 text-primary"></div>
 
                         <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
                             <div className="mb-4 lg:mb-0 flex-shrink-0">
@@ -214,20 +232,6 @@ const ShowcaseAuctions = (props) => {
                             <div className="mb-4 lg:mb-0 flex-shrink-0">
                                 <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
                                 {props.item.isMultiToken ? <div className="font-bold">{nftSupply}</div> : ""}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
-                            {endDate.timestamp ? 
-                            <div className="mb-4 lg:mb-0 flex-shrink-0">
-                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
-                                <Countdown end={endDate.timestamp} />
-                            </div> : ''}
-
-                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
-                                <div className="justify-end card-actions">
-                                    <Link className="btn btn-secondary text-primary-content" to={{ pathname: `/donate/${props.item.itemId}`, state : statesToPass }}>Donate</Link>
-                                </div>
                             </div>
                         </div>
 
