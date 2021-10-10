@@ -879,14 +879,15 @@ const BuyForm = (props) => {
 		<>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
+			<div className=" mb-0 relative ">
                 <div className="card shadow-2xl">
                     <figure>
                         <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" />
                     </figure> 
                     <div className="card-body">
-                        <h2 className="card-title">{nftMetadata && nftMetadata.name}</h2> 
-                        <p> created and donated by {artistInfo.name}</p> 
-                        <p>{nftMetadata && nftMetadata.description}</p> 
+                        <h2 className="card-title uppercase font-bold">{nftMetadata && nftMetadata.name}</h2> 
+                        <p className="mb-3"> created and donated by <span className="text-purple-700 font-bold uppercase">{artistInfo.name}</span></p> 
+                        <p className="mb-3">{nftMetadata && nftMetadata.description}</p> 
 
 						{/* <div className="avatar">
 							<div className="mb-8 rounded-full w-24 h-24">
@@ -894,7 +895,7 @@ const BuyForm = (props) => {
 							</div>
 						</div>  */}
 
-                        <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer">
                             <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
                                 <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
                                 {data.isMultiToken ? <div className="font-bold">ERC 1155</div> : <div className="font-bold">ERC 721</div>}
@@ -914,27 +915,29 @@ const BuyForm = (props) => {
                         </div>
                     </div>
                 </div>
+				</div>
                 <div className="">
                     <div className="card shadow-2xl p-7">
                         <div className=""> 
                             <div className="text-center mb-2">
-                                <h2 className="card-title">Donate to {charityInfo.name}
-                                    <div className="badge mx-2 badge-secondary">ONGOING</div>
+                                <h2 className="card-title uppercase font-bold">Donate to {charityInfo.name}
+                                    <div className="badge mx-2 badge-accent text-primary-content">ONGOING</div>
                                 </h2>
                             </div> 
                         </div>
-                        <div className=""> 
-                            <div className="mb-2">
-                                <p>{charityInfo.long_description}</p>
-                            </div>
+                        <div className="mb-5"> 
+                            <p>{charityInfo.long_description}</p>
                         </div>
 
-                        <div className="divider"></div> 
-
 						{ step ==0 && (
-							<div className="center-cnt mb-5">
-							 	<Countdown end={data.auctionTime} />
-						 	</div>
+							<>
+								<div className="uppercase text-s font-bold mb-2 center-cnt">
+									Time left to participate		
+								</div>
+								<div className="center-cnt mb-5">
+									<Countdown end={data.auctionTime} />
+								</div>
+							</>
 						)}
 
 						{step == 0 && (
@@ -942,7 +945,7 @@ const BuyForm = (props) => {
 								<form className="" onSubmit={handleSubmit}>
 									<div className="form-control">
 										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
-											<span className="label-text">Pay (in ETH)</span>
+											<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
 											{donationAmtUSD ? <span> ({donationAmtUSD} USD)</span> : ""}
 											{/* <span>Balance user: {balance} ETH</span> */}
 										</label>
@@ -980,7 +983,7 @@ const BuyForm = (props) => {
 									</div>
 									<div className="form-control mb-5">
 										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
-											<span className="label-text">Receive {tokenSymbol}</span>
+											<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
 										</label>
 										<input
 											type="text"
@@ -992,54 +995,61 @@ const BuyForm = (props) => {
 											onChange={changeInputTokens}
 										/>
 									</div>
-									<div className="py-2">
-										<p>
-											Remaining number of tokens:
-											<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-												{" "}
-												{fractInfo ? fractInfo.supplyRemaining : tokenSupply} {tokenSymbol}
-											</span>
-										</p>
-									</div>
-									<div className="py-2">
-										<p>
-											Price of 1 {tokenSymbol} (in ETH):{" "}
-											<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-												{tokenPrice} ETH
-											</span>
-										</p>
-									</div>
-									<div className="py-2">
-										<p>
-											Estimated fees:{" "}
-											{gasFeesETH && gasFeesUSD ? (
-												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-												{gasFeesETH} ETH / $ {gasFeesUSD}
-											</span>
-											) : (
-												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-													-
-												</span>
-											)}
-										</p>
-									</div>
-									<div className="py-2">
-										<span>
-											Donation amount to charity:{" "}
-											{donationAmtEth && donationAmtUSD ? (
-												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-													{donationAmtEth} ETH - {donationAmtUSD} $
-												</span>
-											) : (
-												<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-													-
-												</span>
-											)}
-										</span>
-									</div>
+									<div className="overflow-x-auto mb-5">
+										<table className="table w-full table-zebra">
+											<tbody>
+												<tr>
+													<td>Remaining number of tokens</td> 
+													<th>
+													<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+														{fractInfo && fractInfo.supplyRemaining ? fractInfo.supplyRemaining : tokenSupply} {tokenSymbol}
+													</span>
+													</th>
+												</tr>
+												<tr>
+													<td>Price of 1 {tokenSymbol}
+														{/* <span className="badge badge-outline badge-sm">In ETH</span> */}
+													</td> 
+													<th>
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															{tokenPrice} ETH
+														</span>
+													</th>
+												</tr>
+												<tr>
+													<td>Estimated fees</td> 
+													<th>
+													{gasFeesETH && gasFeesUSD ? (
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+														{gasFeesETH} ETH / $ {gasFeesUSD}
+													</span>
+													) : (
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															-
+														</span>
+													)}
+													</th>
+												</tr>
+												<tr>
+													<td>Donation amount to charity</td> 
+													<th>
+													{donationAmtEth && donationAmtUSD ? (
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															{donationAmtEth} ETH - {donationAmtUSD} $
+														</span>
+													) : (
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															-
+														</span>
+													)}
+													</th>
+												</tr>
+											</tbody> 
+										</table>
+										</div>
 									<div className="center-cnt py-2">
 										{!connected ? (
-											<button className="btn btn-secondary btn-wide">Donate</button>
+											<button className="btn btn-secondary btn-wide text-primary-content">Donate</button>
 										) : (
 											<Connect />
 										)}
@@ -1091,13 +1101,13 @@ const BuyForm = (props) => {
 								</div>
 								<div className="center-cnt py-2">
 									<button
-										className="btn btn-secondary btn-wide mx-2"
+										className="btn btn-secondary btn-wide mx-2 text-primary-content"
 										onClick={selectPrevHandler}
 									>
 										Previous
 									</button>
 									<button
-										className="btn btn-primary btn-wide mx-2"
+										className="btn btn-primary btn-wide mx-2 text-primary-content"
 										onClick={handleTransaction}
 									>
 										Validate transaction
@@ -1123,7 +1133,7 @@ const BuyForm = (props) => {
 												You donated {donationAmtEth} ETH ($ {donationAmtUSD}) to {charityInfo.name}. Thanks for supporting them !
 											</div>
 											<div className="center-cnt py-2">
-												<button className="btn btn-secondary btn-wide">Share</button>
+												<button className="btn btn-secondary btn-wide text-primary-content">Share</button>
 											</div>
 										</div>
 									)}
