@@ -2,17 +2,16 @@ import React, { useState, useEffect } from "react";
 import Connect from "./connect";
 import { ethers, Signer, providers, BigNumber, utils } from "ethers";
 import coinGecko from "../api/coinGecko";
-import axios from 'axios';
-import DB from '../db.json';
-import Countdown from '../components/countdown';
-import arrows from '../assets/arrows.png';
+import axios from "axios";
+import DB from "../db.json";
+import Countdown from "../components/countdown";
+import arrows from "../assets/arrows.png";
 
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
 import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
 
 const BuyForm = (props) => {
-
 	const data = props.props.items;
 
 	// console.log('props buyer', data);
@@ -25,24 +24,24 @@ const BuyForm = (props) => {
 	const [errors, setErrors] = useState(null);
 	const [timer, setTimer] = useState(null);
 	const [step, setStep] = useState(0); // setStep to change page
-	const [input, setInput] = useState(1); // input activated - 1 for ETH, 0 for Tokens 
+	const [input, setInput] = useState(1); // input activated - 1 for ETH, 0 for Tokens
 	const [ethPrice, setEthPrice] = useState(null);
 
 	const [charityInfo, setCharityInfo] = useState({
-        id: null,
-        name: null,
-        domain: null
-    });
+		id: null,
+		name: null,
+		domain: null,
+	});
 
 	const [artistInfo, setArtistInfo] = useState({
-        id: null,
-        name: null,
-        bio: null,
-		image: null
-    });
+		id: null,
+		name: null,
+		bio: null,
+		image: null,
+	});
 
 	const [tokenSupply, setTokenSupply] = useState(null); // remaining amount of tokens
-	const [validForm, setValidForm] = useState('');
+	const [validForm, setValidForm] = useState("");
 	const [tokenPrice, setTokenPrice] = useState(null); // value of 1 token for a given marketitem
 	const [tokenSymbol, setTokenSymbol] = useState(null);
 	const [tokenName, setTokenName] = useState(null);
@@ -60,9 +59,9 @@ const BuyForm = (props) => {
 	const [transactionSucceeded, setTransactionSucceeded] = useState(null);
 
 	const [fractInfo, setFractInfo] = useState(null);
-	const [marketItemInfo, setMarketItemInfo] = useState(null); 
-	
-	const [balance, setBalance] = useState(0); 
+	const [marketItemInfo, setMarketItemInfo] = useState(null);
+
+	const [balance, setBalance] = useState(0);
 
 	// setting global var for ACHousContract.
 	let contractACHouse,
@@ -72,10 +71,10 @@ const BuyForm = (props) => {
 		contractACHouseProvider,
 		accountOneSigner,
 		accountTwoSigner = null;
-	const [ ACHouse, setACHouse] = useState(null);
-	const [ ACHouse1155, setACHouse1155 ] = useState(null);
-	const [ ACHouse721, setACHouse721 ] = useState(null); 
-	const [ ACHouseBuyer, setACHouseBuyer ] = useState(null); 
+	const [ACHouse, setACHouse] = useState(null);
+	const [ACHouse1155, setACHouse1155] = useState(null);
+	const [ACHouse721, setACHouse721] = useState(null);
+	const [ACHouseBuyer, setACHouseBuyer] = useState(null);
 
 	// nb of tokens received for a given amount of eth
 	// const [minReceivedToken, setMinReceivedTokens] = useState(0);
@@ -148,9 +147,13 @@ const BuyForm = (props) => {
 		setACHouse1155(contractACHouse1155);
 		setACHouse721(contractACHouse721);
 		setACHouseBuyer(contractACHouseBuyer);
-
 	};
-	if (ACHouse == null && ACHouse1155 == null && ACHouse721 == null && ACHouseBuyer == null) {
+	if (
+		ACHouse == null &&
+		ACHouse1155 == null &&
+		ACHouse721 == null &&
+		ACHouseBuyer == null
+	) {
 		rpcConnection();
 	}
 
@@ -170,7 +173,7 @@ const BuyForm = (props) => {
 	}
 
 	useEffect(() => {
-		console.log('data', data);
+		console.log("data", data);
 		async function getUserInfo() {
 			// if (
 			// 	typeof window.ethereum !== "undefined" ||
@@ -208,43 +211,45 @@ const BuyForm = (props) => {
 		if (data.seller && artistInfo.id == null) {
 			const artists = DB.artists;
 			artists.map((i) => {
-				console.log('i', i);
-				if(i.address == data.seller) {
+				console.log("i", i);
+				if (i.address == data.seller) {
 					setArtistInfo({
 						id: i.id,
 						name: i.name,
 						image: i.profile,
 						bio: i.bio,
-					})
+					});
 				}
 			});
-        };
+		}
 		if (data.charityId && charityInfo.id == null) {
-            setCharityInfo({
-                id: data.charityId,
-                name: DB.charities[data.charityId].name,
-                domain: DB.charities[data.charityId].domain,
-                description: DB.charities[data.charityId].description,
-                long_description: DB.charities[data.charityId].long_description
-            });
-        };
+			setCharityInfo({
+				id: data.charityId,
+				name: DB.charities[data.charityId].name,
+				domain: DB.charities[data.charityId].domain,
+				description: DB.charities[data.charityId].description,
+				long_description: DB.charities[data.charityId].long_description,
+			});
+		}
 		if (props.props.nft_supply) {
 			setTokenSupply(props.props.nft_supply);
 		} else {
 			setTokenSupply(1);
 		}
-		if (tokenName == null) { // que pour 721
+		if (tokenName == null) {
+			// que pour 721
 			if (!data.isMultiToken) {
 				get721TokenName(tokenId);
 			} else {
-				setTokenName('Token Name');
+				setTokenName("Token Name");
 			}
 		}
-		if (tokenSymbol == null) { // que pour 721
+		if (tokenSymbol == null) {
+			// que pour 721
 			if (!data.isMultiToken) {
 				get721TokenSymbol(tokenId);
 			} else {
-				setTokenSymbol('$SYMBOL');
+				setTokenSymbol("$SYMBOL");
 			}
 		}
 		if (data.auctionTime != 0) {
@@ -253,45 +258,62 @@ const BuyForm = (props) => {
 			setDeadlineAuction(false);
 		}
 		if (data.price) {
-			setTokenPrice(data.price);
+			// console.log(
+			// 	"from data set: price  - ",
+			// 	ethers.utils.formatUnits(BigNumber.from(data.price).toString(), "ether")
+			// );
+			setTokenPrice(
+				ethers.utils.formatUnits(BigNumber.from(data.price).toString(), "ether")
+			);
 		} else {
 			setTokenPrice(0.015);
 		}
-
 	}, [charityInfo.id, tokenSupply, tokenName, deadlineAuction, tokenPrice]);
 
 	if (ACHouse != null && marketItemInfo == null && tokenId != null) {
 		fetchMarketItem(tokenId);
 	}
-	if ( ACHouse != null && tokenId != null && fractInfo == null && marketItemInfo != null) {
-		if(marketItemInfo[0].isFrac) {
+	if (
+		ACHouse != null &&
+		tokenId != null &&
+		fractInfo == null &&
+		marketItemInfo != null
+	) {
+		if (marketItemInfo[0].isFrac) {
 			getFractionalInformation(tokenId);
 		}
 	}
-	if( ACHouse != null && tokenId != null && nftUri == null ) {
+	if (ACHouse != null && tokenId != null && nftUri == null) {
 		if (data.isMultiToken) {
-	 		getNftUri1155(tokenId);
+			getNftUri1155(tokenId);
 		} else {
 			get721TokenURI(tokenId);
 		}
 	}
-	if (ACHouse != null && tokenId != null && nftUri != null && nftMetadata == null) {
+	if (
+		ACHouse != null &&
+		tokenId != null &&
+		nftUri != null &&
+		nftMetadata == null
+	) {
 		loadNFT();
 	}
 
 	async function loadNFT() {
 		// console.log("https://ipfs.infura.io/ipfs/" + nftUri.slice(7));
-		const meta = await axios.get("https://ipfs.infura.io/ipfs/" + nftUri.slice(7));
-		const url = 'https://ipfs.io/ipfs/' + meta.data.image.slice(7);
+		const meta = await axios.get(
+			"https://ipfs.infura.io/ipfs/" + nftUri.slice(7)
+		);
+		const url = "https://ipfs.io/ipfs/" + meta.data.image.slice(7);
 		// console.log('meta', meta.data);
 		// console.log('url', url);
 		setNftMetadata({
 			name: meta.data.name,
 			description: meta.data.description,
 			image: meta.data.image,
-			url: url
+			url: url,
 		});
-	};
+	}
 
 	// ---- get info on token for 1155 -----
 	async function getNftUri1155(id) {
@@ -300,7 +322,7 @@ const BuyForm = (props) => {
 			// if string then f.toString();
 			setNftUri(f);
 		});
-	}; 
+	}
 
 	// ---- get info on token for 721 -----
 	async function get721TokenName(id) {
@@ -341,7 +363,7 @@ const BuyForm = (props) => {
 	const isInt = (value) => {
 		var x = parseFloat(value);
 		return !isNaN(value) && (x | 0) === x;
-	  }
+	};
 
 	const changeInputETH = (e) => {
 		setErrors(null);
@@ -352,7 +374,7 @@ const BuyForm = (props) => {
 		setGasFeesUSD(null);
 		setMinReceived(null);
 		setMinDonation(null);
-		setValidForm('');
+		setValidForm("");
 
 		if (timer) {
 			clearTimeout(timer);
@@ -360,7 +382,6 @@ const BuyForm = (props) => {
 		}
 		setTimer(
 			setTimeout(() => {
-				
 				mintingNFTs();
 
 				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
@@ -373,34 +394,51 @@ const BuyForm = (props) => {
 					setDonationAmtUSD(priceEnteredEth * ethPrice);
 
 					// get nb of tokens for given amount of eth
-					const nbTokens = priceEnteredEth / tokenPrice;
-					console.log('nb tokens', nbTokens);
+					const nbTokens =
+						ethers.utils.parseUnits(priceEnteredEth.toString(), "ether") /
+						ethers.utils.parseUnits(tokenPrice.toString(), "ether");
+					console.log("nb tokens", nbTokens);
 					setDonationAmtTokens(nbTokens);
 
-					if (priceEnteredEth < tokenPrice) {
-						const newError = "The amount entered is to low. The price of 1 token is " + tokenPrice + " ETH";
+					if (
+						ethers.utils.parseUnits(priceEnteredEth.toString(), "ether") <
+						ethers.utils.parseUnits(tokenPrice.toString(), "ether")
+					) {
+						const newError =
+							"The amount entered is to low. The price of 1 token is " +
+							tokenPrice +
+							" ETH";
 						setErrors(newError);
-						setValidForm('btn-disabled');
-					} else if (fractInfo != null && fractInfo[0].supplyRemaining < nbTokens) {
-
-						const newError = "Thanks for your generosity but there are only " + fractInfo[0].supplyRemaining + " " + tokenSymbol + " remaining. Please enter a lower number.";
+						setValidForm("btn-disabled");
+					} else if (
+						fractInfo != null &&
+						fractInfo[0].supplyRemaining < nbTokens
+					) {
+						const newError =
+							"Thanks for your generosity but there are only " +
+							fractInfo[0].supplyRemaining +
+							" " +
+							tokenSymbol +
+							" remaining. Please enter a lower number.";
 						setErrors(newError);
-						setValidForm('btn-disabled');
-						
+						setValidForm("btn-disabled");
 					} else if (data.isMultiToken && !isInt(nbTokens)) {
-
 						const roundedTokens = Math.floor(nbTokens);
-						const newPrice = roundedTokens * tokenPrice ;
+						const newPrice = roundedTokens * tokenPrice;
 
 						const newError = "You can only buy full tokens.";
 						setErrors(newError);
-						setValidForm('btn-disabled');
+						setValidForm("btn-disabled");
 
 						setMinReceived(roundedTokens);
 						setDonationAmtTokens(nbTokens); // or roundedTokens depending on what we want to show in input
 
 						const priceEth = ethPrice * newPrice;
-						setMinDonation({ eth: newPrice, usd: priceEth, token: roundedTokens });
+						setMinDonation({
+							eth: newPrice,
+							usd: priceEth,
+							token: roundedTokens,
+						});
 					} else {
 						setMinReceived(nbTokens);
 					}
@@ -410,7 +448,7 @@ const BuyForm = (props) => {
 					// input is not a number
 					const newError = "Please enter a decimal number";
 					setErrors(newError);
-					setValidForm('btn-disabled');
+					setValidForm("btn-disabled");
 				}
 			}, 1000)
 		);
@@ -425,7 +463,7 @@ const BuyForm = (props) => {
 		setGasFeesUSD(null);
 		setMinReceived(null);
 		setMinDonation(null);
-		setValidForm('');
+		setValidForm("");
 
 		if (timer) {
 			clearTimeout(timer);
@@ -434,21 +472,29 @@ const BuyForm = (props) => {
 		setTimer(
 			setTimeout(() => {
 				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
-				if (pattern.test(e.target.value)) { // check if input is a valid number
+				if (pattern.test(e.target.value)) {
+					// check if input is a valid number
 					const nbTokens = e.target.value;
 
-					if (data.isMultiToken && !isInt(nbTokens)) { // 1155 & input is not int
+					if (data.isMultiToken && !isInt(nbTokens)) {
+						// 1155 & input is not int
 						const newError = "It's a 115. You need to enter an integer.";
 						setErrors(newError);
-
-					} else if (fractInfo != null && fractInfo[0].supplyRemaining < nbTokens) {
+					} else if (
+						fractInfo != null &&
+						fractInfo[0].supplyRemaining < nbTokens
+					) {
 						// console.log('nbTokens', nbTokens);
 						// console.log('fractInfo[0].supplyRemaining', fractInfo[0].supplyRemaining);
 
-						const newError = "Thanks for your generosity but there are only " + fractInfo[0].supplyRemaining + " " + tokenSymbol + " remaining. Please enter a lower number.";
+						const newError =
+							"Thanks for your generosity but there are only " +
+							fractInfo[0].supplyRemaining +
+							" " +
+							tokenSymbol +
+							" remaining. Please enter a lower number.";
 						setErrors(newError);
-						setValidForm('btn-disabled');
-
+						setValidForm("btn-disabled");
 					} else {
 						setDonationAmtTokens(nbTokens);
 						// console.log('nb tokens', nbTokens);
@@ -461,7 +507,6 @@ const BuyForm = (props) => {
 						setMinReceived(nbTokens);
 
 						estimateFees();
-
 					}
 				} else {
 					// input is not a number
@@ -567,17 +612,22 @@ const BuyForm = (props) => {
 	// };
 
 	async function createMarketSale() {
+		console.log("donationAmtEth: ", donationAmtEth);
+
+		let price = 2.25;
+		let strPrice = price.toString();
+		let priceInWei = ethers.utils.parseUnits(strPrice, 18);
 
 		let overrides = {
-			value: ethers.utils.parseEther(".000000000000000002"),
+			value: ethers.utils.parseUnits(donationAmtEth, 18),
 		};
 		// console.log(ethers.utils.parseEther("2"));
 		// console.log(ethers.utils.parseEther("2000000000000000000"));
-		console.log(ethers.utils.parseEther(".000000000000000002"));
+		// console.log(ethers.utils.parseEther(donationAmtEth.toString()));
 
 		let tx = await ACHouseBuyer.createMarketSale(
 			ACHouse1155.address,
-			2,
+			1,
 			overrides
 		);
 		const receipt = await tx.wait();
@@ -913,7 +963,7 @@ const BuyForm = (props) => {
 		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "ether"));
 
 		const feesEth = ethers.utils.formatUnits(tx.toString(), "ether");
-		const feesUSD = feesEth * ethPrice
+		const feesUSD = feesEth * ethPrice;
 
 		setGasFeesETH(feesEth);
 		setGasFeesUSD(feesUSD.toFixed(6));
@@ -929,7 +979,6 @@ const BuyForm = (props) => {
 		// connect to smart contract to handle transaction
 		createMarketSale();
 		selectNextHandler();
-
 
 		// console.log(ethers.utils.parseEther(".000000000000000002"));
 		// console.log(ethers.utils.parseEther("0.000000000000000002"));
@@ -954,73 +1003,102 @@ const BuyForm = (props) => {
 			setInput(1);
 		}
 		setErrors(null);
-		setValidForm('');
-	}
+		setValidForm("");
+	};
 
 	return (
 		<>
-
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
-			<div className=" mb-0 relative ">
-				
-                <div className="card shadow-2xl">
-					<div className="px-10 pt-4">
-						<figure className="pt-4">
-							{/* <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" /> */}
-							{nftMetadata && nftMetadata.image && <img src={nftMetadata.url} className="rounded-xl" />}
-						</figure> 
-					</div>
-                    <div className="card-body">
-                        <h2 className="card-title uppercase font-bold text-center text-primary">{nftMetadata && nftMetadata.name}</h2> 
-                        <p className="mb-3 text-center"> created and donated by <span className="font-bold uppercase">{artistInfo.name}</span></p> 
-                        <p className="mb-8 text-center">{nftMetadata && nftMetadata.description}</p> 
+				<div className=" mb-0 relative ">
+					<div className="card shadow-2xl">
+						<div className="px-10 pt-4">
+							<figure className="pt-4">
+								{/* <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" /> */}
+								{nftMetadata && nftMetadata.image && (
+									<img src={nftMetadata.url} className="rounded-xl" />
+								)}
+							</figure>
+						</div>
+						<div className="card-body">
+							<h2 className="card-title uppercase font-bold text-center text-primary">
+								{nftMetadata && nftMetadata.name}
+							</h2>
+							<p className="mb-3 text-center">
+								{" "}
+								created and donated by{" "}
+								<span className="font-bold uppercase">{artistInfo.name}</span>
+							</p>
+							<p className="mb-8 text-center">
+								{nftMetadata && nftMetadata.description}
+							</p>
 
-						{/* <div className="avatar">
+							{/* <div className="avatar">
 							<div className="mb-8 rounded-full w-24 h-24">
 								<img src={artistInfo.image} />
 							</div>
 						</div>  */}
 
-						<div className="border-t-2 text-primary"></div>
+							<div className="border-t-2 text-primary"></div>
 
-                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 px-2 cursor-pointer">
-                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
-                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
-                                {data.isMultiToken ? <div className="font-bold">ERC 1155</div> : <div className="font-bold">ERC 721</div>}
-                            </div>
-                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
-                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
-                                <div className="font-bold">{tokenName}</div>
-                            </div>
-                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
-                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
-                                <div className="font-bold">{tokenSymbol}</div>
-                            </div>
-                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
-                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
-                                {fractInfo && fractInfo.supplyMinted ? <div className="font-bold">{fractInfo.supplyMinted}</div> : data.isMultiToken ? <div className="font-bold">{tokenSupply}</div> : ""}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+							<div className="flex flex-wrap md:flex-nowrap justify-between my-3 px-2 cursor-pointer">
+								<div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+									<div className="uppercase text-xs text-gray-500 font-bold mb-2">
+										Token Type
+									</div>
+									{data.isMultiToken ? (
+										<div className="font-bold">ERC 1155</div>
+									) : (
+										<div className="font-bold">ERC 721</div>
+									)}
+								</div>
+								<div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+									<div className="uppercase text-xs text-gray-500 font-bold mb-2">
+										Token Name
+									</div>
+									<div className="font-bold">{tokenName}</div>
+								</div>
+								<div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+									<div className="uppercase text-xs text-gray-500 font-bold mb-2">
+										Token Symbol
+									</div>
+									<div className="font-bold">{tokenSymbol}</div>
+								</div>
+								<div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+									<div className="uppercase text-xs text-gray-500 font-bold mb-2">
+										Total Supply
+									</div>
+									{fractInfo && fractInfo.supplyMinted ? (
+										<div className="font-bold">{fractInfo.supplyMinted}</div>
+									) : data.isMultiToken ? (
+										<div className="font-bold">{tokenSupply}</div>
+									) : (
+										""
+									)}
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
-                <div className="">
-                    <div className="card shadow-2xl p-7">
-                        <div className=""> 
-                            <div className="text-center mb-2">
-                                <h2 className="card-title uppercase font-bold">Donate to {charityInfo.name}
-                                    <div className="badge mx-2 badge-accent text-primary-content">ONGOING</div>
-                                </h2>
-                            </div> 
-                        </div>
-                        <div className="mb-5"> 
-                            <p>{charityInfo.long_description}</p>
-                        </div>
+				<div className="">
+					<div className="card shadow-2xl p-7">
+						<div className="">
+							<div className="text-center mb-2">
+								<h2 className="card-title uppercase font-bold">
+									Donate to {charityInfo.name}
+									<div className="badge mx-2 badge-accent text-primary-content">
+										ONGOING
+									</div>
+								</h2>
+							</div>
+						</div>
+						<div className="mb-5">
+							<p>{charityInfo.long_description}</p>
+						</div>
 
-						{ step ==0 && (
+						{step == 0 && (
 							<>
 								<div className="uppercase text-s font-bold mb-2 center-cnt">
-									Time left to participate		
+									Time left to participate
 								</div>
 								<div className="center-cnt mb-5">
 									<Countdown end={data.auctionTime} />
@@ -1035,8 +1113,19 @@ const BuyForm = (props) => {
 										<>
 											<div className="form-control">
 												<label className="label font-bold h-6 mt-3 mb-1 text-gray-600 text-xs leading-8 uppercase">
-													<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
-													{donationAmtUSD ? <span className="badge badge-outline badge-sm">$ {donationAmtUSD}</span> : ""}
+													<span className="label-text">
+														Pay{" "}
+														<span className="badge badge-accent text-primary-content badge-sm">
+															In ETH
+														</span>
+													</span>
+													{donationAmtUSD ? (
+														<span className="badge badge-outline badge-sm">
+															$ {donationAmtUSD}
+														</span>
+													) : (
+														""
+													)}
 													{/* <span>Balance user: {balance} ETH</span> */}
 												</label>
 												<input
@@ -1076,7 +1165,12 @@ const BuyForm = (props) => {
 											</div>
 											<div className="form-control mb-5">
 												<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase mb-1">
-													<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
+													<span className="label-text">
+														Receive{" "}
+														<span className="badge badge-accent text-primary-content badge-sm">
+															{tokenSymbol}
+														</span>
+													</span>
 												</label>
 												<input
 													type="text"
@@ -1085,7 +1179,7 @@ const BuyForm = (props) => {
 													className="input input-primary input-bordered"
 													inputMode="decimal"
 													pattern="^\d*[.,]?\d*$"
-													disabled ="disabled"
+													disabled="disabled"
 												/>
 											</div>
 										</>
@@ -1094,7 +1188,12 @@ const BuyForm = (props) => {
 										<>
 											<div className="form-control">
 												<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase mb-1">
-													<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
+													<span className="label-text">
+														Receive{" "}
+														<span className="badge badge-accent text-primary-content badge-sm">
+															{tokenSymbol}
+														</span>
+													</span>
 												</label>
 												<input
 													type="text"
@@ -1132,8 +1231,19 @@ const BuyForm = (props) => {
 											</div>
 											<div className="form-control mb-5">
 												<label className="label font-bold h-6 mt-3 mb-1 text-gray-600 text-xs leading-8 uppercase">
-													<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
-													{donationAmtUSD ? <span className="badge badge-outline badge-sm">$ {donationAmtUSD}</span> : ""}
+													<span className="label-text">
+														Pay{" "}
+														<span className="badge badge-accent text-primary-content badge-sm">
+															In ETH
+														</span>
+													</span>
+													{donationAmtUSD ? (
+														<span className="badge badge-outline badge-sm">
+															$ {donationAmtUSD}
+														</span>
+													) : (
+														""
+													)}
 													{/* <span>Balance user: {balance} ETH</span> */}
 												</label>
 												<input
@@ -1143,29 +1253,32 @@ const BuyForm = (props) => {
 													required
 													inputMode="decimal"
 													pattern="^\d*[.,]?\d*$"
-													disabled ="disabled"
+													disabled="disabled"
 													value={donationAmtEth ? donationAmtEth : ""}
 												/>
 											</div>
 										</>
 									)}
 
-									
 									<div className="overflow-x-auto mb-5">
 										<table className="table w-full table-zebra">
 											<tbody>
 												<tr>
-													<td>Remaining number of tokens</td> 
+													<td>Remaining number of tokens</td>
 													<th>
-													<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-														{fractInfo && fractInfo.supplyRemaining ? fractInfo.supplyRemaining : tokenSupply} {tokenSymbol}
-													</span>
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															{fractInfo && fractInfo.supplyRemaining
+																? fractInfo.supplyRemaining
+																: tokenSupply}{" "}
+															{tokenSymbol}
+														</span>
 													</th>
 												</tr>
 												<tr>
-													<td>Price of 1 {tokenSymbol}
+													<td>
+														Price of 1 {tokenSymbol}
 														{/* <span className="badge badge-outline badge-sm">In ETH</span> */}
-													</td> 
+													</td>
 													<th>
 														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
 															{tokenPrice} ETH
@@ -1173,50 +1286,69 @@ const BuyForm = (props) => {
 													</th>
 												</tr>
 												<tr>
-													<td>Minimum received</td> 
+													<td>Minimum received</td>
 													<th>
-													{minReceived ? (
-														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-															{minReceived} {tokenSymbol}
-														</span>
-													) : (""
-														// <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-														// 	-
-														// </span>
-													)}
-													</th>
-												</tr>
-												<tr>
-													<td>Estimated fees</td> 
-													<th>
-													{gasFeesETH && gasFeesUSD ? (
-														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-															{gasFeesETH} ETH {' '} <span className="badge badge-outline badge-sm">$ {gasFeesUSD}</span>
-														</span>
-													) : (""
-													)}
-													</th>
-												</tr>
-												<tr>
-													<td>Donation amount to charity</td> 
-													<th>
-													{donationAmtEth && donationAmtUSD ? ( minReceived && minDonation ? 
-														( <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-																{minDonation.eth} ETH {' '} <span className="badge badge-outline badge-sm">$ {minDonation.usd}</span>
-															</span> )
-															: (<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-																{donationAmtEth} ETH {' '} <span className="badge badge-outline badge-sm">$ {donationAmtUSD}</span>
+														{minReceived ? (
+															<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+																{minReceived} {tokenSymbol}
 															</span>
-														) ) : ""
-													}
+														) : (
+															""
+															// <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															// 	-
+															// </span>
+														)}
 													</th>
 												</tr>
-											</tbody> 
+												<tr>
+													<td>Estimated fees</td>
+													<th>
+														{gasFeesETH && gasFeesUSD ? (
+															<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+																{gasFeesETH} ETH{" "}
+																<span className="badge badge-outline badge-sm">
+																	$ {gasFeesUSD}
+																</span>
+															</span>
+														) : (
+															""
+														)}
+													</th>
+												</tr>
+												<tr>
+													<td>Donation amount to charity</td>
+													<th>
+														{donationAmtEth && donationAmtUSD ? (
+															minReceived && minDonation ? (
+																<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+																	{minDonation.eth} ETH{" "}
+																	<span className="badge badge-outline badge-sm">
+																		$ {minDonation.usd}
+																	</span>
+																</span>
+															) : (
+																<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+																	{donationAmtEth} ETH{" "}
+																	<span className="badge badge-outline badge-sm">
+																		$ {donationAmtUSD}
+																	</span>
+																</span>
+															)
+														) : (
+															""
+														)}
+													</th>
+												</tr>
+											</tbody>
 										</table>
-										</div>
+									</div>
 									<div className="center-cnt py-2">
 										{!connected ? (
-											<button className={`btn btn-secondary btn-wide text-primary-content ${validForm}`}>Donate</button>
+											<button
+												className={`btn btn-secondary btn-wide text-primary-content ${validForm}`}
+											>
+												Donate
+											</button>
 										) : (
 											<Connect />
 										)}
@@ -1251,17 +1383,21 @@ const BuyForm = (props) => {
 											</div>
 											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
 												<p className="text-gray-600">To</p>
+												<p>{charityInfo.name}</p>
+											</div>
+											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
+												<p className="text-gray-600">
+													Number of tokens purchased
+												</p>
 												<p>
-													{charityInfo.name}
+													{donationAmtTokens} {tokenSymbol}
 												</p>
 											</div>
 											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
-												<p className="text-gray-600">Number of tokens purchased</p>
-												<p>{donationAmtTokens} {tokenSymbol}</p>
-											</div>
-											<div className="md:grid md:grid-cols-2 hover:bg-gray-50 md:space-y-0 space-y-1 p-4 border-b">
 												<p className="text-gray-600">Estimated fees </p>
-												<p>{gasFeesETH} ETH / $ {gasFeesUSD}</p>
+												<p>
+													{gasFeesETH} ETH / $ {gasFeesUSD}
+												</p>
 											</div>
 										</div>
 									</div>
@@ -1289,9 +1425,19 @@ const BuyForm = (props) => {
 										<div>
 											<div className="alert alert-warning">
 												<div className="flex-1">
-													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current"> 
-													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>                         
-													</svg> 
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														fill="none"
+														viewBox="0 0 24 24"
+														className="w-6 h-6 mx-2 stroke-current"
+													>
+														<path
+															strokeLinecap="round"
+															strokeLinejoin="round"
+															strokeWidth="2"
+															d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+														></path>
+													</svg>
 													<label>Oops ! Your transaction failed.</label>
 												</div>
 											</div>
@@ -1299,28 +1445,39 @@ const BuyForm = (props) => {
 									) : (
 										<div className="bg-primary shadow-lg rounded-3xl p-2">
 											<div>
-												<center><img className="mb-1" height="25" width="50" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></center>
+												<center>
+													<img
+														className="mb-1"
+														height="25"
+														width="50"
+														src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg"
+													/>
+												</center>
 											</div>
 											<div className="py-3 text-center text-primary-content">
 												Congratulations, your transaction was a success !
 											</div>
 											<div className="py-3 text-center text-primary-content">
-												You now own {donationAmtTokens} {tokenSymbol}. You donated {donationAmtEth} ETH ($ {donationAmtUSD}) to {charityInfo.name}.
+												You now own {donationAmtTokens} {tokenSymbol}. You
+												donated {donationAmtEth} ETH ($ {donationAmtUSD}) to{" "}
+												{charityInfo.name}.
 											</div>
 											<div className="py-3 text-center text-primary-content">
 												Thanks for supporting them !
 											</div>
 											<div className="center-cnt py-2">
-												<button className="btn btn-accent btn-wide text-primary-content">Share</button>
+												<button className="btn btn-accent btn-wide text-primary-content">
+													Share
+												</button>
 											</div>
 										</div>
 									)}
 								</div>
 							</>
 						)}
-                    </div>
-                </div>
-            </div>
+					</div>
+				</div>
+			</div>
 		</>
 	);
 };

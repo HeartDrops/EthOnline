@@ -76,7 +76,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     bool isFrac;
   }
 
-  mapping(uint256 => MarketItem) private idToMarketItem;
+  mapping(uint256 => MarketItem) private idToMarketItemMapping;
   
   //user mapping to itemSold array
   mapping( address => uint256[]) userSoldItemMapping;
@@ -139,14 +139,13 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   /***************************************************************************************************************************************/
   /**MarketPlace functionality */
   function create1155MarketItem(address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime, bool isFrac) public payable nonReentrant returns (uint256){
-    //   require(price > 0, "Price must be at least 1 wei");
-    //   require(msg.value == listingPrice, "Price must be equal to l_charityId
+    require(price > 0, "Price must be at least 1 wei");
 
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
     
     MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, amount, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
-    idToMarketItem[itemId] = item;
+    idToMarketItemMapping[itemId] = item;
 
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
 
@@ -163,7 +162,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint256 itemId = _itemIds.current();
 
     MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
-    idToMarketItem[itemId] = item;
+    idToMarketItemMapping[itemId] = item;
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
@@ -175,25 +174,25 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   // Remove item from marketplace
   function removeMarketPlaceItem( uint256 itemId) public {
       
-      idToMarketItem[itemId].isRemoved = true;
+      idToMarketItemMapping[itemId].isRemoved = true;
   }
   
   // re add item to marketplace
   function addMarketPlaceItem( uint256 itemId) public {
       
-      idToMarketItem[itemId].isRemoved = false;
+      idToMarketItemMapping[itemId].isRemoved = false;
   }
   
   /* Creates the sale of a marketplace item */
   /* Transfers ownership of the item, as well as funds between parties */
   function createMarketSale(address nftContract, uint256 itemId) public payable nonReentrant {
     
-    MarketItem memory item = idToMarketItem[itemId];
+    MarketItem memory item = idToMarketItemMapping[itemId];
     
     uint price = item.price;
     uint tokenId = item.tokenId;
     bool isMultiToken = item.isMultiToken;
-    require(msg.value == price, "Please submit the asking price in order to complete the purchase");
+    require(msg.value >= price, "Buyer must trasfer Ether equal or greater than Price of Item");
 
     // transfer funds
     item.seller.transfer(msg.value);
@@ -212,7 +211,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     //increament itemSold counter.
     _itemsSold.increment();
     
-    idToMarketItem[itemId] = item;
+    idToMarketItemMapping[itemId] = item;
     // mapp user address to itemSold [] and purchased[]
     userSoldItemMapping[item.seller].push(itemId);
     
@@ -223,7 +222,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   }
 
   function fetchMarketItem(uint256 _id) public view returns(MarketItem memory){
-    return idToMarketItem[_id];
+    return idToMarketItemMapping[_id];
   }
 
   /* Returns all unsold market items */
@@ -238,13 +237,13 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
       
     for(uint i=0; i < totalItemCount; i++){
         // only way i found to iterate through a mapping. 
-        if(idToMarketItem[i+1].owner == address(0) && idToMarketItem[i+1].isRemoved == false ) { 
+        if(idToMarketItemMapping[i+1].owner == address(0) && idToMarketItemMapping[i+1].isRemoved == false ) { 
             uint currentID = i+1;
 
-            MarketItem storage currentItem = idToMarketItem[currentID];
+            MarketItem storage currentItem = idToMarketItemMapping[currentID];
             items[unsoldCurrentIndex] = currentItem;
             
-            // uint itemId =idToMarketItem[currentID].itemId;
+            // uint itemId =idToMarketItemMapping[currentID].itemId;
             // string memory str =  uint2str(itemId);
             
             // itemIdStr.push(str);
@@ -265,9 +264,9 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     MarketItem[] memory items = new MarketItem[](userPurchasedIds.length);
     for(uint i =0; i< userPurchasedIds.length; i++){
         
-        // MarketItem memory item = idToMarketItem[userPurchasedIds[i]];
+        // MarketItem memory item = idToMarketItemMapping[userPurchasedIds[i]];
         
-        items[i] = idToMarketItem[userPurchasedIds[i]];
+        items[i] = idToMarketItemMapping[userPurchasedIds[i]];
     }
     return items;
   }
@@ -279,7 +278,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint itemCount = 0;
     
     for (uint i = 0; i < totalItemCount; i++) {
-      if (idToMarketItem[i + 1].seller == msg.sender) {
+      if (idToMarketItemMapping[i + 1].seller == msg.sender) {
         itemCount += 1;
       }
     }
@@ -288,9 +287,9 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint currentIndex = 0;
     
     for (uint i = 0; i < totalItemCount; i++) {
-      if (idToMarketItem[i + 1].seller == msg.sender) {
+      if (idToMarketItemMapping[i + 1].seller == msg.sender) {
         uint currentId = i + 1;
-        MarketItem storage currentItem = idToMarketItem[currentId];
+        MarketItem storage currentItem = idToMarketItemMapping[currentId];
         items[currentIndex] = currentItem;
         currentIndex += 1;
       }
