@@ -6,3 +6,7 @@
   align-items: center;
   justify-content: center;
 }
+
+.input-disabled, .input[disabled] {
+  border-color: hsla(var(--p)/var(--tw-border-opacity,1));
+}

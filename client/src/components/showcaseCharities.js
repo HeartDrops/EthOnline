@@ -1,6 +1,4 @@
 import React from 'react';
-import { BrowserRouter, Link } from 'react-router-dom';
-import { ethers } from 'ethers';
 
 const ShowcaseCharities = ({item, onSelectCharity, checkCharity=false}) => {
     const selectCharity = () => {
