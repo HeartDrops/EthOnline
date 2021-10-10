@@ -1,23 +1,22 @@
 import React from 'react';
-import discordLogo from '../assets/discord.png';
+import aaronimg from '../assets/AaronImg.png';
 import { Link } from 'react-router-dom';
 
 const ShowcaseArtists = ({item}) => {
-
     return (
         <>
             <div className="card bordered shadow-2xl">
                 <figure>
-                    <img src={item.image} />
+                    {item != null && item.profile == 'AaronImg' ? <img src={aaronimg} /> : <img src={item.profile} /> }
                 </figure> 
                 <div className="card-body" >
                     <h2 className="card-title">{item.name}
                         <div className="badge mx-2 badge-secondary">{item.domain}</div>
                     </h2> 
                     <p>{item.description}</p> 
-                    <div className="justify-end card-actions">
+                    {/* <div className="justify-end card-actions">
                         <Link  to="/donate" className="btn btn-secondary">Donate</Link>
-                    </div>
+                    </div> */}
                     <div className="grid grid-flow-col gap-4 mt-5">
                         <a href="https://twitter.com/#">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" className="fill-current">
