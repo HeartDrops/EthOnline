@@ -962,15 +962,18 @@ const BuyForm = (props) => {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
 			<div className=" mb-0 relative ">
+				
                 <div className="card shadow-2xl">
-                    <figure>
-                        {/* <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" /> */}
-						{nftMetadata && nftMetadata.image && <img src={nftMetadata.url} />}
-                    </figure> 
+					<div className="px-10 pt-4">
+						<figure className="pt-4">
+							{/* <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" /> */}
+							{nftMetadata && nftMetadata.image && <img src={nftMetadata.url} className="rounded-xl" />}
+						</figure> 
+					</div>
                     <div className="card-body">
-                        <h2 className="card-title uppercase font-bold">{nftMetadata && nftMetadata.name}</h2> 
-                        <p className="mb-3"> created and donated by <span className="text-purple-700 font-bold uppercase">{artistInfo.name}</span></p> 
-                        <p className="mb-3">{nftMetadata && nftMetadata.description}</p> 
+                        <h2 className="card-title uppercase font-bold text-center text-primary">{nftMetadata && nftMetadata.name}</h2> 
+                        <p className="mb-3 text-center"> created and donated by <span className="font-bold uppercase">{artistInfo.name}</span></p> 
+                        <p className="mb-8 text-center">{nftMetadata && nftMetadata.description}</p> 
 
 						{/* <div className="avatar">
 							<div className="mb-8 rounded-full w-24 h-24">
@@ -978,7 +981,9 @@ const BuyForm = (props) => {
 							</div>
 						</div>  */}
 
-                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer">
+						<div className="border-t-2 text-primary"></div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 px-2 cursor-pointer">
                             <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
                                 <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
                                 {data.isMultiToken ? <div className="font-bold">ERC 1155</div> : <div className="font-bold">ERC 721</div>}
