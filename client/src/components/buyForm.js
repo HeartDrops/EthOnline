@@ -5,6 +5,7 @@ import coinGecko from "../api/coinGecko";
 import axios from 'axios';
 import DB from '../db.json';
 import Countdown from '../components/countdown';
+import arrows from '../assets/arrows.png';
 
 import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
@@ -24,6 +25,7 @@ const BuyForm = (props) => {
 	const [errors, setErrors] = useState(null);
 	const [timer, setTimer] = useState(null);
 	const [step, setStep] = useState(0); // setStep to change page
+	const [input, setInput] = useState(1); // input activated - 1 for ETH, 0 for Tokens 
 	const [ethPrice, setEthPrice] = useState(null);
 
 	const [charityInfo, setCharityInfo] = useState({
@@ -40,7 +42,7 @@ const BuyForm = (props) => {
     });
 
 	const [tokenSupply, setTokenSupply] = useState(null); // remaining amount of tokens
-	// const [validSupply, setValidSupply] = useState(true);
+	const [validForm, setValidForm] = useState('');
 	const [tokenPrice, setTokenPrice] = useState(null); // value of 1 token for a given marketitem
 	const [tokenSymbol, setTokenSymbol] = useState(null);
 	const [tokenName, setTokenName] = useState(null);
@@ -48,6 +50,8 @@ const BuyForm = (props) => {
 	const [donationAmtEth, setDonationAmtEth] = useState(0);
 	const [donationAmtTokens, setDonationAmtTokens] = useState(null);
 	const [deadlineAuction, setDeadlineAuction] = useState(false);
+	const [minReceived, setMinReceived] = useState(null);
+	const [minDonation, setMinDonation] = useState(null);
 	// Gas fees
 	const [gasFeesETH, setGasFeesETH] = useState(0);
 	const [gasFeesUSD, setGasFeesUSD] = useState(0);
@@ -328,6 +332,11 @@ const BuyForm = (props) => {
 		}
 	};
 
+	const isInt = (value) => {
+		var x = parseFloat(value);
+		return !isNaN(value) && (x | 0) === x;
+	  }
+
 	const changeInputETH = (e) => {
 		setErrors(null);
 		setDonationAmtEth(null);
@@ -335,7 +344,9 @@ const BuyForm = (props) => {
 		setDonationAmtUSD(null);
 		setGasFeesETH(null);
 		setGasFeesUSD(null);
-
+		setMinReceived(null);
+		setMinDonation(null);
+		setValidForm('');
 
 		if (timer) {
 			clearTimeout(timer);
@@ -351,20 +362,49 @@ const BuyForm = (props) => {
 				if (pattern.test(e.target.value)) {
 					// check if input is a valid number
 
-					const priceInEth = e.target.value;
-					setDonationAmtEth(priceInEth);
-					setDonationAmtUSD(priceInEth * ethPrice);
+					const priceEnteredEth = e.target.value;
+					setDonationAmtEth(priceEnteredEth);
+					setDonationAmtUSD(priceEnteredEth * ethPrice);
 
 					// get nb of tokens for given amount of eth
-					const nbTokens = +priceInEth / +tokenPrice;
+					const nbTokens = priceEnteredEth / tokenPrice;
+					console.log('nb tokens', nbTokens);
 					setDonationAmtTokens(nbTokens);
 
+					if (priceEnteredEth < tokenPrice) {
+						const newError = "The amount entered is to low. The price of 1 token is " + tokenPrice + " ETH";
+						setErrors(newError);
+						setValidForm('btn-disabled');
+					} else if (fractInfo != null && fractInfo[0].supplyRemaining < nbTokens) {
+
+						const newError = "Thanks for your generosity but there are only " + fractInfo[0].supplyRemaining + " " + tokenSymbol + " remaining. Please enter a lower number.";
+						setErrors(newError);
+						setValidForm('btn-disabled');
+						
+					} else if (data.isMultiToken && !isInt(nbTokens)) {
+
+						const roundedTokens = Math.floor(nbTokens);
+						const newPrice = roundedTokens * tokenPrice ;
+
+						const newError = "You can only buy full tokens.";
+						setErrors(newError);
+						setValidForm('btn-disabled');
+
+						setMinReceived(roundedTokens);
+						setDonationAmtTokens(nbTokens); // or roundedTokens depending on what we want to show in input
+
+						const priceEth = ethPrice * newPrice;
+						setMinDonation({ eth: newPrice, usd: priceEth, token: roundedTokens });
+					} else {
+						setMinReceived(nbTokens);
+					}
 					// calculate estimated fees
 					estimateFees();
 				} else if (e.target.value) {
 					// input is not a number
 					const newError = "Please enter a decimal number";
 					setErrors(newError);
+					setValidForm('btn-disabled');
 				}
 			}, 1000)
 		);
@@ -375,6 +415,11 @@ const BuyForm = (props) => {
 		setDonationAmtEth(null);
 		setDonationAmtTokens(null);
 		setDonationAmtUSD(null);
+		setGasFeesETH(null);
+		setGasFeesUSD(null);
+		setMinReceived(null);
+		setMinDonation(null);
+		setValidForm('');
 
 		if (timer) {
 			clearTimeout(timer);
@@ -383,24 +428,40 @@ const BuyForm = (props) => {
 		setTimer(
 			setTimeout(() => {
 				const pattern = /^(0|[1-9]\d*)(\.\d+)?$/;
-				if (pattern.test(e.target.value)) {
-					// check if input is a valid number
-
+				if (pattern.test(e.target.value)) { // check if input is a valid number
 					const nbTokens = e.target.value;
-					setDonationAmtEth(nbTokens);
 
-					const priceInEth = nbTokens * tokenPrice;
+					if (data.isMultiToken && !isInt(nbTokens)) { // 1155 & input is not int
+						const newError = "It's a 115. You need to enter an integer.";
+						setErrors(newError);
 
-					setDonationAmtUSD(priceInEth);
-					setDonationAmtUSD(priceInEth * ethPrice);
+					} else if (fractInfo != null && fractInfo[0].supplyRemaining < nbTokens) {
+						// console.log('nbTokens', nbTokens);
+						// console.log('fractInfo[0].supplyRemaining', fractInfo[0].supplyRemaining);
 
-					// calculate estimated fees
-					// estimateFees();
+						const newError = "Thanks for your generosity but there are only " + fractInfo[0].supplyRemaining + " " + tokenSymbol + " remaining. Please enter a lower number.";
+						setErrors(newError);
+						setValidForm('btn-disabled');
+
+					} else {
+						setDonationAmtTokens(nbTokens);
+						// console.log('nb tokens', nbTokens);
+
+						const priceInEth = nbTokens * tokenPrice;
+						// console.log('price in eth', priceInEth);
+						// console.log('price in usd', priceInEth * ethPrice);
+						setDonationAmtEth(priceInEth);
+						setDonationAmtUSD(priceInEth * ethPrice);
+						setMinReceived(nbTokens);
+
+						estimateFees();
+
+					}
 				} else {
 					// input is not a number
-					const newErrorTokens = "Please enter a decimal number";
-					console.log(newErrorTokens);
-					// setErrorsInputTokens(newError);
+					const newError = "Please enter a decimal number";
+					console.log(newError);
+					setErrors(newError);
 				}
 			}, 1000)
 		);
@@ -880,6 +941,16 @@ const BuyForm = (props) => {
 		// console.log('test', wei);
 	};
 
+	const changeInput = (e) => {
+		if (input == 1) {
+			setInput(2);
+		} else {
+			setInput(1);
+		}
+		setErrors(null);
+		setValidForm('');
+	}
+
 	return (
 		<>
 
@@ -948,58 +1019,126 @@ const BuyForm = (props) => {
 						{step == 0 && (
 							<>
 								<form className="" onSubmit={handleSubmit}>
-									<div className="form-control">
-										<label className="label font-bold h-6 mt-3 mb-1 text-gray-600 text-xs leading-8 uppercase">
-											<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
-											{donationAmtUSD ? <span> ({donationAmtUSD} USD)</span> : ""}
-											{/* <span>Balance user: {balance} ETH</span> */}
-										</label>
-										<input
-											type="text"
-											placeholder="0.0"
-											className="input input-primary input-bordered"
-											required
-											inputMode="decimal"
-											pattern="^\d*[.,]?\d*$"
-											onChange={changeInputETH}
-										/>
-										{errors ? (
-											<div className="alert alert-error my-2">
-												<div className="flex-1">
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														fill="none"
-														viewBox="0 0 24 24"
-														className="w-6 h-6 mx-2 stroke-current"
-													>
-														<path
-															strokeLinecap="round"
-															strokeLinejoin="round"
-															strokeWidth="2"
-															d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-														></path>
-													</svg>
-													<label>{errors}</label>
-												</div>
+									{input == 1 && (
+										<>
+											<div className="form-control">
+												<label className="label font-bold h-6 mt-3 mb-1 text-gray-600 text-xs leading-8 uppercase">
+													<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
+													{donationAmtUSD ? <span className="badge badge-outline badge-sm">$ {donationAmtUSD}</span> : ""}
+													{/* <span>Balance user: {balance} ETH</span> */}
+												</label>
+												<input
+													type="text"
+													placeholder="0.0"
+													className="input input-primary input-bordered"
+													required
+													inputMode="decimal"
+													pattern="^\d*[.,]?\d*$"
+													onChange={changeInputETH}
+												/>
+												{errors ? (
+													<div className="alert alert-error my-2">
+														<div className="flex-1">
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																fill="none"
+																viewBox="0 0 24 24"
+																className="w-6 h-6 mx-2 stroke-current"
+															>
+																<path
+																	strokeLinecap="round"
+																	strokeLinejoin="round"
+																	strokeWidth="2"
+																	d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+																></path>
+															</svg>
+															<label>{errors}</label>
+														</div>
+													</div>
+												) : (
+													""
+												)}
 											</div>
-										) : (
-											""
-										)}
-									</div>
-									<div className="form-control mb-5">
-										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase mb-1">
-											<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
-										</label>
-										<input
-											type="text"
-											placeholder="0.0"
-											value={donationAmtTokens ? donationAmtTokens : ""}
-											className="input input-primary input-bordered"
-											inputMode="decimal"
-											pattern="^\d*[.,]?\d*$"
-											onChange={changeInputTokens}
-										/>
-									</div>
+											<div className="center-cnt mt-3">
+												<img src={arrows} onClick={changeInput} />
+											</div>
+											<div className="form-control mb-5">
+												<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase mb-1">
+													<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
+												</label>
+												<input
+													type="text"
+													placeholder="0.0"
+													value={donationAmtTokens ? donationAmtTokens : ""}
+													className="input input-primary input-bordered"
+													inputMode="decimal"
+													pattern="^\d*[.,]?\d*$"
+													disabled ="disabled"
+												/>
+											</div>
+										</>
+									)}
+									{input == 2 && (
+										<>
+											<div className="form-control">
+												<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase mb-1">
+													<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
+												</label>
+												<input
+													type="text"
+													placeholder="0.0"
+													className="input input-primary input-bordered"
+													inputMode="decimal"
+													pattern="^\d*[.,]?\d*$"
+													onChange={changeInputTokens}
+												/>
+												{errors ? (
+													<div className="alert alert-error my-2">
+														<div className="flex-1">
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																fill="none"
+																viewBox="0 0 24 24"
+																className="w-6 h-6 mx-2 stroke-current"
+															>
+																<path
+																	strokeLinecap="round"
+																	strokeLinejoin="round"
+																	strokeWidth="2"
+																	d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+																></path>
+															</svg>
+															<label>{errors}</label>
+														</div>
+													</div>
+												) : (
+													""
+												)}
+											</div>
+											<div className="center-cnt mt-3">
+												<img src={arrows} onClick={changeInput} />
+											</div>
+											<div className="form-control mb-5">
+												<label className="label font-bold h-6 mt-3 mb-1 text-gray-600 text-xs leading-8 uppercase">
+													<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
+													{donationAmtUSD ? <span className="badge badge-outline badge-sm">$ {donationAmtUSD}</span> : ""}
+													{/* <span>Balance user: {balance} ETH</span> */}
+												</label>
+												<input
+													type="text"
+													placeholder="0.0"
+													className="input input-primary input-bordered"
+													required
+													inputMode="decimal"
+													pattern="^\d*[.,]?\d*$"
+													disabled ="disabled"
+													value={donationAmtEth ? donationAmtEth : ""}
+												/>
+											</div>
+										</>
+									)}
+
+									
 									<div className="overflow-x-auto mb-5">
 										<table className="table w-full table-zebra">
 											<tbody>
@@ -1022,12 +1161,12 @@ const BuyForm = (props) => {
 													</th>
 												</tr>
 												<tr>
-													<td>Estimated fees</td> 
+													<td>Minimum received</td> 
 													<th>
-													{gasFeesETH && gasFeesUSD ? (
+													{minReceived ? (
 														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-														{gasFeesETH} ETH / $ {gasFeesUSD}
-													</span>
+															{minReceived} {tokenSymbol}
+														</span>
 													) : (""
 														// <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
 														// 	-
@@ -1036,17 +1175,28 @@ const BuyForm = (props) => {
 													</th>
 												</tr>
 												<tr>
+													<td>Estimated fees</td> 
+													<th>
+													{gasFeesETH && gasFeesUSD ? (
+														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+															{gasFeesETH} ETH {' '} <span className="badge badge-outline badge-sm">$ {gasFeesUSD}</span>
+														</span>
+													) : (""
+													)}
+													</th>
+												</tr>
+												<tr>
 													<td>Donation amount to charity</td> 
 													<th>
-													{donationAmtEth && donationAmtUSD ? (
-														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-															{donationAmtEth} ETH - {donationAmtUSD} $
-														</span>
-													) : ( ""
-														// <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-														// 	-
-														// </span>
-													)}
+													{donationAmtEth && donationAmtUSD ? ( minReceived && minDonation ? 
+														( <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+																{minDonation.eth} ETH {' '} <span className="badge badge-outline badge-sm">$ {minDonation.usd}</span>
+															</span> )
+															: (<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+																{donationAmtEth} ETH {' '} <span className="badge badge-outline badge-sm">$ {donationAmtUSD}</span>
+															</span>
+														) ) : ""
+													}
 													</th>
 												</tr>
 											</tbody> 
@@ -1054,7 +1204,7 @@ const BuyForm = (props) => {
 										</div>
 									<div className="center-cnt py-2">
 										{!connected ? (
-											<button className="btn btn-secondary btn-wide text-primary-content">Donate</button>
+											<button className={`btn btn-secondary btn-wide text-primary-content ${validForm}`}>Donate</button>
 										) : (
 											<Connect />
 										)}
