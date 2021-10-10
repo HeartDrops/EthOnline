@@ -2,19 +2,35 @@
 	"charities": [
 		{
 			"id": 0,
-			"name": "NGO #1",
-			"domain" : "Environment",
-			"description": "Mjölnir, the legendary hammer of the Norse god of thunder. Mjölnir, the legendary hammer of the Norse god of thunder. Mjölnir, the legendary hammer of the Norse god of thunder. Mjölnir, the legendary hammer of the Norse god of thunder.",
-			"long_description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur iaculis nisl lorem, non pellentesque ligula porta eu. Pellentesque iaculis euismod tortor ac cursus. Vivamus tristique, odio nec ornare dapibus, lectus magna vulputate sapien, at tincidunt lacus dui non turpis. Donec sapien purus, tristique ac arcu sit amet, tincidunt dapibus tellus.",
-			"image": "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/thors-hammer-mjolnir-is-seen-during-thor-ragnarok-paris-news-photo-865171312-1560960203.jpg"
+			"name": "Free World",
+			"domain" : "Human Rights",
+			"description": "Across the globe, totalitarian governments oppress and control their people by limiting access to crucial information and stifling their ability to speak. Here at Free World, we believe that every voice deserves to be heard, and that nobody has the right to deny others their basic human rights. So we started an international non-profit that fights to bring freedom to all.",
+			"long_description": "Across the globe, totalitarian governments oppress and control their people by limiting access to crucial information and stifling their ability to speak. Here at Free World, we believe that every voice deserves to be heard, and that nobody has the right to deny others their basic human rights. So we started an international non-profit that fights to bring freedom to all.",
+			"image": "freeworld"
 		},
 		{
 			"id": 1,
-			"name": "NGO #2",
-			"domain" : "Human Rights",
-			"description": "Ancient Katar knife of Sikh Empire. Also known as punching knife",
-			"long_description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur iaculis nisl lorem, non pellentesque ligula porta eu. Pellentesque iaculis euismod tortor ac cursus. Vivamus tristique, odio nec ornare dapibus, lectus magna vulputate sapien, at tincidunt lacus dui non turpis. Donec sapien purus, tristique ac arcu sit amet, tincidunt dapibus tellus. In quam lorem, gravida eget enim a, faucibus tempor enim. Nam sodales elementum pellentesque.",
-			"image": "https://cdn.shopify.com/s/files/1/1597/7419/products/Antique_Vintage_India_Indian_Scissors_Katar_Dagger_Fighting_Knife1_1024x1024.jpeg"
+			"name": "Life Drops",
+			"domain" : "Mental health",
+			"description": "For some, what many people consider as a normal life has never been normal. Depression, anxiety, overworking and abuse can leave many trapped in a shell that is nearly impossible to escape on your own. Life Drops is a global non-profit focused on empowering people on their journeys and helping them create and celebrate the moments of health and happiness.",
+			"long_description" : "For some, what many people consider as a normal life has never been normal. Depression, anxiety, overworking and abuse can leave many trapped in a shell that is nearly impossible to escape on your own. Life Drops is a global non-profit focused on empowering people on their journeys and helping them create and celebrate the moments of health and happiness.",
+			"image": "lifedrops"
+		},
+		{
+			"id": 2,
+			"name": "Greenleaf",
+			"domain" : "Environment",
+			"description": "The hard truth is we’ve done a lot of damage to the environment. Lack of foresight, empathy and regulations have left our world scarred by our unrelenting desire to expand our human presence, no matter the costs. Greenleaf is a charity focused on turning that tide, and helping the environment heal and restore balance to this world.",
+			"long_description": "The hard truth is we’ve done a lot of damage to the environment. Lack of foresight, empathy and regulations have left our world scarred by our unrelenting desire to expand our human presence, no matter the costs. Greenleaf is a charity focused on turning that tide, and helping the environment heal and restore balance to this world.",
+			"image": "greenleafs"
+		},
+		{
+			"id": 3,
+			"name": "Pup Pops",
+			"domain" : "Animals",
+			"description": "Hello from Pup Pops! We are an international organization here to serve humankind's best friends by providing medical assistance to our canine companions who have suffered from neglect, cruelty, starvation or are just lost and in need of a home. ",
+			"long_description" : "Hello from Pup Pops! We are an international organization here to serve humankind's best friends by providing medical assistance to our canine companions who have suffered from neglect, cruelty, starvation or are just lost and in need of a home.",
+			"image": "puppops"
 		}
 	],
     "artists": [
@@ -29,7 +45,8 @@
 			"id": 2,
 			"name": "adamsimms.eth",
 			"profile": "https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1358097393893-O5DKU3GCSQNLYL9PXD85/73549_455062256895_2945838_n.jpg",
-			"bio": "Adam creates immersive experiences that combine photography, new media, and the Internet of Things to explore the intable elements of Newfoundland culture."
+			"bio": "Adam creates immersive experiences that combine photography, new media, and the Internet of Things to explore the intable elements of Newfoundland culture.",
+			"address" : "0x9A05C0f60FA31eA73ae86914c734c2bf7dc21d15"
 		}
 	],
 		"auctions": [

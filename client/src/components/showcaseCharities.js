@@ -1,4 +1,8 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import greenleafs from '../assets/Greenleafs.jpg';
+import freeworld from '../assets/FreeWorld.jpg';
+import lifedrops from '../assets/LifeDrops.jpg';
+import puppops from '../assets/puppops.jpg';
 
 const ShowcaseCharities = ({item, onSelectCharity, checkCharity=false}) => {
     const selectCharity = () => {
@@ -7,7 +11,7 @@ const ShowcaseCharities = ({item, onSelectCharity, checkCharity=false}) => {
         } else {
             return None;
         }
-    }
+    };    
     return (
         <>
             <div 
@@ -15,7 +19,10 @@ const ShowcaseCharities = ({item, onSelectCharity, checkCharity=false}) => {
                 onClick={selectCharity}
                 >
                 <figure>
-                    <img src={item.image} />
+                    {item && item.image == 'greenleafs' ? <img src={greenleafs} /> : '' }
+                    {item && item.image == 'freeworld' && <img src={freeworld} />}
+                    {item && item.image == 'lifedrops' && <img src={lifedrops} />}
+                    {item && item.image == 'puppops' && <img src={puppops} />}
                 </figure> 
                 <div className="card-body" >
                     <h2 className="card-title">{item.name}
