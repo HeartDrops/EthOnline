@@ -333,6 +333,9 @@ const BuyForm = (props) => {
 		setDonationAmtEth(null);
 		setDonationAmtTokens(null);
 		setDonationAmtUSD(null);
+		setGasFeesETH(null);
+		setGasFeesUSD(null);
+
 
 		if (timer) {
 			clearTimeout(timer);
@@ -944,7 +947,7 @@ const BuyForm = (props) => {
 							<>
 								<form className="" onSubmit={handleSubmit}>
 									<div className="form-control">
-										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
+										<label className="label font-bold h-6 mt-3 mb-1 text-gray-600 text-xs leading-8 uppercase">
 											<span className="label-text">Pay <span className="badge badge-accent text-primary-content badge-sm">In ETH</span></span>
 											{donationAmtUSD ? <span> ({donationAmtUSD} USD)</span> : ""}
 											{/* <span>Balance user: {balance} ETH</span> */}
@@ -982,7 +985,7 @@ const BuyForm = (props) => {
 										)}
 									</div>
 									<div className="form-control mb-5">
-										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase">
+										<label className="label font-bold h-6 mt-3 text-gray-600 text-xs leading-8 uppercase mb-1">
 											<span className="label-text">Receive <span className="badge badge-accent text-primary-content badge-sm">{tokenSymbol}</span></span>
 										</label>
 										<input
@@ -1023,10 +1026,10 @@ const BuyForm = (props) => {
 														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
 														{gasFeesETH} ETH / $ {gasFeesUSD}
 													</span>
-													) : (
-														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-															-
-														</span>
+													) : (""
+														// <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+														// 	-
+														// </span>
 													)}
 													</th>
 												</tr>
@@ -1037,10 +1040,10 @@ const BuyForm = (props) => {
 														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
 															{donationAmtEth} ETH - {donationAmtUSD} $
 														</span>
-													) : (
-														<span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
-															-
-														</span>
+													) : ( ""
+														// <span className="font-bold h-6 mt-3 text-gray-600 leading-8 uppercase">
+														// 	-
+														// </span>
 													)}
 													</th>
 												</tr>
