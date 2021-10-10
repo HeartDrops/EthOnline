@@ -854,28 +854,30 @@ const BuyForm = (props) => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log("form submitted");
+		// console.log("form submitted");
 		selectNextHandler();
 	};
 
 	const handleTransaction = () => {
 		// connect to smart contract to handle transaction
-		// createMarketSale();
-		// selectNextHandler();
+		createMarketSale();
+		selectNextHandler();
+
+
 		// console.log(ethers.utils.parseEther(".000000000000000002"));
 		// console.log(ethers.utils.parseEther("0.000000000000000002"));
-		console.log(donationAmtEth);
-		const price = 2;
+		// console.log(donationAmtEth);
+		// const price = 2;
 		// let gwei = ethers.utils.formatUnits(price.toString(), "gwei");
 		// let wei = ethers.utils.formatUnits(price.toString(), "wei");
 
-		let wei = ethers.utils.parseEther(price.toString());
+		// let wei = ethers.utils.parseEther(price.toString());
 
 		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "wei"));
 		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "gwei"));
 		// console.log("tx", ethers.utils.formatUnits(tx.toString(), "ether"));
 		// test = (donationAmtEth + "").split(".");
-		console.log('test', wei);
+		// console.log('test', wei);
 	};
 
 	return (
@@ -1123,20 +1125,31 @@ const BuyForm = (props) => {
 								<div>
 									{!transactionSucceeded ? (
 										<div>
-											<div className="py-3 text-center">
-												Oops ! Your transaction failed..
+											<div className="alert alert-warning">
+												<div className="flex-1">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w-6 h-6 mx-2 stroke-current"> 
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>                         
+													</svg> 
+													<label>Oops ! Your transaction failed.</label>
+												</div>
 											</div>
 										</div>
 									) : (
-										<div>
-											<div className="py-3 text-center">
-												Congratulations ! You now own {donationAmtTokens} {tokenSymbol}
+										<div className="bg-primary shadow-lg rounded-3xl p-2">
+											<div>
+												<center><img className="mb-1" height="25" width="50" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></center>
 											</div>
-											<div className="py-3 text-center">
-												You donated {donationAmtEth} ETH ($ {donationAmtUSD}) to {charityInfo.name}. Thanks for supporting them !
+											<div className="py-3 text-center text-primary-content">
+												Congratulations, your transaction was a success !
+											</div>
+											<div className="py-3 text-center text-primary-content">
+												You now own {donationAmtTokens} {tokenSymbol}. You donated {donationAmtEth} ETH ($ {donationAmtUSD}) to {charityInfo.name}.
+											</div>
+											<div className="py-3 text-center text-primary-content">
+												Thanks for supporting them !
 											</div>
 											<div className="center-cnt py-2">
-												<button className="btn btn-secondary btn-wide text-primary-content">Share</button>
+												<button className="btn btn-accent btn-wide text-primary-content">Share</button>
 											</div>
 										</div>
 									)}
