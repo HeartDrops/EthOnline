@@ -317,7 +317,7 @@ const AuctionsPage = () => {
       <div className="py-5">
         <div className="container mx-auto p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
-            { listItems && listItems.length>0 ? listItems.map((item) => <ShowcaseAuctions key={item.id} item={item} ACHouse={ACHouse} />)  : <div className="align-center">There are currently no auctions ! Please use buttons at the top to create market items in dev environment.</div>}
+            { listItems && listItems.length>0 ? listItems.map((item) => <ShowcaseAuctions key={item.id} item={item} ACHouse={ACHouse} />)  : ''}
           </div>
         </div>
       </div>
