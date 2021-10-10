@@ -280,11 +280,17 @@ const BuyForm = (props) => {
 	}
 
 	async function loadNFT() {
-		// const tokenUri = 'ipfs://bafyreih76tru7mgvpjqszqfjnipbqf5hbit2x37cddpu57slid7kwkeyxy/metadata.json';
-		// console.log("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
-		const meta = await axios.get("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
+		// console.log("https://ipfs.infura.io/ipfs/" + nftUri.slice(7));
+		const meta = await axios.get("https://ipfs.infura.io/ipfs/" + nftUri.slice(7));
+		const url = 'https://ipfs.io/ipfs/' + meta.data.image.slice(7);
 		// console.log('meta', meta.data);
-		setNftMetadata(meta.data);
+		// console.log('url', url);
+		setNftMetadata({
+			name: meta.data.name,
+			description: meta.data.description,
+			image: meta.data.image,
+			url: url
+		});
 	};
 
 	// ---- get info on token for 1155 -----
@@ -958,7 +964,8 @@ const BuyForm = (props) => {
 			<div className=" mb-0 relative ">
                 <div className="card shadow-2xl">
                     <figure>
-                        <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" />
+                        {/* <img src="https://picsum.photos/id/1005/400/250" className="shadow-lg" /> */}
+						{nftMetadata && nftMetadata.image && <img src={nftMetadata.url} />}
                     </figure> 
                     <div className="card-body">
                         <h2 className="card-title uppercase font-bold">{nftMetadata && nftMetadata.name}</h2> 

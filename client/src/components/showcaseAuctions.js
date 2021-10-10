@@ -154,13 +154,18 @@ const ShowcaseAuctions = (props) => {
 
 
         async function loadNFT() {
-            // const tokenUri = 'ipfs://bafyreih76tru7mgvpjqszqfjnipbqf5hbit2x37cddpu57slid7kwkeyxy/metadata.json';
             if (nftUri != null) {
-                console.log("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
+                // console.log("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
                 const meta = await axios.get("https://ipfs.infura.io/ipfs/" + nftUri.slice(7))
-                console.log('meta', meta);
-                setNftMetadata(meta.data);
-                // setStatesToPass({ ...statesToPass, nft_metadata: meta });
+                const url = 'https://ipfs.io/ipfs/' + meta.data.image.slice(7);
+                // console.log('meta', meta.data);
+                // console.log('url', url);
+                setNftMetadata({
+                    name: meta.data.name,
+                    description: meta.data.description,
+                    image: meta.data.image,
+                    url: url
+                });
             }
         };
         if (nftMetadata == null) {
@@ -176,8 +181,8 @@ const ShowcaseAuctions = (props) => {
         <>
         {/* <button className="btn btn-primary btn-wide mx-2" onClick={showState}>Show State</button> */}
             <div className="card bordered shadow-2xl" key={props.item.itemId}>
-                    <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered" />
-                    {/* <img src={nftMetadata && nftMetadata.image} /> */}
+                    {/* <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered" /> */}
+                    {nftMetadata && nftMetadata.image && <img src={nftMetadata.url} className="cnt-centered" />}
                 <div className="card-body">
                     <h2 className="card-title">{nftMetadata && nftMetadata.name}<span className=""> created by {artistInfo && artistInfo.name}</span> 
                         {endDate.ongoing ? <div className="badge mx-2 badge-secondary text-primary-content">ONGOING</div> : <div className="badge mx-2 badge-accent text-primary-content">FINISHED</div>}
