@@ -29,12 +29,12 @@ const ArtistsPage = () => {
           </div>
 
           <div className="bg-white shadow-lg rounded-3xl p-8 mb-5">
-            <h3 class="font-bold text-xl mb-1">Where are the Charities/NGOs located?</h3>
+            <h3 className="font-bold text-xl mb-1">Where are the Charities/NGOs located?</h3>
             <p>We are a global community, coming together to change the world. There is no one central location.</p>
           </div>
 
           <div className="bg-white shadow-lg rounded-3xl p-8 mb-5">
-            <h3 class="font-bold text-xl mb-1">What Blockchains are supported?</h3>
+            <h3 className="font-bold text-xl mb-1">What Blockchains are supported?</h3>
             <p>Currently, all Heart Drops are located either on the Ethereum or Polygon MATIC blockchains.</p>
           </div>
 

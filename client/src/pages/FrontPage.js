@@ -1,81 +1,145 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ShowcaseAuctions from '../components/showcaseAuctions';
 import Countdown from '../components/countdown';
+import { ethers, Signer, providers, BigNumber, utils } from "ethers";
+
+import ACHouseContract from "../contracts/ACHouse.json";
+import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
+import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
 
 const FrontPage = () => {
+
+  const [ ACHouse, setACHouse] = useState(null);
+  const [ ACHouse1155, setACHouse1155 ] = useState(null);
+  const [ ACHouse721, setACHouse721 ] = useState(null); 
+  const [ listItems, setListItems ] = useState(null); 
+
+  // setting global var for ACHousContract.
+	let contractACHouse,
+      contractACHouse1155,
+      contractACHouse721 = null;
+
+  const rpcConnection = async () => {
+		const ganacheUrl = "http://127.0.0.1:7545";
+		let provider = new providers.JsonRpcProvider(ganacheUrl);
+		// console.log("provider: ", provider);
+
+		let chainId = await provider.getNetwork();
+		// console.log("chainId: ", chainId);
+
+		let networkId = await window.ethereum.request({
+			method: "net_version",
+		});
+		// console.log("networkId: " + networkId);
+
+		let providerAccounts = await provider.listAccounts();
+		// console.log("providerAccts: ", providerAccounts);
+
+		const accountOne = providerAccounts[1]; // ganache account at index 1
+		const accountTwo = providerAccounts[2]; // ganache account at index 2
+
+		// console.log("accountOne: " + accountOne + ", accountTwo: " + accountTwo);
+
+		/******************************************************************************* */
+		// This is the only thing i have to hard code. The 5777 value i am not able to find it through ether.js.. so for now this will get you the address regardless
+		// of migrations.
+		const ACHouseAddress = ACHouseContract.networks[5777].address;
+		const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
+		const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
+		/******************************************************************************* */
+		const signerOne = provider.getSigner(accountOne);
+
+		contractACHouse = new ethers.Contract(
+			ACHouseAddress,
+			ACHouseContract.abi,
+			signerOne
+		);
+
+		contractACHouse1155 = new ethers.Contract(
+			ACHouse1155Address,
+			ACHouseToken1155Contract.abi,
+			signerOne
+		);
+
+		contractACHouse721 = new ethers.Contract(
+			ACHouse721Address,
+			ACHouseToken721Contract.abi,
+			signerOne
+		);
+
+    setACHouse(contractACHouse);
+    setACHouse1155(contractACHouse1155);
+    setACHouse721(contractACHouse721);
+	};
+
+  if (ACHouse == null && ACHouse1155 == null && ACHouse721 == null) {
+    rpcConnection();
+  };
+
+  useEffect(() => {
+    if (ACHouse && listItems == null) {
+      fetchUnSoldMarketItems();
+    };
+  }, [fetchUnSoldMarketItems]);
+
+  async function fetchUnSoldMarketItems() {
+		let data = await ACHouse.fetchUnSoldMarketItems().then((f) => {
+			// console.log("unsold market items", f);
+			return f;
+		});
+
+		// console.log("data: ", data);
+
+		const items = await Promise.all(
+			data.map(async (i) => {
+				let item = {
+					itemId: i.itemId.toNumber(),
+					nftContract: i.nftContract,
+					tokenId: i.tokenId.toNumber(),
+					seller: i.seller,
+					owner: i.owner,
+					price: ethers.utils.formatUnits(i.price.toString(), "wei"),
+					amount: i.amount.toNumber(),
+					charityId: i.charityId.toNumber(),
+					auctionTime: i.auctionTime.toNumber(),
+					sold: i.sold,
+					isMultiToken: i.isMultiToken,
+					isRemoved: i.isRemoved,
+					isFrac: i.isFrac,
+				};
+				return item;
+			})
+		);
+		console.log("items: ", items);
+    setListItems(items);
+	}
+
   return (
     <>
 
     <div className="hero min-h-screen bg-primary">
-  <div className="text-center hero-content text-primary-content">
-    <div className="max-w-lg">
-      <center><img className="mb-6" height="100" width="200" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></center>
-      <img className="mt-6 mb-6" src="https://freight.cargo.site/t/thumbnail/w/100/i/887ac2e88349f644bf4718496c686b8d9101eb1b295bf3b0852f54e68dcf9d76/logotype-heart-drops.svg" />
-      <p className="mb-5">
-      A Decentralized Philanthropy (AKA “DePhi”) platform focused on bringing people together who want to make a difference in the world through life-changing NFT Drops.
-          </p>
-          <Link to="/auctions" className="btn bg-accent mr-2">Discover Heart Drops</Link>
-          <Link to="/create" className="btn btn-secondary text-primary-content">Create an Heart Drop</Link>
+      <div className="text-center hero-content text-primary-content">
+        <div className="max-w-lg">
+          <center><img className="mb-6" height="100" width="200" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></center>
+          <img className="mt-6 mb-6" src="https://freight.cargo.site/t/thumbnail/w/100/i/887ac2e88349f644bf4718496c686b8d9101eb1b295bf3b0852f54e68dcf9d76/logotype-heart-drops.svg" />
+          <p className="mb-5">
+          A Decentralized Philanthropy (AKA “DePhi”) platform focused on bringing people together who want to make a difference in the world through life-changing NFT Drops.
+              </p>
+              <Link to="/auctions" className="btn bg-accent mr-2">Discover Heart Drops</Link>
+              <Link to="/create" className="btn btn-secondary text-primary-content">Create an Heart Drop</Link>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
 
-
-    {/* <ShowcaseAuctions /> */}
     <div className="py-5">
         <div className="container mx-auto p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
-            <div className="card bordered shadow-2xl">
-                    <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered" />
-                <div className="card-body">
-                    <h2 className="card-title">NFT NAME <span className="">by ARTIST_NAME</span> 
-                        <div className="badge mx-2 badge-secondary text-primary-content">ONGOING</div>
-                        <div className="badge badge-accent text-primary-content">FOR HUMAN RIGHTS</div>
-                    </h2> 
-                    <div className="my-3">
-                        <p>Rerum reiciendis beatae tenetur excepturi aut pariatur est eos.</p> 
-                    </div>
-                    <div className="my-3">
-                        <span>Donated by DONOR_NAME</span>
-                        <span>  for Charity_NAME</span>
-                    </div>
-
-                    <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
-                        <div className="mb-4 lg:mb-0 flex-shrink-0">
-                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
-                            <div className="font-bold">ERC 721</div>
-                        </div>
-                        <div className="mb-4 lg:mb-0 flex-shrink-0">
-                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
-                            <div className="font-bold">$HEARTS</div>
-                        </div>
-                        <div className="mb-4 lg:mb-0 flex-shrink-0">
-                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
-                            <div className="font-bold">100</div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-wrap md:flex-nowrap justify-between mx-2 my-3 cursor-pointer">
-                         <div className="mb-4 lg:mb-0 flex-shrink-0">
-                            <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
-                            <Countdown end="1634309818" size="small" />
-                        </div>
-
-                        <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
-                            <div className="justify-end card-actions">
-                                <Link className="btn btn-secondary text-primary-content" to='/'>Donate</Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> 
+            { listItems && listItems.length>0 ? listItems.map((item) => <ShowcaseAuctions key={item.id} item={item} ACHouse={ACHouse} />)  : <div className="align-center">There are currently no auctions !</div>}
+          </div>
         </div>
-        </div>
-        </div>
-
-
+    </div>
 
     <div className="py-5">
       <h2 className="my-5 text-5xl font-bold text-center">How it works</h2>

@@ -214,7 +214,7 @@ const ShowcaseAuctions = (props) => {
                         {endDate.timestamp ? 
                          <div className="mb-4 lg:mb-0 flex-shrink-0">
                             <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
-                            <Countdown end={endDate.timestamp} size="small" />
+                            <Countdown end={endDate.timestamp} />
                         </div> : ''}
 
                         <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
