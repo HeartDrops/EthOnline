@@ -27,6 +27,7 @@ const ArtForm = () => {
     artname: true,
     ethadd: true,
   });
+  const [ listed, setListed ] = useState(false);
   const [ ethPrice, setEthPrice ] = useState(null);
 
   // Token standard
@@ -340,9 +341,9 @@ const ArtForm = () => {
 		// const ACHouseAddress = ACHouseContract.networks[5777].address;
 		// const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
 		// const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
-    const ACHouseAddress = "0xE3d93EA7DFbEbE603b34F14a8D00c1606f0125e3";
-    const ACHouse1155Address = "0xC6f790148595f0DF89A03a104D8A01Cf574bAae8";
-    const ACHouse721Address = "0xAA0897e999EC5E0bED7D8f690c9090B92BEa644A";
+    const ACHouseAddress = "0x76Bfcd6C8F83D1F2b947C5119978D4C03bC7a0Bd";
+    const ACHouse1155Address = "0x691a7c7CA95287EFB5C38ACD1C33A93B75e55962";
+    const ACHouse721Address = "0xC8a05eD84Feadc0eb21A8aBdf614879722526771";
 		/******************************************************************************* */
 		const signerOne = provider.getSigner(accountOne);
 
@@ -374,8 +375,7 @@ const ArtForm = () => {
   }
 
 
-  const mint721NFT = async (uri) => {
-    console.log(uri);
+  const mint721NFT = async () => {
     // (uint256 _id, string memory uri, string memory name, string memory symbol)
     let tx = await ACHouse.createNFT721(1, uri, artName, tokenSymbol);
     const receipt = await tx.wait();
@@ -386,14 +386,13 @@ const ArtForm = () => {
     } else {
       setMinted(false);
     }
-    return uri
   }
 
-  const fractionalize721NFT = async (uri) => {
+  const fractionalize721NFT = async () => {
     console.log(tokenPrice);
     console.log(tokenSupply);
     console.log(uri);
-    console.log(ACHouse721.address)
+    console.log(ACHouse721.address);
     // (address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri)
     let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
     let tx = await ACHouse.fractionalize721NFT(ACHouse721.address, 1, 1, tokenSupply, uri);
@@ -423,20 +422,61 @@ const ArtForm = () => {
     }
 	};
 
+  const setParentApproval721 = async () => {
+    console.log("Approving")
+    let tx = await ACHouse721.setParentApproval()
+    const receipt = await tx.wait();
+    console.log(receipt);
+  }
+
+  const setParentApproval1155 = async () => {
+    console.log("Approving")
+    let tx = await ACHouse721.setParentApproval()
+    const receipt = await tx.wait();
+    console.log(receipt);
+	};
 
   const listItem = async () => {
     console.log(validPrice)
     console.log(validSupply)
     console.log(validSymbol)
     if (validPrice && validSupply && validSymbol && tokenPrice!=null && tokenSupply!=null && tokenSymbol!=null) {
-      const uri = await storeNFT()
-      .then(res =>
-        mint721NFT(res))
-        .then(res => 
-          fractionalize721NFT(res)).then(res =>
-            createMarketItem721())
-    }
+      if (standard=="ERC721") {
+        console.log("ERC721")
+        const uri = await mint721NFT()
+        .then(res =>{
+          setParentApproval721()})
+          .then(res => {
+            fractionalize721NFT()})
+            .then(res =>{
+              createMarketItem721()})
+            .then(res =>
+              setListed(true));
+        } else if (standard=="ERC1155") {
+          console.log("ERC1155")
+          const uri = await mint1155NFT()
+          .then(res =>{
+            setParentApproval1155()})
+            .then(res => {
+              fractionalize1155NFT()})
+              .then(res =>{
+                createMarketItem1155()})
+              .then(res =>
+                setListed(true));
+        } else {
+          console.log("failed")
+          setListed(false);
+        }
+      }
   };
+
+  const fetchUnSoldMarketItems = async () => {
+		let data = await ACHouse.fetchUnSoldMarketItems().then((f) => {
+			console.log("unsold market items", f);
+			return f;
+		});		
+    console.log("data: ", data);
+  }
 
 
   // const listItem = () => new Promise((resolve, reject) => {
@@ -463,9 +503,9 @@ const ArtForm = () => {
     console.log(tokenSupply);
     console.log(uri);
     console.log(ACHouse721.address);
-    // (address nftContract, uint256 tokenId, uint256 shardId, uint256 priceOfShard, uint256 supplyToCreate, string memory uri)
+    // fractionalize1155NFT(address nftContract, uint256 tokenId, uint256 shardId, uint256 supplyToCreate, string memory uri) => uint256
     let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
-    let tx = await ACHouse.fractionalize1155NFT(ACHouse1155.address, 1, 1, adjustedPrice, tokenSupply, uri);
+    let tx = await ACHouse.fractionalize1155NFT(ACHouse1155.address, 1, 1, tokenSupply, uri);
     const receipt = await tx.wait();
     console.log(tx);
     console.log(receipt);
@@ -481,7 +521,7 @@ const ArtForm = () => {
 		// Same applies for NFT create outside of our system.
     // (address nftContract, uint256 tokenId, uint256 price, uint256 amount, uint256 _charityId, uint256 auctionTime)
     let adjustedPrice = BigInt(ethers.utils.parseEther(tokenPrice.toString()).toString()).toString();
-		let tx = ACHouse.create1155MarketItem(ACHouse1155.address, 1, adjustedPrice, tokenSupply, charityId, `${ deadline ? 1634309818 : 0}`)
+		let tx = await ACHouse.create1155MarketItem(ACHouse1155.address, 1, adjustedPrice, tokenSupply, charityId, `${ deadline ? 1634309818 : 0}`, true)
 		const receipt = await tx.wait();
     if (receipt) {
       setItemCreated(true);
@@ -851,7 +891,18 @@ const ArtForm = () => {
           onClick={fractionalize721NFT}
         >Fractionalize</button>} */}
         
-        { !itemCreated && <button 
+        {!stored &&<button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out
+          border-teal-600 transition"
+          onClick={storeNFT}
+        >Confirm NFT</button>}
+        { !itemCreated && 
+        <button 
           className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
           hover:bg-teal-600  
           bg-purple-500 
@@ -871,12 +922,23 @@ const ArtForm = () => {
           border-teal-600 transition"
         ><NavLink to="/auctions" activeClassName="active">View NFT Item</NavLink>
         </button>}
+        { itemCreated && <button 
+          className="text-base ml-2 w-40 hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer 
+          hover:bg-teal-600  
+          bg-purple-500 
+          text-white 
+          font-bold
+          border duration-200 ease-in-out
+          border-teal-600 transition"
+          onClick={fetchUnSoldMarketItems}
+        >Fetch Item
+        </button>}
         
       </div>          
           }
 
       <div className="flex p-2 mt-4">
-          { step!=0 && <button
+          { step!=0 && !listed && <button
             className="text-base  ml-2  hover:scale-110 hover:bg-purple-600 focus:shadow-outline focus:outline-none flex justify-center px-4 py-2 rounded font-bold cursor-pointer
             hover:bg-teal-600
             bg-purple-500

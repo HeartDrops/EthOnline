@@ -21,30 +21,33 @@ const AuctionsPage = () => {
 	const rpcConnection = async () => {
 		const ganacheUrl = "http://127.0.0.1:7545";
 		let provider = new providers.JsonRpcProvider(ganacheUrl);
-		// console.log("provider: ", provider);
+		console.log("provider: ", provider);
 
 		let chainId = await provider.getNetwork();
-		// console.log("chainId: ", chainId);
+		console.log("chainId: ", chainId);
 
 		let networkId = await window.ethereum.request({
 			method: "net_version",
 		});
-		// console.log("networkId: " + networkId);
+		console.log("networkId: " + networkId);
 
 		let providerAccounts = await provider.listAccounts();
-		// console.log("providerAccts: ", providerAccounts);
+		console.log("providerAccts: ", providerAccounts);
 
 		const accountOne = providerAccounts[1]; // ganache account at index 1
 		const accountTwo = providerAccounts[2]; // ganache account at index 2
 
-		// console.log("accountOne: " + accountOne + ", accountTwo: " + accountTwo);
+		console.log("accountOne: " + accountOne + ", accountTwo: " + accountTwo);
 
 		/******************************************************************************* */
 		// This is the only thing i have to hard code. The 5777 value i am not able to find it through ether.js.. so for now this will get you the address regardless
 		// of migrations.
-		const ACHouseAddress = ACHouseContract.networks[5777].address;
-		const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
-		const ACHouse721Address = ACHouseToken721Contract.networks[5777].address;
+		// const ACHouseAddress = ACHouseContract.networks[5777].address;
+		// const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
+		// const ACHouse721Address = ACHouseToken721Contract.networks[5777].address
+		const ACHouseAddress = "0xB1C3dFbc7A5f348004E0f6fBE44061fd58177A79";
+		const ACHouse1155Address = "0x7c03758Fd6710fa5c2260b08713b38ab8bE91b4e";
+		const ACHouse721Address = "0x3261225BDfBb1546BB28202007B893966b6a21Be";
 		/******************************************************************************* */
 		const signerOne = provider.getSigner(accountOne);
 
@@ -114,11 +117,11 @@ const AuctionsPage = () => {
 
 	async function fetchUnSoldMarketItems() {
 		let data = await ACHouse.fetchUnSoldMarketItems().then((f) => {
-			// console.log("unsold market items", f);
+			console.log("unsold market items", f);
 			return f;
-		});
+		});		
 
-		// console.log("data: ", data);
+		console.log("data: ", data);
 
 		const items = await Promise.all(
 			data.map(async (i) => {
