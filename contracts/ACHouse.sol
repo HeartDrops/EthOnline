@@ -1,5 +1,5 @@
+pragma solidity ^0.8.3;
 // "SPDX-License-Identifier: UNLICENSED"
-pragma solidity ^ 0.8 .3;
 
 import "./ACHouseToken1155.sol";
 import "./ACHouseToken721.sol";
@@ -76,7 +76,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     bool isFrac;
   }
 
-  mapping(uint256 => MarketItem) private idToMarketItemMapping;
+  mapping(uint256 => MarketItem) private idMarketItemMapping;
   
   //user mapping to itemSold array
   mapping( address => uint256[]) userSoldItemMapping;
@@ -144,8 +144,8 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     _itemIds.increment();
     uint256 itemId = _itemIds.current();
     
-    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, amount, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
-    idToMarketItemMapping[itemId] = item;
+    MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price / 1 ether, amount, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
+    idMarketItemMapping[itemId] = item;
 
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
 
@@ -162,7 +162,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint256 itemId = _itemIds.current();
 
     MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
-    idToMarketItemMapping[itemId] = item;
+    idMarketItemMapping[itemId] = item;
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
@@ -173,37 +173,25 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   
   // Remove item from marketplace
   function removeMarketPlaceItem( uint256 itemId) public {
-      
-      idToMarketItemMapping[itemId].isRemoved = true;
+    idMarketItemMapping[itemId].isRemoved = true;
   }
   
   // re add item to marketplace
   function addMarketPlaceItem( uint256 itemId) public {
-      
-      idToMarketItemMapping[itemId].isRemoved = false;
+    idMarketItemMapping[itemId].isRemoved = false;
   }
   
   /* Creates the sale of a marketplace item */
   /* Transfers ownership of the item, as well as funds between parties */
   function createMarketSale(address nftContract, uint256 itemId) public payable nonReentrant {
     
-    MarketItem memory item = idToMarketItemMapping[itemId];
+    MarketItem memory item = idMarketItemMapping[itemId];
     
     uint price = item.price;
     uint tokenId = item.tokenId;
     bool isMultiToken = item.isMultiToken;
     require(msg.value >= price, "Buyer must trasfer Ether equal or greater than Price of Item");
 
-    // transfer funds
-    item.seller.transfer(msg.value);
-
-    //transfer ownership.
-    if(isMultiToken){
-      IERC1155(nftContract).safeTransferFrom(address(this), msg.sender, item.tokenId, item.amount, '[]');
-    }else{
-      IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
-    }
-    
     //set new owner inrecords.
     item.owner = payable(msg.sender);
     //set sold to true
@@ -211,22 +199,37 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     //increament itemSold counter.
     _itemsSold.increment();
     
-    idToMarketItemMapping[itemId] = item;
-    // mapp user address to itemSold [] and purchased[]
+    //save updated item mapping. 
+    idMarketItemMapping[itemId] = item;
+
+    // mapp seller user-address to itemSold [] and increase sold count
     userSoldItemMapping[item.seller].push(itemId);
+    uint256 sellerCount = userSoldCountMapping[item.seller];
+    userSoldCountMapping[item.seller] = sellerCount++;
     
-    //user mapping to purchased item  array
+    //// mapp buyer user-address to itemPurchased [] 
     userpurchasedItemMapping[msg.sender].push(itemId);
+    uint256 buyerCount = userPurchasedCountMapping[msg.sender];
+    userPurchasedCountMapping[msg.sender] = buyerCount++;
+    // transfer funds to seller. 
+    item.seller.transfer(msg.value);
+
+    //transfer ownership to buyer.
+    if(isMultiToken){
+      IERC1155(nftContract).safeTransferFrom(address(this), msg.sender, item.tokenId, item.amount, '[]');
+    }else{
+      IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
+    }
 
     emit MarketItemSold( itemId, nftContract, tokenId, item.seller, msg.sender, price, true);
   }
 
   function fetchMarketItem(uint256 _id) public view returns(MarketItem memory){
-    return idToMarketItemMapping[_id];
+    return idMarketItemMapping[_id];
   }
 
   /* Returns all unsold market items */
-  function fetchUnSoldMarketItems() public view returns(MarketItem[] memory) {
+  function getUnSoldMarketItems() public view returns(MarketItem[] memory) {
     
     uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
     MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
@@ -237,17 +240,11 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
       
     for(uint i=0; i < totalItemCount; i++){
         // only way i found to iterate through a mapping. 
-        if(idToMarketItemMapping[i+1].owner == address(0) && idToMarketItemMapping[i+1].isRemoved == false ) { 
+        if(idMarketItemMapping[i+1].owner == address(0) && idMarketItemMapping[i+1].isRemoved == false ) { 
             uint currentID = i+1;
 
-            MarketItem storage currentItem = idToMarketItemMapping[currentID];
+            MarketItem memory currentItem = idMarketItemMapping[currentID];
             items[unsoldCurrentIndex] = currentItem;
-            
-            // uint itemId =idToMarketItemMapping[currentID].itemId;
-            // string memory str =  uint2str(itemId);
-            
-            // itemIdStr.push(str);
-            
             unsoldCurrentIndex +=1;
         }
     }
@@ -259,14 +256,11 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   function fetchMyNFTs() public view returns (MarketItem[] memory) {
     
     uint256[] memory userPurchasedIds = userpurchasedItemMapping[msg.sender];
-    
-    
+
     MarketItem[] memory items = new MarketItem[](userPurchasedIds.length);
+
     for(uint i =0; i< userPurchasedIds.length; i++){
-        
-        // MarketItem memory item = idToMarketItemMapping[userPurchasedIds[i]];
-        
-        items[i] = idToMarketItemMapping[userPurchasedIds[i]];
+        items[i] = idMarketItemMapping[userPurchasedIds[i]];
     }
     return items;
   }
@@ -278,7 +272,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint itemCount = 0;
     
     for (uint i = 0; i < totalItemCount; i++) {
-      if (idToMarketItemMapping[i + 1].seller == msg.sender) {
+      if (idMarketItemMapping[i + 1].seller == msg.sender) {
         itemCount += 1;
       }
     }
@@ -287,9 +281,9 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     uint currentIndex = 0;
     
     for (uint i = 0; i < totalItemCount; i++) {
-      if (idToMarketItemMapping[i + 1].seller == msg.sender) {
+      if (idMarketItemMapping[i + 1].seller == msg.sender) {
         uint currentId = i + 1;
-        MarketItem storage currentItem = idToMarketItemMapping[currentId];
+        MarketItem memory currentItem = idMarketItemMapping[currentId];
         items[currentIndex] = currentItem;
         currentIndex += 1;
       }
