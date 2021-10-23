@@ -90,7 +90,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
   mapping ( address => uint256) userPurchasedCountMapping;
   
   event MarketItemCreated(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
-    address seller, uint256 price, uint256 amount, uint256 charityId, uint256 auctionTime, bool sold, bool isMultiToken, bool isRemoved, bool isFrac);
+    address seller, uint256 price, uint256 amount, uint256 auctionTime, bool isMultiToken, bool isFrac);
   
   event MarketItemSold(uint indexed itemId, address indexed nftContract, uint256 indexed tokenId, 
     address seller, address owner, uint256 price, bool sold);
@@ -154,10 +154,9 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     userItemCreatedCountMapping[msg.sender] = userCount++;
     userItemCreatedMapping[msg.sender].push(itemId);
 
-
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
 
-    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, price, amount, _charityId, auctionTime, false, true, false, isFrac);
+    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, price, amount, auctionTime, true, isFrac);
 
     return itemId;
   }
@@ -179,7 +178,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
-    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, price, 1, _charityId, auctionTime, false, false, false, isFrac);
+    emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, price, 1, auctionTime, false, isFrac);
 
     return itemId;
   }
@@ -291,7 +290,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
       items[i] = fetchMarketItem(userItem[i]);
     }
 
-    return irems;
+    return items;
 
   }
 
