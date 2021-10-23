@@ -78,6 +78,8 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
   mapping(uint256 => MarketItem) private idMarketItemMapping;
   
+  mapping( address => uint256[]) userItemCreatedMapping;
+  mapping( address => uint256) userItemCreatedCountMapping;
   //user mapping to itemSold array
   mapping( address => uint256[]) userSoldItemMapping;
   //user sold count mapp;
@@ -147,6 +149,12 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
     MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price / 1 ether, amount, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
     idMarketItemMapping[itemId] = item;
 
+    // increament user item created count and store and push itemId to userItem Created mapping
+    uint256 userCount = userItemCreatedCountMapping[msg.sender];
+    userItemCreatedCountMapping[msg.sender] = userCount++;
+    userItemCreatedMapping[msg.sender].push(itemId);
+
+
     IERC1155(nftContract).safeTransferFrom(msg.sender, address(this), tokenId, amount, '[]');
 
     emit MarketItemCreated(itemId, nftContract, tokenId, msg.sender, price, amount, _charityId, auctionTime, false, true, false, isFrac);
@@ -163,6 +171,11 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
     MarketItem memory item = MarketItem(itemId, nftContract, tokenId, payable(msg.sender), payable(address(0)), price, 1, _charityId, auctionTime, false, true, false, isFrac); // amount will always be 1. 
     idMarketItemMapping[itemId] = item;
+
+    // increament user item created count and store and push itemId to userItem Created mapping
+    uint256 userCount = userItemCreatedCountMapping[msg.sender];
+    userItemCreatedCountMapping[msg.sender] = userCount++;
+    userItemCreatedMapping[msg.sender].push(itemId);
 
     IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
 
@@ -230,7 +243,7 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
   /* Returns all unsold market items */
   function getUnSoldMarketItems() public view returns(MarketItem[] memory) {
-    
+
     uint totalUnSoldCount = _itemIds.current() - _itemsSold.current();
     MarketItem[] memory items = new MarketItem[] (totalUnSoldCount);
     
@@ -267,28 +280,27 @@ contract ACHouse is ReentrancyGuard, ERC1155Holder, ERC721Holder {
 
   /* Returns only items a user has created */
   function fetchItemsCreated() public view returns (MarketItem[] memory) {
-    //get total item count - created nin MarketItem.
-    uint totalItemCount = _itemIds.current();
-    uint itemCount = 0;
     
-    for (uint i = 0; i < totalItemCount; i++) {
-      if (idMarketItemMapping[i + 1].seller == msg.sender) {
-        itemCount += 1;
-      }
+    // get array of itemId user created.
+    uint256[] memory userItem = userItemCreatedMapping[msg.sender];
+
+    MarketItem[] memory items = new MarketItem[](userItem.length);
+    
+    //loop through array and fetch the marketItems
+    for(uint i = 0; i < userItem.length; i++){
+      items[i] = fetchMarketItem(userItem[i]);
     }
 
-    MarketItem[] memory items = new MarketItem[](itemCount);
-    uint currentIndex = 0;
-    
-    for (uint i = 0; i < totalItemCount; i++) {
-      if (idMarketItemMapping[i + 1].seller == msg.sender) {
-        uint currentId = i + 1;
-        MarketItem memory currentItem = idMarketItemMapping[currentId];
-        items[currentIndex] = currentItem;
-        currentIndex += 1;
-      }
-    }
-    return items;
+    return irems;
+
+  }
+
+  function fetchUserSoldCount() public view returns (uint256){
+    return userSoldCountMapping[msg.sender];
+  }
+
+  function fetchUserPurchasedCount() public view returns (uint256){
+    return userPurchasedCountMapping[msg.sender];
   }
   
   /***************************************************************************************************************************************/
