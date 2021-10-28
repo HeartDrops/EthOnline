@@ -21,33 +21,33 @@ const AuctionsPage = () => {
 	const rpcConnection = async () => {
 		const ganacheUrl = "http://127.0.0.1:7545";
 		let provider = new providers.JsonRpcProvider(ganacheUrl);
-		console.log("provider: ", provider);
+		// console.log("provider: ", provider);
 
 		let chainId = await provider.getNetwork();
-		console.log("chainId: ", chainId);
+		// console.log("chainId: ", chainId);
 
 		let networkId = await window.ethereum.request({
 			method: "net_version",
 		});
-		console.log("networkId: " + networkId);
+		// console.log("networkId: " + networkId);
 
 		let providerAccounts = await provider.listAccounts();
-		console.log("providerAccts: ", providerAccounts);
+		// console.log("providerAccts: ", providerAccounts);
 
 		const accountOne = providerAccounts[1]; // ganache account at index 1
 		const accountTwo = providerAccounts[2]; // ganache account at index 2
 
-		console.log("accountOne: " + accountOne + ", accountTwo: " + accountTwo);
+		// console.log("accountOne: " + accountOne + ", accountTwo: " + accountTwo);
 
 		/******************************************************************************* */
 		// This is the only thing i have to hard code. The 5777 value i am not able to find it through ether.js.. so for now this will get you the address regardless
 		// of migrations.
-		// const ACHouseAddress = ACHouseContract.networks[5777].address;
-		// const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
-		// const ACHouse721Address = ACHouseToken721Contract.networks[5777].address
-		const ACHouseAddress = "0xB1C3dFbc7A5f348004E0f6fBE44061fd58177A79";
-		const ACHouse1155Address = "0x7c03758Fd6710fa5c2260b08713b38ab8bE91b4e";
-		const ACHouse721Address = "0x3261225BDfBb1546BB28202007B893966b6a21Be";
+		const ACHouseAddress = ACHouseContract.networks[5777].address;
+		const ACHouse1155Address = ACHouseToken1155Contract.networks[5777].address;
+		const ACHouse721Address = ACHouseToken721Contract.networks[5777].address
+		// const ACHouseAddress = "0xB1C3dFbc7A5f348004E0f6fBE44061fd58177A79";
+		// const ACHouse1155Address = "0x7c03758Fd6710fa5c2260b08713b38ab8bE91b4e";
+		// const ACHouse721Address = "0x3261225BDfBb1546BB28202007B893966b6a21Be";
 		/******************************************************************************* */
 		const signerOne = provider.getSigner(accountOne);
 
@@ -78,16 +78,19 @@ const AuctionsPage = () => {
 		rpcConnection();
 	}
 
-	useEffect(() => {
-		if (ACHouse && listItems == null) {
-			fetchUnSoldMarketItems();
-			// fetchItemsCreated();
-		}
-	}, [fetchUnSoldMarketItems]);
+  useEffect(() => {
+    if (ACHouse && listItems == null) {
+      	fetchUnSoldMarketItems();
+    	// fetchItemsCreated();
+		// get721TokenCount();
+		// getTokenIds721();
+		// getTokenIds1155();
+    };
+  }, [fetchUnSoldMarketItems]);
 
 	async function fetchItemsCreated() {
 		let data = await ACHouse.fetchItemsCreated().then((f) => {
-			console.log("Fetch Items created by user", f);
+			// console.log("Fetch Items created by user", f);
 			return f;
 		});
 
@@ -112,11 +115,11 @@ const AuctionsPage = () => {
 				return item;
 			})
 		);
-		// console.log("items: ", items);
-	}
+    console.log("items created by user: ", items);
+	};
 
 	async function fetchUnSoldMarketItems() {
-		let data = await ACHouse.fetchUnSoldMarketItems().then((f) => {
+		let data = await ACHouse.getUnSoldMarketItems().then((f) => {
 			console.log("unsold market items", f);
 			return f;
 		});		
@@ -144,7 +147,7 @@ const AuctionsPage = () => {
 			})
 		);
 		console.log("items: ", items);
-		setListItems(items);
+    	setListItems(items);
 	}
 
 	// ------------ functions for testing purposes ------------------
@@ -236,131 +239,98 @@ const AuctionsPage = () => {
 		console.log("items: ", items);
 	}
 
-	// ------ For ERC 1155 -------
+    async function getTokenIds1155() {
+      let data = await ACHouse.getTokenIds().then((f) => {
+        // console.log("Token Ids", f);
+        return f;
+      });
+      // console.log("data = ", data);
+      const tokenIds = await Promise.all(
+        data.map(async (i) => {
+          // console.log("i = ", i);
+          return i.toNumber();
+        })
+      );
+      console.log("tokenIds 1155: ", tokenIds);
+      setTokenIdsList1155(tokenIds);
+    };
+  
+    // ------ For ERC 721 -------
+    // get total number of tokens.
+    async function get721TokenCount() {
+      let data = await ACHouse.get721TokenCount().then((f) => {
+        console.log("721Token Count: ", f.toNumber());
+        return f.toNumber();
+      });
+    }
+  
+    async function getTokenIds721() {
+      let data = await ACHouse.get721TokenIds().then((f) => {
+        // console.log("721Token Ids", f);
+        return f;
+      });
+      // console.log("data721 = ", data);
+      if (data.length > 0) {
+        const tokenIds = await Promise.all(
+          data.map(async (i) => {
+            // console.log("i = ", i);
+            return i.toNumber();
+          })
+        );
+        console.log("721tokenIds: ", tokenIds);
+        setTokenIdsList721(tokenIds);
+      } else {
+        setTokenIdsList721([]);
+      }
+    }
+  
+    async function get721TokenName(id) {
+      let data = await ACHouse.get721TokenName(id).then((f) => {
+        console.log("Token Name for id", f);
+        return f;
+      });
+    }
+  
+    async function get721TokenSymbol(id) {
+      let data = await ACHouse.get721TokenSymbol(id).then((f) => {
+        console.log("Token Symbol for id", f);
+        return f;
+      });
+    }
+  
+    async function get721TokenURI(id) {
+      let data = await ACHouse.get721TokenURI(id).then((f) => {
+        console.log("721Token URI: ", f);
+        // if string then f.toString();
+        return f;
+      });
+    }
+  
+    // ------------ end block of functions for testing purposes ------------------
 
-	async function getTokenIds1155() {
-		let data = await ACHouse.getTokenIds().then((f) => {
-			// console.log("Token Ids", f);
-			return f;
-		});
-		// console.log("data = ", data);
-		const tokenIds = await Promise.all(
-			data.map(async (i) => {
-				// console.log("i = ", i);
-				return i.toNumber();
-			})
-		);
-		// console.log("tokenIds: ", tokenIds);
-		setTokenIdsList1155(tokenIds);
-	}
-
-	// ------ For ERC 721 -------
-	// get total number of tokens.
-	async function get721TokenCount() {
-		let data = await contractACHouse.get721TokenCount().then((f) => {
-			console.log("721Token Count: ", f.toNumber());
-			return f.toNumber();
-		});
-	}
-
-	async function getTokenIds721() {
-		let data = await ACHouse.get721TokenIds().then((f) => {
-			// console.log("721Token Ids", f);
-			return f;
-		});
-		// console.log("data721 = ", data);
-		if (data.length > 0) {
-			const tokenIds = await Promise.all(
-				data.map(async (i) => {
-					// console.log("i = ", i);
-					return i.toNumber();
-				})
-			);
-			// console.log("721tokenIds: ", tokenIds);
-			setTokenIdsList721(tokenIds);
-		} else {
-			setTokenIdsList721([]);
-		}
-	}
-
-	async function get721TokenName(id) {
-		let data = await ACHouse.get721TokenName(id).then((f) => {
-			console.log("Token Name for id", f);
-			return f;
-		});
-	}
-
-	async function get721TokenSymbol(id) {
-		let data = await ACHouse.get721TokenSymbol(id).then((f) => {
-			console.log("Token Symbol for id", f);
-			return f;
-		});
-	}
-
-	async function get721TokenURI(id) {
-		let data = await ACHouse.get721TokenURI(id).then((f) => {
-			console.log("721Token URI: ", f);
-			// if string then f.toString();
-			return f;
-		});
-	}
-
-	// ------------ end block of functions for testing purposes ------------------
-
-	return (
-		<>
-			<h2 className="title text-4xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">
-				Current Heart Drops
-			</h2>
-			{/* <div>
-				<button className="btn btn-primary btn-wide mx-2" onClick={mintNFT1155}>
-					1.Create NFT 1155
-				</button>
-				<button
-					className="btn btn-primary btn-wide mx-2"
-					onClick={setParentApproval}
-				>
-					2.Set Parent Approval
-				</button>
-				<button
-					className="btn btn-primary btn-wide mx-2"
-					onClick={fractionalizeMarketItem1155}
-				>
-					3.Fractionalize 1155
-				</button>
-				<button
-					className="btn btn-primary btn-wide mx-2"
-					onClick={createMarketItem1155Frac}
-				>
-					4.Create Market Item 1155
-				</button>
-				<button
-					className="btn btn-primary btn-wide mx-2"
-					onClick={fetchUnSoldMarketItems}
-				>
-					Fetch items created
-				</button>
-				<button className="btn btn-primary btn-wide mx-2" onClick={showState}>
-					Show State
-				</button>
-			</div> */}
-			<div className="py-5">
-				<div className="container mx-auto p-5">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
-						{listItems && listItems.length > 0
-							? listItems.map((item) => (
-									<ShowcaseAuctions
-										key={item.id}
-										item={item}
-										ACHouse={ACHouse}
-									/>
-							  ))
-							: ""}
-					</div>
-				</div>
-			</div>
-		</>
-	);
+  return (
+    <>
+      <h2 className="title text-4xl mb-8 my-10 mx-auto text-center font-bold text-purple-700">Current Heart Drops</h2>
+      <div>
+        <button className="btn btn-primary btn-wide mx-2" onClick={mintNFT1155}>1.Create NFT 1155</button>
+        <button className="btn btn-primary btn-wide mx-2" onClick={setParentApproval}>2.Set Parent Approval</button>
+        <button className="btn btn-primary btn-wide mx-2" onClick={fractionalizeMarketItem1155}>3.Fractionalize 1155</button>
+        <button className="btn btn-primary btn-wide mx-2" onClick={createMarketItem1155Frac}>4.Create Market Item 1155</button>
+        <button className="btn btn-primary btn-wide mx-2" onClick={fetchUnSoldMarketItems}>Fetch items created</button>
+        <button className="btn btn-primary btn-wide mx-2" onClick={showState}>Show State</button>
+      </div>
+      <div className="py-5">
+        <div className="container mx-auto p-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
+            { listItems && listItems.length>0 ? listItems.map((item) => 
+					<ShowcaseAuctions key={item.itemId} item={item} ACHouse={ACHouse} />
+				) 
+			 : ''}
+          </div>
+        </div>
+      </div>
+    </>
+    );
 };
 
 export default AuctionsPage;

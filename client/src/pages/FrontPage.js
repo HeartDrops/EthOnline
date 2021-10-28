@@ -8,6 +8,13 @@ import ACHouseContract from "../contracts/ACHouse.json";
 import ACHouseToken721Contract from "../contracts/ACHouseToken721.json";
 import ACHouseToken1155Contract from "../contracts/ACHouseToken1155.json";
 
+import westcoast from '../assets/westcoast.jpg';
+import surfer from '../assets/surferpup.jpg';
+import solar from '../assets/solareternity.jpg';
+import caught from '../assets/caught.jpg';
+import house from '../assets/adamhouse.png';
+
+
 const FrontPage = () => {
 
   const [ ACHouse, setACHouse] = useState(null);
@@ -81,10 +88,10 @@ const FrontPage = () => {
     if (ACHouse && listItems == null) {
       fetchUnSoldMarketItems();
     };
-  }, [fetchUnSoldMarketItems]);
+  }, [ACHouse, fetchUnSoldMarketItems]);
 
   async function fetchUnSoldMarketItems() {
-		let data = await ACHouse.fetchUnSoldMarketItems().then((f) => {
+		let data = await ACHouse.getUnSoldMarketItems().then((f) => {
 			// console.log("unsold market items", f);
 			return f;
 		});
@@ -136,7 +143,221 @@ const FrontPage = () => {
     <div className="py-5">
         <div className="container mx-auto p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-20">
-            { listItems && listItems.length>0 ? listItems.map((item) => <ShowcaseAuctions key={item.id} item={item} ACHouse={ACHouse} />)  :''}
+            { listItems && listItems.length>0 ? listItems.map((item) => <ShowcaseAuctions key={item.itemId} item={item} ACHouse={ACHouse} />)  :''}
+            
+            
+            <div className="card shadow-2xl">
+                <div className="px-10 pt-4">
+                    <div className="badge badge-secondary text-primary-content font-bold">ONGOING</div>
+                    <div className="badge badge-primary text-primary-content uppercase mx-2 font-bold">for human rights</div>
+                    <figure className="pt-4">
+                        <img src={surfer} className="cnt-centered rounded-xl" />
+                    </figure>
+                </div>
+                <div className="card-body">
+                    <h2 className="card-title px-2 text-center">Surfer Pup <span className=""> created by aaron.eth</span> </h2> 
+                    <div className="mb-4 px-2 text-center">
+                        <span>Donated by aaron.eth </span>
+                        <span>for Free World</span>
+                    </div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0 text-center">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
+                                <div className="center-cnt mb-5">
+                                <Countdown end='1634330774' />
+								</div>
+                            </div>
+
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="justify-end card-actions">
+                                    <Link className="btn btn-primary text-primary-content" to='/'>Donate <img className="ml-2" height="10" width="20" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t-2 text-primary"></div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
+                                <div className="font-bold">ERC 1155</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                                <div className="font-bold">Surfer Token</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
+                                <div className="font-bold">$SURFER</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
+                                <div className="font-bold">200</div>
+                            </div>
+                        </div>
+                </div>
+            </div> 
+
+            <div className="card shadow-2xl">
+                <div className="px-10 pt-4">
+                    <div className="badge badge-secondary text-primary-content font-bold">ONGOING</div>
+                    <div className="badge badge-primary text-primary-content uppercase mx-2 font-bold">for dogs</div>
+                    <figure className="pt-4">
+                        <img src={solar} className="cnt-centered rounded-xl" />
+                    </figure>
+                </div>
+                <div className="card-body">
+                    <h2 className="card-title px-2 text-center">Solar Eternity <span className=""> created by aaron.eth</span> </h2> 
+                    <div className="mb-4 px-2 text-center">
+                        <span>Donated by aaron.eth </span>
+                        <span>for Pup Pops</span>
+                    </div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0 text-center">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
+                                <div className="center-cnt mb-5">
+                                <Countdown end='1634503574' />
+								</div>
+                            </div>
+
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="justify-end card-actions">
+                                    <Link className="btn btn-primary text-primary-content" to='/'>Donate <img className="ml-2" height="10" width="20" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t-2 text-primary"></div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
+                                <div className="font-bold">ERC 1155</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                                <div className="font-bold">Solar Token</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
+                                <div className="font-bold">$SOLAR</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
+                                <div className="font-bold">80</div>
+                            </div>
+                        </div>
+                </div>
+            </div> 
+
+            <div className="card shadow-2xl">
+                <div className="px-10 pt-4">
+                    <div className="badge badge-secondary text-primary-content font-bold">ONGOING</div>
+                    <div className="badge badge-primary text-primary-content uppercase mx-2 font-bold">for environment</div>
+                    <figure className="pt-4">
+                        <img src="https://images.squarespace-cdn.com/content/v1/50e5fc10e4b0291e3b9b75c6/1615390602909-4MPRJWZ9JND1Q72OFK4Y/loop.gif" className="cnt-centered rounded-xl" />
+                    </figure>
+                </div>
+                <div className="card-body">
+                    <h2 className="card-title px-2 text-center">Light House <span className=""> created by adamsimms.eth</span> </h2> 
+                    <div className="mb-4 px-2 text-center">
+                        <span>Donated by adamsimms.eth</span>
+                        <span> for Greenleaf</span>
+                    </div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0 text-center">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
+                                <div className="center-cnt mb-5">
+                                <Countdown end='1634157974' />
+								</div>
+                            </div>
+
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="justify-end card-actions">
+                                    <Link className="btn btn-primary text-primary-content" to='/'>Donate <img className="ml-2" height="10" width="20" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t-2 text-primary"></div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
+                                <div className="font-bold">ERC 721</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                                <div className="font-bold">ADAM Token</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
+                                <div className="font-bold">$ADAM</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
+                                <div className="font-bold">150</div>
+                            </div>
+                        </div>
+                </div>
+            </div> 
+
+            <div className="card shadow-2xl">
+                <div className="px-10 pt-4">
+                    <div className="badge badge-secondary text-primary-content font-bold">ONGOING</div>
+                    <div className="badge badge-primary text-primary-content uppercase mx-2 font-bold">for mental health</div>
+                    <figure className="pt-4">
+                        <img src={house} className="cnt-centered rounded-xl" />
+                    </figure>
+                </div>
+                <div className="card-body">
+                    <h2 className="card-title px-2 text-center">Adrift <span className=""> created by adamsimms.eth</span> </h2> 
+                    <div className="mb-4 px-2 text-center">
+                        <span>Donated by adamsimms.eth</span>
+                        <span> for Life Drops</span>
+                    </div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0 text-center">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Time left to participate</div>
+                                <div className="center-cnt mb-5">
+                                <Countdown end='1634417174' />
+								</div>
+                            </div>
+
+                            <div className="px-2 mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="justify-end card-actions">
+                                    <Link className="btn btn-primary text-primary-content" to='/'>Donate <img className="ml-2" height="10" width="20" src="https://freight.cargo.site/t/thumbnail/w/100/i/7f7bbd305c0db77b741361e48b637588c0c47f141fcfb76be3e751b2adf3fff5/logo-heart-drops.svg" /></Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border-t-2 text-primary"></div>
+
+                        <div className="flex flex-wrap md:flex-nowrap justify-between my-3 cursor-pointer px-2">
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Type</div>
+                                <div className="font-bold">ERC 721</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Name</div>
+                                <div className="font-bold">Adrift Token</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Token Symbol</div>
+                                <div className="font-bold">$ADRIFT</div>
+                            </div>
+                            <div className="mb-4 lg:mb-0 flex-shrink-0">
+                                <div className="uppercase text-xs text-gray-500 font-bold mb-2">Total Supply</div>
+                                <div className="font-bold">120</div>
+                            </div>
+                        </div>
+                </div>
+            </div> 
+          
           </div>
         </div>
     </div>
@@ -170,7 +391,7 @@ const FrontPage = () => {
         <div className="w-full shadow stats">
           <div className="bg-primary stat place-items-center place-content-center">
             <div className="stat-title text-white">Our Charities</div>
-            <div className="stat-value text-white">3</div>
+            <div className="stat-value text-white">4</div>
           </div>
           <div className="bg-primary stat place-items-center place-content-center">
             <div className="stat-title text-white">Number of Heart Drop</div>
